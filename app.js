@@ -1,37 +1,20 @@
 const puppeteer = require('puppeteer');
-
-const HOSTNAME = 'https://www.acfun.cn/';
-// const USINFO_URL = HOSTNAME + 'rest/pc-direct/user/personalInfo';
-
-// 是否使用Cookie登录
-const useCookieLogin = true
-
-// 使用Cookie登录
-const cookies = ''
-
-// 不想用 cookie 也可以用账号密码，要设置 useCookieLogin 为 false。
-const user = {
-  account: '你的登录账号',
-  password: '登录密码'
-}
-
-// 每隔（毫秒）检查一次开播的 UP，现在是十分钟
-const timeOut = 1000 * 60 * 10
+const config = require('./config.json')
 
 /**
  * 用户登录
  * @param {Object} page 登录页
  */
 async function userLogin (page) {
-  await page.goto(HOSTNAME + 'login')
+  await page.goto('https://www.acfun.cn/login')
   console.log('page navigation');
   const loginSwitch = '#login-switch'
   await page.waitForSelector(loginSwitch)
   await page.click(loginSwitch)
 
   console.log('sign in...');
-  await page.type('#ipt-account-login', user.account);
-  await page.type('#ipt-pwd-login', user.password);
+  await page.type('#ipt-account-login', config.account);
+  await page.type('#ipt-pwd-login', config.password);
   const loginBtnSelector = '.btn-login'
   await page.waitForSelector(loginBtnSelector);
   await page.click(loginBtnSelector)
@@ -42,7 +25,7 @@ async function userLogin (page) {
 
 function userLoginByCookies (page) {
   let list = []
-  cookies.split('; ').forEach(e => {
+  config.cookies.split('; ').forEach(e => {
     const cookie = e.split('=')
     list.push(page.setCookie({
       name: cookie[0],
@@ -104,11 +87,6 @@ async function startMonitor (page, browser) {
           res => res.json()
         ).then(res => {
           return res.medalDegreeLimit
-          // if (res.medalDegreeLimit.liveWatchDegree < res.medalDegreeLimit.liveWatchDegreeLimit) {
-          //   return res.medalDegreeLimit.uperId
-          // } else {
-          //   return null
-          // }
         })
       )
     })
@@ -214,7 +192,7 @@ puppeteer.launch({
     });
 
     // 开始登录
-    if (useCookieLogin) {
+    if (config.cookies !== '') {
       await userLoginByCookies(mainPage)
       await mainPage.goto('https://www.acfun.cn')
     } else {
@@ -222,10 +200,29 @@ puppeteer.launch({
       await userLogin(page)
     }
 
-    // 起飞
-    startMonitor(mainPage, browser)
-    setInterval(() => {
+    // 检查登录状态
+    let personalInfo = await mainPage.waitForFunction(() => {
+      return fetch(
+        'https://www.acfun.cn/rest/pc-direct/user/personalInfo',
+        {
+          method: 'POST'
+        }
+      ).then(res => {
+        return res.json()
+      }).catch(err => {
+        return err
+      })
+    })
+    personalInfo = await personalInfo.jsonValue()
+    if (personalInfo.info) {
+      console.log(personalInfo.info.userName, personalInfo.info.userId);
+      // 起飞
       startMonitor(mainPage, browser)
-    }, timeOut)
+      setInterval(() => {
+        startMonitor(mainPage, browser)
+      }, 1000 * 60 * config.timeOut)
+    } else {
+      console.log('登录失败，请检查配置');
+    }
   })
 })
