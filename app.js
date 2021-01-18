@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const config = require('./config.json')
+let times = 0
 
 /**
  * 用户登录
@@ -36,13 +37,19 @@ function userLoginByCookies (page) {
   return Promise.all(list)
 }
 
+function formartDate (time) {
+  let date = new Date(time)
+  return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+}
+
 /**
  * 开始监控室
  * @param {Object} page 页面
  * @param {Object} browser 浏览器
  */
 async function startMonitor (page, browser) {
-  console.log(new Date, '检查正在直播的房间...');
+  console.groupCollapsed('第', times + 1, '次检查直播状态')
+  console.log(formartDate(new Date));
   let isLiveList = await page.evaluate(async () => {
     // 获取拥有粉丝牌的列表
     const fansClub = fetch(
@@ -53,10 +60,17 @@ async function startMonitor (page, browser) {
     ).then(
       res => res.json()
     ).then(
-      res => res.medalList
+      res => res.medalList.map(e => ({
+        clubName: e.clubName,
+        joinClubTime: e.joinClubTime,
+        level: e.level,
+        uperId: e.uperId,
+        uperName: e.uperName,
+        wearMedal: e.wearMedal
+      }))
     )
     // 获取已开播的
-    const followLiveUsers = fetch(
+    const getFollowLiveUsers = fetch(
       `https://www.acfun.cn/rest/pc-direct/live/followLiveUsers`,
       {
         method: 'POST',
@@ -64,22 +78,43 @@ async function startMonitor (page, browser) {
     ).then(
       res => res.json()
     ).then(
-      res => res.liveUsers.map(e => e.authorId)
+      res => res.liveUsers.map(e => ({
+        authorId: e.authorId,
+        title: e.title,
+        createTime: e.createTime
+      }))
     )
 
-    // 筛选有牌子的
+    // 所有有粉丝牌的直播间
     let liveAndClub = await Promise.all([
       fansClub,
-      followLiveUsers
+      getFollowLiveUsers
     ]).then(responseList => {
       console.log('responseList', responseList);
-      return responseList[0].filter(e => responseList[1].includes(e.uperId))
+      return responseList[1].map(e => {
+        const target = responseList[0].find(clubList => clubList.uperId === e.authorId)
+        console.log('target', target, e.authorId);
+        if (target === undefined) {
+          return {
+            ...e,
+            onLive: true,
+            fansClub: false
+          }
+        }
+        return {
+          ...e,
+          onLive: true,
+          fansClub: true,
+          ...target
+        }
+      })
     })
-    // console.log('liveAndClub', liveAndClub);
-
     let checkLiveWatch = []
+    console.log('liveAndClub', liveAndClub);
+    liveAndClub = liveAndClub.filter(e => e.fansClub)
     // 获取当日时长
     liveAndClub.forEach(item => {
+      console.log('获取当日时长', item);
       checkLiveWatch.push(
         fetch(
           `https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/degreeLimit?uperId=${item.uperId}`
@@ -91,19 +126,18 @@ async function startMonitor (page, browser) {
       )
     })
     return Promise.all(checkLiveWatch).then(list => {
-      // console.log('list', list)
+      console.log('list', list)
       return list.map((e, i) => ({
-        uid: e.uperId,
-        clubName: liveAndClub[i].clubName,
-        uName: liveAndClub[i].uperName,
+        ...liveAndClub[i],
         limit: e.liveWatchDegree + '/' + e.liveWatchDegreeLimit,
         watch: e.liveWatchDegree < e.liveWatchDegreeLimit
       }))
     })
   });
-
-  console.table(isLiveList)
-  DDVup(await browser.pages(), isLiveList.filter(e => e.watch).map(e => e.uid), browser)
+  // console.log('isLiveList', isLiveList);
+  DDVup(await browser.pages(), isLiveList.filter(e => e.watch), browser)
+  console.groupEnd('第', times + 1, '次检查直播状态')
+  times ++
 }
 
 /**
@@ -120,52 +154,51 @@ function getUidByLink (link) {
  * @param {Array} liveUidList 直播中的用户uid数组
  * @param {Object} browser 浏览器对象
  */
-async function DDVup (pages, liveUidList, browser) {
+async function DDVup (pages, liveUpinfo, browser) {
+  console.log('---');
+  liveUpinfo.forEach(e => {
+    console.log('up主：', e.uperId, e.uperName, e.title, `开播于 ${formartDate(e.createTime)}`);
+    console.log('粉丝牌：', e.level, e.clubName, `(${e.limit})`,`获取于 ${formartDate(e.joinClubTime)}`,);
+    console.log('---');
+  })
+  let liveUidList = liveUpinfo.map(e => e.authorId)
+
   const patt = new RegExp("live.acfun.cn/live/")
-  pages = pages.filter(p => patt.test(p.url())).map(p => ({
-    p,
-    uid: Number(getUidByLink(p.url()))
-  }))
-  pages.forEach(async page => {
-    if (liveUidList.includes(page.uid)) {
+  const openedUid = []
+  pages.filter(p => patt.test(p.url())).forEach((page, index) => {
+    const uid = Number(getUidByLink(page.url()))
+    if (liveUidList.includes(uid)) {
       // 直播仍继续
+      openedUid.push(uid)
     } else {
-      console.log('live over', page.uid);
-      page.p.close = true
-      page.p.close()
+      console.log(`退出 ${liveUpinfo[index].uperName} 的直播间`);
+      page.close()
     }
   })
 
-  let openedUid = pages.filter(e => !e.close).map(e => e.uid)
+  liveUidList.filter(e => !openedUid.includes(e)).forEach((uid, index) => {
+    console.log(`进入 ${liveUpinfo[index].uperName} 的直播间`);
+    browser.newPage().then(async page => {
+      await page.setRequestInterception(true);
 
-  liveUidList.forEach(uid => {
-    if (openedUid.includes(uid)) {
-      // 直播仍继续
-    } else {
-      console.log('进入房间', uid);
-      browser.newPage().then(async page => {
-        // console.log('new live', page);
-        await page.setRequestInterception(true);
+      page.on('request', request => {
+        if (request.resourceType() === 'image') {
+          request.continue({
+            url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
+          })
+        }
+        else request.continue();
+      });
 
-        page.on('request', request => {
-          if (request.resourceType() === 'image') {
-            request.continue({
-              url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
-            })
-          }
-          else request.continue();
-        });
+      await page.goto(`https://live.acfun.cn/live/${uid}`)
 
-        await page.goto(`https://live.acfun.cn/live/${uid}`)
+      // const title = await page.waitForFunction(() => document.title)
+      // console.log(uid, '房间名', await title.jsonValue());
 
-        const title = await page.waitForFunction(() => document.title)
-        console.log(uid, '房间名', await title.jsonValue());
-
-        page.evaluate(() => {
-          document.write('')
-        });
-      })
-    }
+      page.evaluate(() => {
+        document.write('')
+      });
+    })
   })
 }
 
@@ -178,51 +211,53 @@ puppeteer.launch({
   // },
   args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-extensions']
 }).then(async browser => {
-
-  browser.newPage().then(async mainPage => {
-    await mainPage.setRequestInterception(true);
-    mainPage.on('request', request => {
-      if (request.resourceType() === 'image') {
-        // 随便塞一个小图片，减少资源占用
-        request.continue({
-          url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
-        })
-      }
-      else request.continue();
-    });
-
-    // 开始登录
-    if (config.cookies !== '') {
-      await userLoginByCookies(mainPage)
-      await mainPage.goto('https://www.acfun.cn')
-    } else {
-      await mainPage.goto('https://www.acfun.cn')
-      await userLogin(page)
-    }
-
-    // 检查登录状态
-    let personalInfo = await mainPage.waitForFunction(() => {
-      return fetch(
-        'https://www.acfun.cn/rest/pc-direct/user/personalInfo',
-        {
-          method: 'POST'
-        }
-      ).then(res => {
-        return res.json()
-      }).catch(err => {
-        return err
+  const pageList = await browser.pages()
+  const mainPage = pageList[0]
+  await mainPage.setRequestInterception(true);
+  mainPage.on('request', request => {
+    if (request.resourceType() === 'image') {
+      // 随便塞一个小图片，减少资源占用
+      request.continue({
+        url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
       })
-    })
-    personalInfo = await personalInfo.jsonValue()
-    if (personalInfo.info) {
-      console.log(personalInfo.info.userName, personalInfo.info.userId);
-      // 起飞
-      startMonitor(mainPage, browser)
-      setInterval(() => {
-        startMonitor(mainPage, browser)
-      }, 1000 * 60 * config.timeOut)
-    } else {
-      console.log('登录失败，请检查配置');
     }
+    else request.continue();
+  });
+
+  // 开始登录
+  if (config.cookies !== '') {
+    await userLoginByCookies(mainPage)
+    await mainPage.goto('https://www.acfun.cn')
+  } else {
+    await mainPage.goto('https://www.acfun.cn')
+    await userLogin(mainPage)
+  }
+  mainPage.evaluate(() => {
+    document.write('')
+  });
+
+  // 检查登录状态
+  let personalInfo = await mainPage.waitForFunction(() => {
+    return fetch(
+      'https://www.acfun.cn/rest/pc-direct/user/personalInfo',
+      {
+        method: 'POST'
+      }
+    ).then(res => {
+      return res.json()
+    }).catch(err => {
+      return err
+    })
   })
+  personalInfo = await personalInfo.jsonValue()
+  if (personalInfo.info) {
+    console.log('登录用户：', personalInfo.info.userName, personalInfo.info.userId);
+    // 起飞
+    startMonitor(mainPage, browser)
+    setInterval(() => {
+      startMonitor(mainPage, browser)
+    }, 1000 * 60 * config.timeOut)
+  } else {
+    console.log('登录失败，请检查配置');
+  }
 })
