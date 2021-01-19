@@ -2,5 +2,6 @@
   "cookies": "",
   "account": "",
   "password": "",
-  "timeOut": 10
+  "checkLiveTimeout": 10,
+  "defaultTimeout": 3
 }
