@@ -3,5 +3,7 @@
   "account": "",
   "password": "",
   "checkLiveTimeout": 10,
-  "defaultTimeout": 3
+  "defaultTimeout": 3,
+  "executablePath": "",
+  "liveRoomLimit": 3
 }
