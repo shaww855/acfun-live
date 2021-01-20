@@ -1,10 +1,44 @@
 const puppeteer = require('puppeteer');
 const config = require('./config.json')
+
+// 检查次数
 let times = 0
+/**
+ * 补零
+ * @param {*} value 
+ * @param {Number} digits 理想位数 默认2
+ */
+const padNum = (value, digits = 2) => Array(digits - value.toString().length + 1).join('0') + value
+
+/**
+ * 格式化时间
+ * @param {Date}} time 时间戳
+ */
+const formartDate = (time) => {
+  let date = new Date(time)
+  return `${date.getFullYear()}/${padNum(date.getMonth() + 1)}/${padNum(date.getDate())} ${padNum(date.getHours())}:${padNum(date.getMinutes())}:${padNum(date.getSeconds())}`
+}
+/**
+ * 排序对象数组
+ * @author https://www.css88.com/30-seconds-of-code/#orderby
+ * @param {Array} arr 
+ * @param {Array} props 需要排序的值数组
+ * @param {Array} orders asc desc
+ */
+const orderBy = (arr, props, orders) =>
+  [...arr].sort((a, b) =>
+    props.reduce((acc, prop, i) => {
+      if (acc === 0) {
+        const [p1, p2] = orders && orders[i] === 'desc' ? [b[prop], a[prop]] : [a[prop], b[prop]];
+        acc = p1 > p2 ? 1 : p1 < p2 ? -1 : 0;
+      }
+      return acc;
+    }, 0)
+  );
 
 /**
  * 用户登录
- * @param {Object} page 登录页
+ * @param {Object} page 页面
  */
 async function userLogin (page) {
   await page.goto('https://www.acfun.cn/login')
@@ -24,6 +58,10 @@ async function userLogin (page) {
   await page.waitForNavigation()
 }
 
+/**
+ * 用Cookies登录
+ * @param {Object} page 页面
+ */
 function userLoginByCookies (page) {
   let list = []
   config.cookies.split('; ').forEach(e => {
@@ -37,18 +75,12 @@ function userLoginByCookies (page) {
   return Promise.all(list)
 }
 
-function formartDate (time) {
-  let date = new Date(time)
-  return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-}
-
 /**
  * 开始监控室
  * @param {Object} page 页面
  */
 async function startMonitor (page) {
-  console.groupCollapsed('第', times + 1, '次检查直播状态')
-  console.log(formartDate(new Date));
+  console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
   let isLiveList = await page.evaluate(async () => {
     // 获取拥有粉丝牌的列表
     const fansClub = fetch(
@@ -61,6 +93,9 @@ async function startMonitor (page) {
     ).then(
       res => res.medalList.map(e => ({
         clubName: e.clubName,
+        currentDegreeLimit: e.currentDegreeLimit,
+        friendshipDegree: e.friendshipDegree,
+        friendshipToLevelUp: e.currentDegreeLimit - e.friendshipDegree,
         joinClubTime: e.joinClubTime,
         level: e.level,
         uperId: e.uperId,
@@ -128,15 +163,15 @@ async function startMonitor (page) {
       console.log('list', list)
       return list.map((e, i) => ({
         ...liveAndClub[i],
-        limit: e.liveWatchDegree + '/' + e.liveWatchDegreeLimit,
-        watch: e.liveWatchDegree < e.liveWatchDegreeLimit
+        timeLimitStr: e.liveWatchDegree + '/' + e.liveWatchDegreeLimit,
+        noTimeLimit: e.liveWatchDegree < e.liveWatchDegreeLimit,
+        timeDifference: e.liveWatchDegreeLimit - e.liveWatchDegree
       }))
     })
   });
   // console.log('isLiveList', isLiveList);
-  DDVup(await page.browser().pages(), isLiveList.filter(e => e.watch))
-  console.groupEnd('第', times + 1, '次检查直播状态')
-  times ++
+  DDVup(await page.browser().pages(), isLiveList)
+  times++
 }
 
 /**
@@ -147,20 +182,41 @@ function getUidByLink (link) {
   return link.split('/')[4]
 }
 
+// 即使是DD，爱也是有限度的吧
+function DDlimit (list) {
+  // 牌子最先升级的放前面
+  console.log('---');
+  list = orderBy(list, ['timeDifference','friendshipToLevelUp'], ['desc', 'asc']).map((e, i) => {
+    let unlimitedLove = false
+    if (config.liveRoomLimit == 0) {
+      unlimitedLove = true
+    } else {
+      unlimitedLove = i <= config.liveRoomLimit
+    }
+    // console.log('主播：', e.uperName, e.uperId, `开播于 ${formartDate(e.createTime)}`);
+    // console.log('标题：', e.title);
+    // console.log('牌子：', e.level, e.clubName, `(${e.timeLimitStr})`, `获取于 ${formartDate(e.joinClubTime)}`,);
+    // console.log('届不到', !unlimitedLove);
+    console.log(e.level, e.clubName, `(${e.timeLimitStr})`, e.uperName, e.uperId);
+    console.log(unlimitedLove && e.noTimeLimit ? '✔️' : '❌', e.title);
+    console.log('---');
+    return {
+      ...e,
+      unlimitedLove
+    }
+  })
+  // 限制多开、过滤牌子时间已满
+  return list.filter(e => e.unlimitedLove && e.noTimeLimit)
+}
+
 /**
  * 开启DD监控室
  * @param {Object} pages 已打开的页面对象
- * @param {Array} liveUidList 直播中的用户uid数组
+ * @param {Array} liveUperInfo 直播中的用户uid数组
  */
-async function DDVup (pages, liveUpinfo) {
-  console.log('---');
-  liveUpinfo.forEach(e => {
-    console.log('主播：', e.uperId, e.uperName, `开播于 ${formartDate(e.createTime)}`);
-    console.log('标题：', e.title);
-    console.log('牌子：', e.level, e.clubName, `(${e.limit})`,`获取于 ${formartDate(e.joinClubTime)}`,);
-    console.log('---');
-  })
-  let liveUidList = liveUpinfo.map(e => e.authorId)
+async function DDVup (pages, liveUperInfo) {
+  liveUperInfo = DDlimit(liveUperInfo)
+  let liveUidList = liveUperInfo.map(e => e.authorId)
 
   const patt = new RegExp("live.acfun.cn/live/")
   const openedUid = []
@@ -170,13 +226,15 @@ async function DDVup (pages, liveUpinfo) {
       // 直播仍继续
       openedUid.push(uid)
     } else {
-      console.log('退出直播间', liveUpinfo[index].uperName);
+      const uper = liveUperInfo.find(e => e.uperId === uid)
+      const uperName = uper === undefined ? '' : uper.uperName
+      console.log('退出直播间', uperName);
       page.close()
     }
   })
 
   liveUidList.filter(e => !openedUid.includes(e)).forEach((uid, index) => {
-    console.log('进入直播间', liveUpinfo[index].uperName);
+    console.log('进入直播间', liveUperInfo[index].uperName);
     pages[0].browser().newPage().then(async page => {
       await page.setRequestInterception(true);
       page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
@@ -190,6 +248,15 @@ async function DDVup (pages, liveUpinfo) {
           request.continue({
             url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
           })
+        } else if (request.url().includes('.flv')) {
+          // 拦截直播流
+          request.abort()
+        } else if (request.url().includes('/log')) {
+          // 拦截疑似日志
+          request.abort()
+        } else if (request.url().includes('/collect')) {
+          // 拦截疑似错误收集
+          request.abort()
         }
         else request.continue();
       });
@@ -198,21 +265,17 @@ async function DDVup (pages, liveUpinfo) {
 
       // const title = await page.waitForFunction(() => document.title)
       // console.log(uid, '房间名', await title.jsonValue());
-
-      page.evaluate(() => {
-        document.write('')
-      });
     })
   })
 }
 
 process.on('uncaughtException', err => {
-  console.error('有一个未捕获的错误', err)
+  console.log(err)
   Browser.close()
   process.exit(1) //强制性的（根据 Node.js 文档）
 })
 process.on("unhandledRejection", err => {
-  console.error('有一个未拒绝的错误', err)
+  console.log(err)
   Browser.close()
   process.exit(1) //强制性的（根据 Node.js 文档）
 });
@@ -220,12 +283,14 @@ process.on("unhandledRejection", err => {
 
 let Browser = null
 puppeteer.launch({
-  // devtools: true,
+  // devtools: true, // 开发者工具
+  // headless: false, // 无头模式
   product: 'chrome',
   // defaultViewport: {
   //   width: 1366,
   //   height: 768
   // },
+  executablePath: config.executablePath,
   args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-extensions']
 }).then(async browser => {
   Browser = browser
@@ -278,7 +343,8 @@ puppeteer.launch({
   let personalInfoJson = await personalInfo.jsonValue()
   personalInfo.dispose()
   if (personalInfoJson.info) {
-    console.log('登录用户：', personalInfoJson.info.userName, personalInfoJson.info.userId);
+    console.log('🍉🍉🍉🍉🍉🍉')
+    console.log(`登录用户：${personalInfoJson.info.userName} ${personalInfoJson.info.userId}`);
     // 起飞
     startMonitor(page)
     setInterval(() => {
