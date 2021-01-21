@@ -80,7 +80,8 @@ function userLoginByCookies (page) {
  * @param {Object} page 页面
  */
 async function startMonitor (page) {
-  console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
+  console.log('===');
+  console.log('第', times + 1, '次检查直播状态')
   let isLiveList = await page.evaluate(async () => {
     // 获取拥有粉丝牌的列表
     const fansClub = fetch(
@@ -226,15 +227,15 @@ async function DDVup (pages, liveUperInfo) {
       // 直播仍继续
       openedUid.push(uid)
     } else {
-      const uper = liveUperInfo.find(e => e.uperId === uid)
-      const uperName = uper === undefined ? '' : uper.uperName
-      console.log('退出直播间', uperName);
-      page.close()
+      page.evaluate(() => document.querySelector('.up-name').textContent)
+        .then(uperName => {
+          console.log('退出直播间', uperName);
+          page.close()
+        })
     }
   })
 
   liveUidList.filter(e => !openedUid.includes(e)).forEach((uid, index) => {
-    console.log('进入直播间', liveUperInfo[index].uperName);
     pages[0].browser().newPage().then(async page => {
       await page.setRequestInterception(true);
       page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
@@ -262,7 +263,8 @@ async function DDVup (pages, liveUperInfo) {
       });
 
       await page.goto(`https://live.acfun.cn/live/${uid}`)
-
+      const uperName = await page.evaluate(() => document.querySelector('.up-name').textContent)
+      console.log('进入直播间', uperName);
       // const title = await page.waitForFunction(() => document.title)
       // console.log(uid, '房间名', await title.jsonValue());
     })
@@ -343,7 +345,6 @@ puppeteer.launch({
   let personalInfoJson = await personalInfo.jsonValue()
   personalInfo.dispose()
   if (personalInfoJson.info) {
-    console.log('🍉🍉🍉🍉🍉🍉')
     console.log(`登录用户：${personalInfoJson.info.userName} ${personalInfoJson.info.userId}`);
     // 起飞
     startMonitor(page)
