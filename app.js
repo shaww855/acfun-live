@@ -220,7 +220,7 @@ function DDlimit (list) {
       configWatch
     }
   })
-  console.log(JSON.stringify(list));
+  // console.log(JSON.stringify(list));
 
   return list.filter(e => e.configWatch)
 }
@@ -232,7 +232,7 @@ function DDlimit (list) {
  */
 async function DDVup (pages, liveUperInfo) {
   liveUperInfo = DDlimit(liveUperInfo)
-  console.log(JSON.stringify(liveUperInfo));
+  // console.log(JSON.stringify(liveUperInfo));
   let liveUidList = liveUperInfo.map(e => e.authorId)
   const patt = new RegExp("live.acfun.cn/live/")
   const openedUid = []
@@ -295,6 +295,7 @@ async function DDVup (pages, liveUperInfo) {
         })
       }).catch(err => {
         console.log(uid, '进入直播间超时', err);
+        page.close()
       })
     })
   })
@@ -302,20 +303,17 @@ async function DDVup (pages, liveUperInfo) {
 
 process.on('uncaughtException', err => {
   console.log(err)
-  Browser.close()
   process.exit(1) //强制性的（根据 Node.js 文档）
 })
 process.on("unhandledRejection", err => {
   console.log(err)
-  Browser.close()
   process.exit(1) //强制性的（根据 Node.js 文档）
 });
 
 
-let Browser = null
 puppeteer.launch({
   // devtools: true, // 开发者工具
-  headless: false, // 无头模式
+  // headless: false, // 无头模式
   product: 'chrome',
   // defaultViewport: {
   //   width: 1366,
@@ -324,7 +322,6 @@ puppeteer.launch({
   executablePath: config.executablePath,
   args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-extensions']
 }).then(async browser => {
-  Browser = browser
   const pageList = await browser.pages()
   const page = pageList[0]
   await page.setRequestInterception(true);
@@ -332,7 +329,6 @@ puppeteer.launch({
 
   page.on('error', async error => {
     console.log(error);
-    await browser.close()
     process.exit(1)
   })
 
