@@ -187,6 +187,7 @@ function getUidByLink (link) {
 function DDlimit (list) {
   console.log('---');
 
+  config.uidSortList = config.uidSortList.reverse()
   list.forEach(info => {
     // 配置优先级
     info.configOrder = config.uidSortList.findIndex(e => e === info.uperId)
@@ -199,7 +200,12 @@ function DDlimit (list) {
 
   // 直播间数量限制
   list = list.map((info, index) => {
-    let configWatch = index < config.liveRoomLimit
+    let configWatch = false
+    if (config.liveRoomLimit === 0) {
+      configWatch = true
+    } else {
+      configWatch = index < config.liveRoomLimit
+    }
 
     // console.log('主播：', info.uperName, info.uperId, `开播于 ${formartDate(info.createTime)}`);
     // console.log('标题：', info.title);
@@ -214,6 +220,7 @@ function DDlimit (list) {
       configWatch
     }
   })
+  console.log(JSON.stringify(list));
 
   return list.filter(e => e.configWatch)
 }
@@ -225,6 +232,7 @@ function DDlimit (list) {
  */
 async function DDVup (pages, liveUperInfo) {
   liveUperInfo = DDlimit(liveUperInfo)
+  console.log(JSON.stringify(liveUperInfo));
   let liveUidList = liveUperInfo.map(e => e.authorId)
   const patt = new RegExp("live.acfun.cn/live/")
   const openedUid = []
@@ -307,7 +315,7 @@ process.on("unhandledRejection", err => {
 let Browser = null
 puppeteer.launch({
   // devtools: true, // 开发者工具
-  // headless: false, // 无头模式
+  headless: false, // 无头模式
   product: 'chrome',
   // defaultViewport: {
   //   width: 1366,
