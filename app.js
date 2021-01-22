@@ -185,29 +185,37 @@ function getUidByLink (link) {
 
 // 即使是DD，爱也是有限度的吧
 function DDlimit (list) {
-  // 牌子最先升级的放前面
   console.log('---');
-  list = orderBy(list, ['timeDifference','friendshipToLevelUp'], ['desc', 'asc']).map((e, i) => {
-    let unlimitedLove = false
-    if (config.liveRoomLimit == 0) {
-      unlimitedLove = true
-    } else {
-      unlimitedLove = i <= config.liveRoomLimit
-    }
-    // console.log('主播：', e.uperName, e.uperId, `开播于 ${formartDate(e.createTime)}`);
-    // console.log('标题：', e.title);
-    // console.log('牌子：', e.level, e.clubName, `(${e.timeLimitStr})`, `获取于 ${formartDate(e.joinClubTime)}`,);
+
+  list.forEach(info => {
+    // 配置优先级
+    info.configOrder = config.uidSortList.findIndex(e => e === info.uperId)
+    // 配置不观看
+    info.configUnWatch = config.uidUnwatchList.includes(info.uperId)
+  })
+
+  // 配置观看、配置排序、牌子最快升级
+  list = orderBy(list, ['configUnWatch', 'configOrder', 'friendshipToLevelUp'], ['asc', 'desc', 'asc'])
+
+  // 直播间数量限制
+  list = list.map((info, index) => {
+    let configWatch = index < config.liveRoomLimit
+
+    // console.log('主播：', info.uperName, info.uperId, `开播于 ${formartDate(info.createTime)}`);
+    // console.log('标题：', info.title);
+    // console.log('牌子：', info.level, info.clubName, `(${info.timeLimitStr})`, `获取于 ${formartDate(info.joinClubTime)}`,);
     // console.log('届不到', !unlimitedLove);
-    console.log(e.level, e.clubName, `(${e.timeLimitStr})`, e.uperName, e.uperId);
-    console.log(unlimitedLove && e.noTimeLimit ? '✔️' : '❌', e.title);
+    console.log(info.level, info.clubName, `(${info.timeLimitStr})`, info.uperName, info.uperId);
+    console.log(configWatch ? '✔' : '✘', info.title, `[${formartDate(info.createTime)}]`);
     console.log('---');
+
     return {
-      ...e,
-      unlimitedLove
+      ...info,
+      configWatch
     }
   })
-  // 限制多开、过滤牌子时间已满
-  return list.filter(e => e.unlimitedLove && e.noTimeLimit)
+
+  return list.filter(e => e.configWatch)
 }
 
 /**
@@ -218,7 +226,6 @@ function DDlimit (list) {
 async function DDVup (pages, liveUperInfo) {
   liveUperInfo = DDlimit(liveUperInfo)
   let liveUidList = liveUperInfo.map(e => e.authorId)
-
   const patt = new RegExp("live.acfun.cn/live/")
   const openedUid = []
   pages.filter(p => patt.test(p.url())).forEach((page, index) => {
@@ -262,11 +269,25 @@ async function DDVup (pages, liveUperInfo) {
         else request.continue();
       });
 
-      await page.goto(`https://live.acfun.cn/live/${uid}`)
-      const uperName = await page.evaluate(() => document.querySelector('.up-name').textContent)
-      console.log('进入直播间', uperName);
-      // const title = await page.waitForFunction(() => document.title)
-      // console.log(uid, '房间名', await title.jsonValue());
+      page.goto(`https://live.acfun.cn/live/${uid}`).then(() => {
+        page.evaluate(() => document.querySelector('.up-name').textContent).then(uperName => {
+          console.log('进入直播间', uperName);
+          page.waitForSelector('.like-btn').then(() => {
+            page.evaluate(() => {
+              setTimeout(() => {
+                document.querySelector('.like-btn').click()
+                // 10分钟点赞一次
+              }, 1000 * 60 * 10)
+            }).catch(err => {
+              console.log(uperName, '执行点赞操作失败', err);
+            })
+          }).catch(err => {
+            console.log(uperName, '等待点赞按钮超时', err);
+          })
+        })
+      }).catch(err => {
+        console.log(uid, '进入直播间超时', err);
+      })
     })
   })
 }
