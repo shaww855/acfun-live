@@ -5,5 +5,7 @@
   "checkLiveTimeout": 10,
   "defaultTimeout": 3,
   "executablePath": "",
-  "liveRoomLimit": 3
+  "liveRoomLimit": 3,
+  "uidSortList": [],
+  "uidUnwatchList": []
 }
