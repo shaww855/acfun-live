@@ -40,22 +40,24 @@ const orderBy = (arr, props, orders) =>
  * 用户登录
  * @param {Object} page 页面
  */
-async function userLogin (page) {
-  await page.goto('https://www.acfun.cn/login')
-  console.log('page navigation');
-  const loginSwitch = '#login-switch'
-  await page.waitForSelector(loginSwitch)
-  await page.click(loginSwitch)
-
-  console.log('sign in...');
-  await page.type('#ipt-account-login', config.account);
-  await page.type('#ipt-pwd-login', config.password);
-  const loginBtnSelector = '.btn-login'
-  await page.waitForSelector(loginBtnSelector);
-  await page.click(loginBtnSelector)
-  console.log('logged!');
-
-  await page.waitForNavigation()
+function userLogin (page) {
+  return page.goto('https://www.acfun.cn/login').then(async () => {
+    const loginSwitch = '#login-switch'
+    await page.waitForSelector(loginSwitch)
+    await page.click(loginSwitch)
+    // console.log('sign in...');
+    await page.type('#ipt-account-login', config.account);
+    await page.type('#ipt-pwd-login', config.password);
+    const loginBtnSelector = '.btn-login'
+    await page.waitForSelector(loginBtnSelector);
+    await page.click(loginBtnSelector)
+    // console.log('logged!');
+    await page.waitForNavigation()
+  }).catch(err => {
+    console.log('使用账号密码登录失败');
+    console.log(err);
+    page.browser().close()
+  })
 }
 
 /**
@@ -171,7 +173,7 @@ async function startMonitor (page) {
     })
   });
   // console.log('isLiveList', isLiveList);
-  DDVup(await page.browser().pages(), isLiveList)
+  DDVup(await page.browser(), isLiveList)
   times++
 }
 
@@ -183,129 +185,160 @@ function getUidByLink (link) {
   return link.split('/')[4]
 }
 
-// 即使是DD，爱也是有限度的吧
-function DDlimit (list) {
-  console.log('---');
+/**
+ * 检查已打开的页面，关闭符合条件的直播间，标记已打开的直播
+ * @param {Object} browser 浏览器对象
+ * @param {Array} list 正在直播的信息
+ */
+async function checkOpenedPages (browser) {
+  const patt = new RegExp("live.acfun.cn/live/")
+  let pages = await browser.pages()
+    pages.forEach(page => {
+      const isLiveRoom = patt.test(page.url())
+      if (!isLiveRoom) {
+        // 不是直播间则跳过
+        return
+      }
+      const uid = Number(getUidByLink(page.url()))
+      let target = list.find(e => e.uperId === uid)
+      if (target === undefined) {
+        // 已经停止直播
+        roomExit(page)
+      } else {
+        target.opened = true
+        if (target.timeDifference === 0) {
+          // 牌子已挂满
+          roomExit(page)
+        } else {
+          // 继续监控
+        }
+      }
+    })
+  return list
+}
 
-  config.uidSortList = config.uidSortList.reverse()
-  list.forEach(info => {
-    // 配置优先级
-    info.configOrder = config.uidSortList.findIndex(e => e === info.uperId)
+/**
+ * 退出直播间
+ */
+function roomExit (page) {
+  page
+    .evaluate(() => document.querySelector('.up-name').textContent)
+    .then(uperName => {
+      console.log('退出直播间', uperName)
+    }).catch(err => {
+      console.log('退出直播间时，获取主播昵称失败')
+      console.log(err)
+    }).finally(() => {
+      page.close()
+    })
+}
+
+/**
+ * 进入直播间
+ */
+function roomOpen (browser, info) {
+  browser.newPage().then(async page => {
+    await page.setRequestInterception(true);
+    page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
+    page.on('error', async error => {
+      console.log(error);
+      await browser.close()
+      process.exit(1)
+    })
+    page.on('request', request => {
+      if (request.resourceType() === 'image') {
+        request.continue({
+          url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
+        })
+      } else if (request.url().includes('.flv')) {
+        // 拦截直播流
+        request.abort()
+      } else if (request.url().includes('/log')) {
+        // 拦截疑似日志
+        request.abort()
+      } else if (request.url().includes('/collect')) {
+        // 拦截疑似错误收集
+        request.abort()
+      }
+      else request.continue();
+    });
+
+    page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
+      console.log('进入直播间', info.uperName);
+      page.waitForSelector('.like-btn').then(() => {
+        page.evaluate(() => {
+          setTimeout(() => {
+            document.querySelector('.like-btn').click()
+            // 10分钟点赞一次
+          }, 1000 * 60 * 10)
+        }).catch(err => {
+          console.log(info.uperName, '执行点赞操作失败', err);
+        })
+      }).catch(err => {
+        console.log(info.uperName, '等待点赞按钮超时', err);
+      })
+    }).catch(err => {
+      console.log(info.uperName, '进入直播间超时', err);
+      page.close()
+    })
+  })
+}
+
+/**
+ * 开启DD监控室
+ * @param {Object} browser 浏览器对象
+ * @param {Array} liveUperInfo 直播中的用户uid数组
+ */
+async function DDVup (browser, liveUperInfo) {
+  orderBy(liveUperInfo.map(info => {
     // 配置不观看
     info.configUnWatch = config.uidUnwatchList.includes(info.uperId)
-  })
+  }), ['configUnWatch'], ['asc'])
 
-  // 配置观看、配置排序、牌子最快升级
-  list = orderBy(list, ['configUnWatch', 'configOrder', 'friendshipToLevelUp'], ['asc', 'desc', 'asc'])
+  console.log(liveUperInfo);
 
   // 直播间数量限制
-  list.map((info, index) => {
+  liveUperInfo.map((info, index) => {
     // console.log('主播：', info.uperName, info.uperId, `开播于 ${formartDate(info.createTime)}`);
     // console.log('标题：', info.title);
     // console.log('牌子：', info.level, info.clubName, `(${info.timeLimitStr})`, `获取于 ${formartDate(info.joinClubTime)}`,);
     // console.log('届不到', !unlimitedLove);
     console.log(info.level, info.clubName, `(${info.timeLimitStr})`, info.uperName, info.uperId);
-    console.log(index, info.title, `[${formartDate(info.createTime)}]`);
-    console.log('---');
-
+    console.log(`No.${index + 1}`, info.title, `[${formartDate(info.createTime)}]`);
+    console.log('---')
     return info
   })
-  // console.log(JSON.stringify(list));
 
-  return list
-}
+  liveUperInfo = checkOpenedPages(browser, liveUperInfo)
 
-/**
- * 开启DD监控室
- * @param {Object} pages 已打开的页面对象
- * @param {Array} liveUperInfo 直播中的用户uid数组
- */
-async function DDVup (pages, liveUperInfo) {
-  liveUperInfo = DDlimit(liveUperInfo)
-  // console.log(JSON.stringify(liveUperInfo));
-  let liveUidList = liveUperInfo.map(e => e.authorId)
-  const patt = new RegExp("live.acfun.cn/live/")
-  const openedUid = []
-  pages.filter(p => patt.test(p.url())).forEach((page, index) => {
-    const uid = Number(getUidByLink(page.url()))
-    if (liveUidList.some(e => e.uperId === uid)) {
-      // 直播仍继续
-      openedUid.push(uid)
-    } else {
-      page.evaluate(() => document.querySelector('.up-name').textContent)
-        .then(uperName => {
-          console.log('退出直播间', uperName);
-          page.close()
-        })
+  let filter = liveUperInfo.filter(e => e.opened && e.timeDifference > 0)
+  filter.forEach((info, index) => {
+    if (!info.opened && !info.configUnWatch && info.timeDifference > 0) {
+      if (index < config.liveRoomLimit) {
+        roomOpen(info)
+      } else {
+        console.log(info.uperName, '数量限制', config.liveRoomLimit);
+      }
     }
-  })
-
-  liveUperInfo.filter(e => !openedUid.includes(e.uperId)).forEach((info, index) => {
-    if (config.liveRoomLimit > 0 && index >= config.liveRoomLimit) {
-      console.log('已超出直播间数量限制', info.uperName);
-      return
-    }
-    pages[0].browser().newPage().then(async page => {
-      await page.setRequestInterception(true);
-      page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
-      page.on('error', async error => {
-        console.log(error);
-        await browser.close()
-        process.exit(1)
-      })
-      page.on('request', request => {
-        if (request.resourceType() === 'image') {
-          request.continue({
-            url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
-          })
-        } else if (request.url().includes('.flv')) {
-          // 拦截直播流
-          request.abort()
-        } else if (request.url().includes('/log')) {
-          // 拦截疑似日志
-          request.abort()
-        } else if (request.url().includes('/collect')) {
-          // 拦截疑似错误收集
-          request.abort()
-        }
-        else request.continue();
-      });
-
-      page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
-        console.log('进入直播间', info.uperName);
-        page.waitForSelector('.like-btn').then(() => {
-          page.evaluate(() => {
-            setTimeout(() => {
-              document.querySelector('.like-btn').click()
-              // 10分钟点赞一次
-            }, 1000 * 60 * 10)
-          }).catch(err => {
-            console.log(info.uperName, '执行点赞操作失败', err);
-          })
-        }).catch(err => {
-          console.log(info.uperName, '等待点赞按钮超时', err);
-        })
-      }).catch(err => {
-        console.log(info.uperName, '进入直播间超时', err);
-        page.close()
-      })
-    })
   })
 }
 
 process.on('uncaughtException', err => {
   console.log(err)
-  process.exit(1) //强制性的（根据 Node.js 文档）
+  process.exit(1)
 })
 process.on("unhandledRejection", err => {
   console.log(err)
-  process.exit(1) //强制性的（根据 Node.js 文档）
+  process.exit(1)
 });
 
 
+console.log(`每(分钟)检查直播`, config.checkLiveTimeout);
+console.log(`异步操作最多等待(分钟)`, config.defaultTimeout);
+console.log('直播间数量限制', config.liveRoomLimit);
 puppeteer.launch({
   // devtools: true, // 开发者工具
-  // headless: false, // 无头模式
+  headless: false, // 无头模式
   product: 'chrome',
   // defaultViewport: {
   //   width: 1366,
@@ -337,14 +370,17 @@ puppeteer.launch({
   // 开始登录
   if (config.cookies !== '') {
     await userLoginByCookies(page)
-    await page.goto('https://www.acfun.cn')
+    await page.goto('https://www.acfun.cn').catch(err => {
+      console.log('跳转主页失败');
+      console.log(err);
+      page.browser().close()
+    })
   } else {
-    await page.goto('https://www.acfun.cn')
     await userLogin(page)
   }
-  page.evaluate(() => {
-    document.write('')
-  });
+  // page.evaluate(() => {
+  //   document.write('')
+  // });
 
   // 检查登录状态
   let personalInfo = await page.waitForFunction(() => {
@@ -369,6 +405,6 @@ puppeteer.launch({
       startMonitor(page)
     }, 1000 * 60 * config.checkLiveTimeout)
   } else {
-    console.log('登录失败，请检查配置');
+    console.log('登录失败，请检查配置', personalInfoJson);
   }
 })
