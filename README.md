@@ -12,7 +12,6 @@ checkLiveTimeout | Number | 每（分钟）检查直播
 defaultTimeout | Number | 异步操作最多等待（分钟）
 executablePath | String | Chromium 路径 <br> 例 `C:/Program Files (x86)/Google/Chrome/Application/chrome.exe`
 liveRoomLimit | Number | 监控限制 0为无限制 实测 1G 内存 vps 能开3个
-uidSortList | Array | 喜欢的 V 按 uid 排序
 uidUnwatchList | Array | 这些 uid 的直播间不看
 ## 运行  
 1. 安装  
