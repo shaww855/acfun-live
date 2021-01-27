@@ -1,7 +1,7 @@
 {
   "name": "acfun-live",
-  "version": "1.0.1",
-  "description": "使用 Puppeteer 开启 acfun 直播监控室，挂牌子！",
+  "version": "1.0.2",
+  "description": "使用 Puppeteer 开启 acfun 直播监控室，挂牌子！😏",
   "main": "index.js",
   "scripts": {
     "start": "node app.js",
