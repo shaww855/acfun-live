@@ -18,9 +18,9 @@ uidUnwatchList | Array | 这些 uid 的直播间不看
     - NodeJs 和 NPM
     - `npm i --registry=https://registry.npm.taobao.org`  
 2. 运行  
-  `npm run start`  
+  `npm run start` 或 `node app.js`  
 3. 进阶  
-  使用进程守护挂载到服务器  
+  使用进程守护挂载到服务器（我用的 PM2 ，配置文件是 ./ecosystem.config.js ，日志输出也靠它）
 
 ## 当前状态  
 - Win10 正常运行 😎
