@@ -142,7 +142,7 @@ async function startMonitor (page, times = 0) {
   });
   // console.log('isLiveList', isLiveList);
   DDVup(await page.browser(), isLiveList)
-  
+
   setTimeout(() => {
     startMonitor(page, times + 1)
   }, 1000 * 60 * config.checkLiveTimeout)
@@ -171,9 +171,6 @@ async function checkOpenedPages (browser, list) {
       target.opened = true
       if (target.timeDifference === 0) {
         roomExit(page, uid)
-      } else {
-        // 继续监控
-        console.log('继续观看', target.uperName);
       }
     }
   })
@@ -185,15 +182,15 @@ async function checkOpenedPages (browser, list) {
  */
 function roomExit (page, uid) {
   page
-  .evaluate(() => document.querySelector('.up-name').textContent)
-  .then(uperName => {
-    console.log('已停止直播，退出直播间', uperName)
-  }).catch(err => {
-    console.log('退出直播间时，获取主播昵称失败', uid)
-    console.log(err)
-  }).finally(() => {
-    page.close()
-  })
+    .evaluate(() => document.querySelector('.up-name').textContent)
+    .then(uperName => {
+      console.log('退出', uperName)
+    }).catch(err => {
+      console.log('退出', uid)
+      console.log(err)
+    }).finally(() => {
+      page.close()
+    })
 }
 
 /**
@@ -234,7 +231,7 @@ function roomOpen (browser, info, num = 0) {
     });
 
     page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
-      console.log('进入直播间', info.uperName);
+      console.log('进入', info.uperName);
       page.waitForSelector('.like-btn').then(() => {
         page.evaluate(() => {
           setTimeout(() => {
@@ -266,35 +263,35 @@ async function DDVup (browser, liveUperInfo) {
     configUnWatch: config.uidUnwatchList.includes(info.uperId)
   })), ['configUnWatch', 'createTime'], ['asc', 'asc'])
   // console.log(liveUperInfo);
-  
+
   if (liveUperInfo.length === 0) {
+    console.log('---')
     console.log('拥有牌子的主播均未开播。')
-  } else {
     console.log('---')
   }
-  liveUperInfo.map((info, index) => {
-    // console.log('主播：', info.uperName, info.uperId, `开播于 ${formartDate(info.createTime)}`);
-    // console.log('标题：', info.title);
-    // console.log('牌子：', info.level, info.clubName, `(${info.timeLimitStr})`, `获取于 ${formartDate(info.joinClubTime)}`,);
-    // console.log('届不到', !unlimitedLove);
-    console.log(`${info.level}级`, info.clubName, `(${info.timeLimitStr})`, info.uperName, `UID ${info.uperId}`);
-    console.log(`[${index + 1}/${liveUperInfo.length}]`, info.title, `开播于 ${formartDate(info.createTime)}`);
-    console.log('---')
-    return info
-  })
-
   liveUperInfo = await checkOpenedPages(browser, liveUperInfo)
   // console.log('liveUperInfo', liveUperInfo);
+  if (config.showLiveInfo) {
+    console.log('---')
+    liveUperInfo.forEach((info, index) => {
+      console.log(`开播时间 ${formartDate(info.createTime)}`);
+      console.log(`${info.level}级`, info.clubName, `(${info.timeLimitStr})`, info.uperName, info.uperId);
+      console.log(`[${index + 1}/${liveUperInfo.length}]`, info.title);
+      console.log('---')
+    })
+  }
 
-  let filter = liveUperInfo.filter(e => !e.opened && e.timeDifference > 0)
-  // console.log('filter', filter);
-  filter.forEach((info, index) => {
-    if (!info.opened && !info.configUnWatch && info.timeDifference > 0) {
-      if (index < config.liveRoomLimit) {
-        roomOpen(browser, info)
-      } else {
-        console.log(info.uperName, '数量限制', config.liveRoomLimit);
-      }
+  liveUperInfo.forEach((info, index) => {
+    if (info.opened) {
+      console.log('继续', info.uperName);
+    } else if (info.configUnWatch) {
+      console.log('不看', info.uperName);
+    } else if (info.timeDifference <= 0) {
+      console.log('已满', info.uperName);
+    } else if (config.liveRoomLimit > 0 && index >= config.liveRoomLimit) {
+      console.log('限制', info.uperName);
+    } else {
+      roomOpen(browser, info)
     }
   })
 }
