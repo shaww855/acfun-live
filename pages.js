@@ -144,7 +144,7 @@ async function startMonitor (page, times = 0) {
   DDVup(await page.browser(), isLiveList)
   
   setTimeout(() => {
-    startMonitor(page, times++)
+    startMonitor(page, times + 1)
   }, 1000 * 60 * config.checkLiveTimeout)
 }
 
@@ -262,12 +262,12 @@ function roomOpen (browser, info, num = 0) {
  * @param {Array} liveUperInfo 直播中的用户uid数组
  */
 async function DDVup (browser, liveUperInfo) {
-  orderBy(liveUperInfo.map(info => {
+  liveUperInfo = orderBy(liveUperInfo.map(info => ({
     // 配置不观看
-    info.configUnWatch = config.uidUnwatchList.includes(info.uperId)
-  }), ['configUnWatch'], ['asc'])
+    ...info,
+    configUnWatch: config.uidUnwatchList.includes(info.uperId)
+  })), ['configUnWatch', 'createTime'], ['asc', 'asc'])
   // console.log(liveUperInfo);
-
   
   if (liveUperInfo.length === 0) {
     console.log('拥有牌子的主播均未开播。')
