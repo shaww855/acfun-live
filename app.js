@@ -17,10 +17,11 @@ process.on("unhandledRejection", err => {
   process.exit(1)
 });
 
-
 console.log(`每(分钟)检查直播`, config.checkLiveTimeout);
 console.log(`异步操作最多等待(分钟)`, config.defaultTimeout);
 console.log('直播间数量限制', config.liveRoomLimit);
+console.log('设置了不看', config.uidUnwatchList);
+console.log('显示详细直播信息', config.showLiveInfo);
 puppeteer.launch({
   // devtools: true, // 开发者工具
   // headless: false, // 无头模式

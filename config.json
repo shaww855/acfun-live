@@ -6,5 +6,6 @@
   "defaultTimeout": 5,
   "executablePath": "",
   "liveRoomLimit": 3,
-  "uidUnwatchList": []
+  "uidUnwatchList": [],
+  "showLiveInfo": false
 }
