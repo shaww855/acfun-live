@@ -166,13 +166,11 @@ async function checkOpenedPages (browser, list) {
     let target = list.find(e => e.uperId === uid)
     // console.log('target', target);
     if (target === undefined) {
-      console.log('已停止直播，退出直播间', target.uperName);
-      roomExit(page)
+      roomExit(page, uid)
     } else {
       target.opened = true
       if (target.timeDifference === 0) {
-        console.log('牌子已挂满，退出直播间', target.uperName);
-        roomExit(page)
+        roomExit(page, uid)
       } else {
         // 继续监控
         console.log('继续观看', target.uperName);
@@ -185,17 +183,17 @@ async function checkOpenedPages (browser, list) {
 /**
  * 退出直播间
  */
-function roomExit (page) {
-  page.close()
-  // .evaluate(() => document.querySelector('.up-name').textContent)
-  // .then(uperName => {
-  //   console.log('退出直播间', uperName)
-  // }).catch(err => {
-  //   console.log('退出直播间时，获取主播昵称失败')
-  //   console.log(err)
-  // }).finally(() => {
-  //   page.close()
-  // })
+function roomExit (page, uid) {
+  page
+  .evaluate(() => document.querySelector('.up-name').textContent)
+  .then(uperName => {
+    console.log('已停止直播，退出直播间', uperName)
+  }).catch(err => {
+    console.log('退出直播间时，获取主播昵称失败', uid)
+    console.log(err)
+  }).finally(() => {
+    page.close()
+  })
 }
 
 /**
