@@ -56,6 +56,7 @@ puppeteer.launch({
 
   // 开始登录
   if (config.cookies !== '') {
+    console.log('登录方式 Cookile');
     await userLoginByCookies(page)
     await page.goto('https://www.acfun.cn').catch(err => {
       console.log('跳转主页失败');
@@ -63,6 +64,7 @@ puppeteer.launch({
       page.browser().close()
     })
   } else {
+    console.log('登录方式 账号');
     await userLogin(page)
   }
   page.evaluate(() => {

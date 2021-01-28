@@ -56,7 +56,11 @@ async function startMonitor (page, times = 0, timeId = null) {
 
   let personalInfoJson = await getPersonalInfo(page)
   console.log(`用户 ${personalInfoJson.info.userName} ${personalInfoJson.info.userId}`);
-  console.log(`当前佩戴 ${personalInfoJson.info.mediaWearInfo.level} ${personalInfoJson.info.mediaWearInfo.clubName} ${personalInfoJson.info.mediaWearInfo.uperName}`);
+  if (personalInfoJson.info.mediaWearInfo) {
+    console.log(`当前佩戴 ${personalInfoJson.info.mediaWearInfo.level} ${personalInfoJson.info.mediaWearInfo.clubName} ${personalInfoJson.info.mediaWearInfo.uperName}`);
+  } else {
+    console.log('当前未佩戴牌子');
+  }
 
   let isLiveList = await page.evaluate(async () => {
     // 获取拥有粉丝牌的列表
@@ -307,6 +311,7 @@ async function DDVup (browser, liveUperInfo, DDVup) {
     })
   }
 
+  let limit = config.liveRoomLimit
   liveUperInfo.forEach((info, index) => {
     if (info.opened) {
       console.log('继续监控', info.uperName);
@@ -314,7 +319,8 @@ async function DDVup (browser, liveUperInfo, DDVup) {
       console.log('不看直播', info.uperName);
     } else if (info.timeDifference <= 0) {
       console.log('牌子已满', info.uperName);
-    } else if (config.liveRoomLimit > 0 && index >= config.liveRoomLimit) {
+      limit ++
+    } else if (config.liveRoomLimit > 0 && index >= limit) {
       console.log('数量限制', info.uperName);
     } else {
       roomOpen(browser, info)
