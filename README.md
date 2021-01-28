@@ -14,6 +14,7 @@ executablePath | String | Chromium 路径 <br> 例 `C:/Program Files (x86)/Googl
 liveRoomLimit | Number | 监控限制 0为无限制 实测 1G 内存 vps 能开3个
 uidUnwatchList | Array | 这些 uid 的直播间不看
 showLiveInfo | Boolean | 检查直播状态时是否展示详细信息
+checkWearMedal | Boolean | 佩戴牌子的主播不观看 <br> 戴着牌子说明你正在D TA，不需要服务器帮忙挂
 ## 运行  
 1. 安装  
     - NodeJs 和 NPM
