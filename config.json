@@ -7,5 +7,6 @@
   "executablePath": "",
   "liveRoomLimit": 3,
   "uidUnwatchList": [],
-  "showLiveInfo": false
+  "showLiveInfo": true,
+  "checkWearMedal": true
 }
