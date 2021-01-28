@@ -48,10 +48,16 @@ function userLoginByCookies (page) {
  * 开始监控室
  * @param {Object} page 页面
  * @param {Number} times 检查次数
+ * @param {Number} timeId 定时器ID
  */
-async function startMonitor (page, times = 0) {
+async function startMonitor (page, times = 0, timeId = null) {
   console.log('===');
-  console.log('第', times + 1, '次检查直播状态')
+  console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
+
+  let personalInfoJson = await getPersonalInfo(page)
+  console.log(`用户 ${personalInfoJson.info.userName} ${personalInfoJson.info.userId}`);
+  console.log(`当前佩戴 ${personalInfoJson.info.mediaWearInfo.level} ${personalInfoJson.info.mediaWearInfo.clubName} ${personalInfoJson.info.mediaWearInfo.uperName}`);
+
   let isLiveList = await page.evaluate(async () => {
     // 获取拥有粉丝牌的列表
     const fansClub = fetch(
@@ -103,7 +109,8 @@ async function startMonitor (page, times = 0) {
           return {
             ...e,
             onLive: true,
-            fansClub: false
+            fansClub: false,
+            wearMedal: false
           }
         }
         return {
@@ -113,6 +120,13 @@ async function startMonitor (page, times = 0) {
           ...target
         }
       })
+    }).catch(err => {
+      console.log('获取粉丝牌列表和已开播房间信息时失败', err);
+      clearTimeout(timeId)
+      // 1分钟后重试
+      setTimeout(id => {
+        startMonitor(page, times + 1, id)
+      }, 1000 * 60)
     })
     let checkLiveWatch = []
     // console.log('liveAndClub', liveAndClub);
@@ -138,13 +152,21 @@ async function startMonitor (page, times = 0) {
         noTimeLimit: e.liveWatchDegree < e.liveWatchDegreeLimit,
         timeDifference: e.liveWatchDegreeLimit - e.liveWatchDegree
       }))
+    }).catch(err => {
+      console.log('获取所有牌子的当日信息失败');
+      console.log(err);
+      clearTimeout(timeId)
+      // 1分钟后重试
+      setTimeout(id => {
+        startMonitor(page, times + 1, id)
+      }, 1000 * 60)
     })
   });
   // console.log('isLiveList', isLiveList);
   DDVup(await page.browser(), isLiveList)
 
-  setTimeout(() => {
-    startMonitor(page, times + 1)
+  setTimeout(timeId => {
+    startMonitor(page, times + 1, timeId)
   }, 1000 * 60 * config.checkLiveTimeout)
 }
 
@@ -172,6 +194,10 @@ async function checkOpenedPages (browser, list) {
       if (target.timeDifference === 0) {
         roomExit(page, uid)
       }
+      if (target.wearMedal && config.checkWearMedal) {
+        console.log('因佩戴牌子，退出直播间', target.uperName);
+        roomExit(page, uid)
+      }
     }
   })
   return list
@@ -184,9 +210,9 @@ function roomExit (page, uid) {
   page
     .evaluate(() => document.querySelector('.up-name').textContent)
     .then(uperName => {
-      console.log('退出', uperName)
+      console.log('退出直播', uperName)
     }).catch(err => {
-      console.log('退出', uid)
+      console.log('退出直播', uid)
       console.log(err)
     }).finally(() => {
       page.close()
@@ -231,7 +257,7 @@ function roomOpen (browser, info, num = 0) {
     });
 
     page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
-      console.log('进入', info.uperName);
+      console.log('进入直播', info.uperName);
       page.waitForSelector('.like-btn').then(() => {
         page.evaluate(() => {
           setTimeout(() => {
@@ -256,7 +282,7 @@ function roomOpen (browser, info, num = 0) {
  * @param {Object} browser 浏览器对象
  * @param {Array} liveUperInfo 直播中的用户uid数组
  */
-async function DDVup (browser, liveUperInfo) {
+async function DDVup (browser, liveUperInfo, DDVup) {
   liveUperInfo = orderBy(liveUperInfo.map(info => ({
     // 配置不观看
     ...info,
@@ -283,16 +309,41 @@ async function DDVup (browser, liveUperInfo) {
 
   liveUperInfo.forEach((info, index) => {
     if (info.opened) {
-      console.log('继续', info.uperName);
+      console.log('继续监控', info.uperName);
     } else if (info.configUnWatch) {
-      console.log('不看', info.uperName);
+      console.log('不看直播', info.uperName);
     } else if (info.timeDifference <= 0) {
-      console.log('已满', info.uperName);
+      console.log('牌子已满', info.uperName);
     } else if (config.liveRoomLimit > 0 && index >= config.liveRoomLimit) {
-      console.log('限制', info.uperName);
+      console.log('数量限制', info.uperName);
     } else {
       roomOpen(browser, info)
     }
+  })
+}
+
+/**
+ * 获取个人信息
+ */
+function getPersonalInfo (page) {
+  return page.waitForFunction(() => {
+    return fetch(
+      'https://www.acfun.cn/rest/pc-direct/user/personalInfo',
+      {
+        method: 'POST'
+      }
+    ).then(res => {
+      return res.json()
+    }).catch(err => {
+      return err
+    })
+  }).then(async info => {
+    let infoJson = await info.jsonValue()
+    info.dispose()
+    return infoJson
+  }).catch(err => {
+    console.log('登录失败，请检查');
+    console.log(err);
   })
 }
 
@@ -302,6 +353,5 @@ module.exports = {
   startMonitor,
   checkOpenedPages,
   roomExit,
-  roomOpen,
-  DDVup
+  roomOpen
 }
