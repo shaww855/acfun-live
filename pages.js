@@ -169,8 +169,8 @@ async function startMonitor (page, times = 0, timeId = null) {
   // console.log('isLiveList', isLiveList);
   DDVup(await page.browser(), isLiveList)
 
-  setTimeout(timeId => {
-    startMonitor(page, times + 1, timeId)
+  setTimeout(id => {
+    startMonitor(page, times + 1, id)
   }, 1000 * 60 * config.checkLiveTimeout)
 }
 
@@ -349,7 +349,7 @@ function getPersonalInfo (page) {
     return infoJson
   }).catch(err => {
     console.log('登录失败，请检查');
-    console.log(err);
+    throw err
   })
 }
 
