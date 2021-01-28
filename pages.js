@@ -55,11 +55,15 @@ async function startMonitor (page, times = 0, timeId = null) {
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
 
   let personalInfoJson = await getPersonalInfo(page)
-  console.log(`用户 ${personalInfoJson.info.userName} ${personalInfoJson.info.userId}`);
-  if (personalInfoJson.info.mediaWearInfo) {
-    console.log(`当前佩戴 ${personalInfoJson.info.mediaWearInfo.level} ${personalInfoJson.info.mediaWearInfo.clubName} ${personalInfoJson.info.mediaWearInfo.uperName}`);
+  if (personalInfoJson.info) {
+    console.log(`用户 ${personalInfoJson.info.userName} ${personalInfoJson.info.userId}`);
+    if (personalInfoJson.info.mediaWearInfo) {
+      console.log(`当前佩戴 ${personalInfoJson.info.mediaWearInfo.level} ${personalInfoJson.info.mediaWearInfo.clubName} ${personalInfoJson.info.mediaWearInfo.uperName}`);
+    } else {
+      console.log('当前未佩戴牌子');
+    }
   } else {
-    console.log('当前未佩戴牌子');
+    console.log('读取用户信息失败');
   }
 
   let isLiveList = await page.evaluate(async () => {
