@@ -130,11 +130,6 @@ async function startMonitor (page, times = 0, timeId = null) {
       })
     }).catch(err => {
       console.log('获取粉丝牌列表和已开播房间信息时失败', err);
-      clearTimeout(timeId)
-      // 1分钟后重试
-      setTimeout(id => {
-        startMonitor(page, times + 1, id)
-      }, 1000 * 60)
     })
     let checkLiveWatch = []
     // console.log('liveAndClub', liveAndClub);
@@ -163,13 +158,15 @@ async function startMonitor (page, times = 0, timeId = null) {
     }).catch(err => {
       console.log('获取所有牌子的当日信息失败');
       console.log(err);
-      clearTimeout(timeId)
-      // 1分钟后重试
-      setTimeout(id => {
-        startMonitor(page, times + 1, id)
-      }, 1000 * 60)
     })
-  });
+  }).catch(err => {
+    console.log(err);
+    clearTimeout(timeId)
+    // 1分钟后重试
+    setTimeout(id => {
+      startMonitor(page, times + 1, id)
+    }, 1000 * 60)
+  })
   // console.log('isLiveList', isLiveList);
   DDVup(await page.browser(), isLiveList)
 
