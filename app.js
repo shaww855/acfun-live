@@ -50,6 +50,11 @@ puppeteer.launch({
       request.continue({
         url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
       })
+    } else if (request.url().includes('/perfLog')) {
+      // 拦截日志
+      request.abort()
+    } else {
+      request.continue();
     }
     else request.continue();
   });
