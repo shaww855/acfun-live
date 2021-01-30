@@ -56,7 +56,6 @@ puppeteer.launch({
     } else {
       request.continue();
     }
-    else request.continue();
   });
 
   // 开始登录
