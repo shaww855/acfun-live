@@ -55,6 +55,10 @@ async function startMonitor (page, times = 0, timeId = null) {
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
 
   getPersonalInfo(page).then(personalInfoJson => {
+    if (personalInfoJson.info === undefined) {
+      console.log('读取用户信息失败', personalInfoJson);
+      return
+    }
     console.log(`用户 ${personalInfoJson.info.userName} ${personalInfoJson.info.userId}`);
     if (personalInfoJson.info.mediaWearInfo) {
       console.log(`当前佩戴 ${personalInfoJson.info.mediaWearInfo.level} ${personalInfoJson.info.mediaWearInfo.clubName} ${personalInfoJson.info.mediaWearInfo.uperName}`);
