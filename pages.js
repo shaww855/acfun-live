@@ -215,6 +215,10 @@ async function checkOpenedPages (browser, list) {
  * 退出直播间
  */
 function roomExit (page, uid) {
+  if (page.isClosed()) {
+    // 异步操作 检查牌子时已经执行退出
+    return
+  }
   page
     .evaluate(() => document.querySelector('.up-name').textContent)
     .then(uperName => {
@@ -223,6 +227,10 @@ function roomExit (page, uid) {
       console.log('退出直播', uid)
       console.log(err)
     }).finally(() => {
+      if (page.isClosed()) {
+        // 异步操作
+        return
+      }
       page.close()
     })
 }
