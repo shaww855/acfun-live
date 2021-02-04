@@ -55,7 +55,7 @@ async function startMonitor (page, times = 0, timeId = null) {
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
 
   getPersonalInfo(page).then(personalInfoJson => {
-    if (personalInfoJson.info === undefined) {
+    if (typeof personalInfoJson !== 'object' || personalInfoJson.info === undefined) {
       console.log('读取用户信息失败', personalInfoJson);
       return
     }
