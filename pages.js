@@ -210,6 +210,20 @@ async function checkOpenedPages (browser, list) {
         console.log('因佩戴牌子，退出直播间', target.uperName);
         roomExit(page, uid)
       }
+      page.waitForSelector('.main-tip .active').then(() => {
+        console.log('继续监控时，需要刷新页面');
+        location.reload()
+        page.waitForNavigation().then(() => {
+          afterOpenRoom(page)
+        }).catch(err => {
+          console.log('继续监控刷新时出错，退出直播间', target.uperName);
+          console.log(err);
+          roomExit(page, uid)
+        })
+      }).catch(err => {
+        console.log('未找到页面提示信息，继续观看');
+        console.log(err);
+      })
     }
   })
   return list
@@ -270,24 +284,32 @@ function roomOpen (browser, info, num = 0) {
 
     page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
       console.log('进入直播', info.uperName);
-      page.waitForSelector('.like-btn').then(() => {
-        page.evaluate(() => {
-          setTimeout(() => {
-            document.querySelector('.like-btn').click()
-            // 10分钟点赞一次
-          }, 1000 * 60 * 10)
-        }).catch(err => {
-          console.log(info.uperName, '执行点赞操作失败');
-          console.log(err);
-        })
-      }).catch(err => {
-        console.log(info.uperName, '等待点赞按钮超时');
-        console.log(err);
-      })
+      afterOpenRoom(page)
     }).catch(err => {
-      console.log(info.uperName, '进入直播间失败');
+      console.log('进入直播间失败');
       console.log(err);
     })
+  })
+}
+
+/**
+ * 点赞
+ * @param {Object} page 页面对象
+ */
+function afterOpenRoom (page) {
+  page.waitForSelector('.like-btn').then(() => {
+    page.evaluate(() => {
+      setTimeout(() => {
+        document.querySelector('.like-btn').click()
+        // 10分钟点赞一次
+      }, 1000 * 60 * 10)
+    }).catch(err => {
+      console.log('执行点赞操作失败');
+      console.log(err);
+    })
+  }).catch(err => {
+    console.log('等待点赞按钮超时');
+    console.log(err);
   })
 }
 
