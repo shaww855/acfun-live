@@ -54,18 +54,20 @@ async function startMonitor (page, times = 0, timeId = null) {
   console.log('===');
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
 
-  getPersonalInfo(page).then(personalInfoJson => {
-    if (personalInfoJson === undefined || personalInfoJson.info === undefined) {
-      console.log('读取用户信息失败', personalInfoJson);
-      return
-    }
-    console.log(`用户 ${personalInfoJson.info.userName} ${personalInfoJson.info.userId}`);
-    if (personalInfoJson.info.mediaWearInfo) {
-      console.log(`当前佩戴 ${personalInfoJson.info.mediaWearInfo.level} ${personalInfoJson.info.mediaWearInfo.clubName} ${personalInfoJson.info.mediaWearInfo.uperName}`);
-    } else {
-      console.log('当前未佩戴牌子');
-    }
-  })
+  if (config.checkWearMedal) {
+    getPersonalInfo(page).then(personalInfoJson => {
+      if (personalInfoJson === undefined || personalInfoJson.info === undefined) {
+        console.log('读取用户信息失败', personalInfoJson);
+        return
+      }
+      console.log(`用户 ${personalInfoJson.info.userName} ${personalInfoJson.info.userId}`);
+      if (personalInfoJson.info.mediaWearInfo) {
+        console.log(`当前佩戴 ${personalInfoJson.info.mediaWearInfo.level} ${personalInfoJson.info.mediaWearInfo.clubName} ${personalInfoJson.info.mediaWearInfo.uperName}`);
+      } else {
+        console.log('当前未佩戴牌子');
+      }
+    })
+  }
 
   page.evaluate(async () => {
     // 获取拥有粉丝牌的列表
@@ -211,7 +213,7 @@ async function checkOpenedPages (browser, list) {
         roomExit(page, uid)
       }
       page.waitForSelector('.main-tip .active').then(() => {
-        console.log('继续监控时，需要刷新页面');
+        console.log('继续监控时，需要刷新页面', target.uperName);
         location.reload()
         page.waitForNavigation().then(() => {
           afterOpenRoom(page)
@@ -221,8 +223,8 @@ async function checkOpenedPages (browser, list) {
           roomExit(page, uid)
         })
       }).catch(err => {
-        console.log('未找到页面提示信息，继续观看');
-        console.log(err);
+        // console.log('未找到页面提示信息，继续观看');
+        // console.log(err);
       })
     }
   })
@@ -384,6 +386,7 @@ function getPersonalInfo (page) {
   }).catch(err => {
     console.log('登录失败，请检查');
     console.log(err);
+    throw err
   })
 }
 
