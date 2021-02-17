@@ -176,10 +176,12 @@ async function startMonitor (page, times = 0, timeId = null) {
     console.log('执行失败，1分钟后重试');
     console.log(err);
     clearTimeout(timeId)
-    // 1分钟后重试
-    setTimeout(id => {
-      startMonitor(page, times + 1, id)
-    }, 1000 * 60)
+    page.reload().then(() => {
+      // 1分钟后重试
+      setTimeout(id => {
+        startMonitor(page, times + 1, id)
+      }, 1000 * 60)
+    })
   })
 }
 
@@ -349,6 +351,7 @@ async function DDVup (browser, liveUperInfo, DDVup) {
   liveUperInfo.forEach((info, index) => {
     if (info.wearMedal) {
       console.log('佩戴牌子', info.uperName);
+      limit++
     } else if (info.opened) {
       console.log('继续监控', info.uperName);
     } else if (info.configUnWatch) {
