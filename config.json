@@ -8,5 +8,6 @@
   "liveRoomLimit": 3,
   "uidUnwatchList": [],
   "showLiveInfo": true,
-  "checkWearMedal": true
+  "checkWearMedal": true,
+  "loadBalancer": 0
 }
