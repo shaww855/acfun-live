@@ -338,34 +338,37 @@ async function DDVup (browser, liveUperInfo, DDVup) {
   }
   liveUperInfo = await checkOpenedPages(browser, liveUperInfo)
   // console.log('liveUperInfo', liveUperInfo);
-  if (config.showLiveInfo) {
-    console.log('---')
-    liveUperInfo.forEach((info, index) => {
-      console.log(`开播时间 ${formartDate(info.createTime)}`, info.configUnWatch);
-      console.log(`${info.level}级`, info.clubName, `(${info.timeLimitStr})`, info.uperName, info.uperId);
-      console.log(`[${index + 1}/${liveUperInfo.length}]`, info.title);
-      console.log('---')
-    })
-  }
-
-  let limit = config.liveRoomLimit
+  let limit = config.liveRoomLimit,
+    msg = ''
+  console.log('---')
   liveUperInfo.forEach((info, index) => {
     if (info.wearMedal) {
-      console.log('佩戴牌子', info.uperName);
+      msg = '佩戴牌子'
       limit++
     } else if (info.opened) {
       if (info.timeDifference == 0) {
-        console.log('牌子已满', info.uperName);
+        msg = '牌子已满'
         limit++
       } else {
-        console.log('继续监控', info.uperName);
+        msg = '继续监控'
       }
     } else if (info.configUnWatch) {
-      console.log('配置不看', info.uperName);
+      msg = '配置不看'
+    } else if (index < config.liveRoomLimit * config.loadBalancer) {
+      msg = '均衡负载'
+      limit++
     } else if (config.liveRoomLimit > 0 && index >= limit) {
-      console.log('数量限制', info.uperName);
+      msg = '数量限制'
     } else {
+      msg = '进入直播'
       roomOpen(browser, info)
+    }
+    if (config.showLiveInfo) {
+      console.log(`开播时间 ${formartDate(info.createTime)}`);
+      console.log(`标题： ${info.title}`);
+      console.log(`${info.level}级`, info.clubName, `(${info.timeLimitStr})`, info.uperName, info.uperId);
+      console.log(`开播并且有牌子 ${ index + 1}/${liveUperInfo.length} 状态：${msg}`);
+      console.log('---')
     }
   })
 }
