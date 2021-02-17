@@ -173,10 +173,11 @@ async function startMonitor (page, times = 0, timeId = null) {
       startMonitor(page, times + 1, id)
     }, 1000 * 60 * config.checkLiveTimeout)
   }).catch(err => {
-    console.log('执行失败，1分钟后重试');
+    console.log('执行失败，页面刷新1分钟后重试');
     console.log(err);
     clearTimeout(timeId)
     page.reload().then(() => {
+      console.log('页面刷新成功');
       // 1分钟后重试
       setTimeout(id => {
         startMonitor(page, times + 1, id)
@@ -353,12 +354,14 @@ async function DDVup (browser, liveUperInfo, DDVup) {
       console.log('佩戴牌子', info.uperName);
       limit++
     } else if (info.opened) {
-      console.log('继续监控', info.uperName);
+      if (info.timeDifference == 0) {
+        console.log('牌子已满', info.uperName);
+        limit++
+      } else {
+        console.log('继续监控', info.uperName);
+      }
     } else if (info.configUnWatch) {
       console.log('配置不看', info.uperName);
-    } else if (info.timeDifference <= 0) {
-      console.log('牌子已满', info.uperName);
-      limit++
     } else if (config.liveRoomLimit > 0 && index >= limit) {
       console.log('数量限制', info.uperName);
     } else {
