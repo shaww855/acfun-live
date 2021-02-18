@@ -23,6 +23,7 @@ console.log('直播间数量限制', config.liveRoomLimit);
 console.log('设置了不看', config.uidUnwatchList);
 console.log('显示详细直播信息', config.showLiveInfo);
 console.log('佩戴牌子的主播不观看', config.checkWearMedal);
+console.log(`开源节流 当前第${config.loadBalancer}台服务器`);
 puppeteer.launch({
   // devtools: true, // 开发者工具
   // headless: false, // 无头模式
@@ -60,7 +61,7 @@ puppeteer.launch({
 
   // 开始登录
   if (config.cookies !== '') {
-    console.log('登录方式 Cookile');
+    console.log('登录方式 Cookie');
     await userLoginByCookies(page)
     await page.goto('https://www.acfun.cn').catch(err => {
       console.log('跳转主页失败');

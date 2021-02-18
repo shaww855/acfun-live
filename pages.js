@@ -107,8 +107,7 @@ async function startMonitor (page, times = 0, timeId = null) {
       }))
     )
 
-    // 所有有粉丝牌的直播间
-    let liveAndClub = await Promise.all([
+    const allLiveRoom = await Promise.all([
       fansClub,
       getFollowLiveUsers
     ]).then(responseList => {
@@ -137,8 +136,9 @@ async function startMonitor (page, times = 0, timeId = null) {
     })
 
     let checkLiveWatch = []
+    let liveAndClub = allLiveRoom.filter(e => e.fansClub)
     // console.log('liveAndClub', liveAndClub);
-    liveAndClub = liveAndClub.filter(e => e.fansClub)
+    // console.log(`关注的主播已开播${allLiveRoom.length}位，其中${liveAndClub.length}拥有粉丝牌`);
     // 获取当日时长
     liveAndClub.forEach(item => {
       // console.log('获取当日时长', item);
@@ -166,7 +166,7 @@ async function startMonitor (page, times = 0, timeId = null) {
       throw err
     })
   }).then(async isLiveList => {
-    // console.log('isLiveList', isLiveList);
+    console.log('拥有牌子并且开播的直播间数', isLiveList.length);
     DDVup(await page.browser(), isLiveList)
 
     setTimeout(id => {
@@ -237,8 +237,25 @@ async function checkOpenedPages (browser, list) {
 /**
  * 退出直播间
  */
-function roomExit (page, uid) {
-  if (page.isClosed()) {
+async function roomExit (page, uid, browser=null) {
+  if (page === null) {
+    const pages = await browser.pages()
+    const patt = new RegExp("live.acfun.cn/live/")
+    page = pages.find(p => {
+      const isLiveRoom = patt.test(p.url())
+      if (!isLiveRoom) {
+        // 不是直播间则跳过
+        return false
+      }
+      const pageUid = Number(getUidByLink(p.url()))
+      if (uid === pageUid) {
+        return true
+      }
+      return false
+    })
+  }
+
+  if (page && page.isClosed()) {
     // 异步操作 检查牌子时已经执行退出
     return
   }
@@ -345,18 +362,20 @@ async function DDVup (browser, liveUperInfo, DDVup) {
     if (info.wearMedal) {
       msg = '佩戴牌子'
       limit++
-    } else if (info.opened) {
-      if (info.timeDifference == 0) {
-        msg = '牌子已满'
-        limit++
-      } else {
-        msg = '继续监控'
+    } else if (info.timeDifference == 0) {
+      msg = '牌子已满'
+      limit++
+    } else if (index < config.liveRoomLimit * config.loadBalancer) {
+      msg = `由第${config.loadBalancer - 1}台服务器执行`
+      limit++
+      if (info.opened) {
+        roomExit(null, info.uperId, browser)
+        msg += `转移至第${config.loadBalancer - 1}台服务器执行`
       }
+    } else if (info.opened) {
+        msg = '继续监控'
     } else if (info.configUnWatch) {
       msg = '配置不看'
-    } else if (index < config.liveRoomLimit * config.loadBalancer) {
-      msg = '均衡负载'
-      limit++
     } else if (config.liveRoomLimit > 0 && index >= limit) {
       msg = '数量限制'
     } else {
@@ -367,7 +386,7 @@ async function DDVup (browser, liveUperInfo, DDVup) {
       console.log(`开播时间 ${formartDate(info.createTime)}`);
       console.log(`标题： ${info.title}`);
       console.log(`${info.level}级`, info.clubName, `(${info.timeLimitStr})`, info.uperName, info.uperId);
-      console.log(`开播并且有牌子 ${ index + 1}/${liveUperInfo.length} 状态：${msg}`);
+      console.log(`[${ index + 1}/${liveUperInfo.length}] 状态：${msg}`);
       console.log('---')
     }
   })
