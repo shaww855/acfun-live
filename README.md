@@ -8,7 +8,7 @@
   
 # 来自无常猴的温馨提示  
 我们注意到最近有很多有关A站平台的自制插件出现在社区中，我们不鼓励也不禁止大家自行开发涉AC的相关插件，但请肥肥们一定注意账号财产安全，对所有需要A站账号密码的插件有所警惕，在A站只有平台登录与APP登录才可以提供账号密码哦。  
-[原文链接 ac23978179](https://www.acfun.cn/a/ac23978179)  
+原文链接：[ac23978179](https://www.acfun.cn/a/ac23978179)  
   
 ## 配置 config.json  
 键名 | 类型 | 说明  
@@ -23,7 +23,7 @@ liveRoomLimit | Number | 监控限制 0为无限制 <br> 实测 1G 内存 vps �
 uidUnwatchList | Array | 这些 uid 的直播间不看
 showLiveInfo | Boolean | 检查直播状态时是否展示详细信息
 checkWearMedal | Boolean | 佩戴牌子的主播不观看 <br> 戴着牌子说明你正在D TA，不需要服务器挂牌子
-loadBalancer | Number | 负载均衡 当前是第几台机子 默认第一台为0 <br> 请保持每台机子的 liveRoomLimit 一致
+loadBalancer | Number | 开源节流 默认当前为第1台服务器 <br> 第N台达到数量限制时，由第N+1台服务器接力挂牌子 <br> 请保持每台机子的 liveRoomLimit 一致
 ## 运行  
 1. 安装  
     - NodeJs 和 NPM
@@ -53,7 +53,7 @@ loadBalancer | Number | 负载均衡 当前是第几台机子 默认第一台为
   `yum install libXScrnSaver`
   ---
 
-## 正常运行时日志会这样打印  
+## 运行日志示例  
   
   每(分钟)检查直播 10  
   异步操作最多等待(分钟) 5  
@@ -61,7 +61,7 @@ loadBalancer | Number | 负载均衡 当前是第几台机子 默认第一台为
   设置了不看 []  
   显示详细直播信息 true  
   佩戴牌子的主播不观看 true  
-  登录方式 Cookile  
+  登录方式 Cookie  
     ===  
   第 1 次检查直播状态 2021/02/18 00:44:11  
   用户 XX 337845818  
