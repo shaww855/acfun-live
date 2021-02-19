@@ -216,12 +216,12 @@ async function checkOpenedPages (browser, list) {
         roomExit(page, uid)
       }
       page.waitForSelector('.main-tip .active').then(() => {
-        console.log('继续监控时，需要刷新页面', target.uperName);
+        console.log('继续监控 刷新', target.uperName);
         location.reload()
         page.waitForNavigation().then(() => {
           afterOpenRoom(page)
         }).catch(err => {
-          console.log('继续监控刷新时出错，退出直播间', target.uperName);
+          console.log('继续监控 刷新 出错 退出直播间', target.uperName);
           console.log(err);
           roomExit(page, uid)
         })
@@ -355,8 +355,15 @@ async function DDVup (browser, liveUperInfo, DDVup) {
   }
   liveUperInfo = await checkOpenedPages(browser, liveUperInfo)
   // console.log('liveUperInfo', liveUperInfo);
-  let limit = config.liveRoomLimit,
-    msg = ''
+  let limit = config.serverRoomLimit[config.serverIndex],
+    msg = '',
+    ignoreIndex = 0
+  for (let index = 0; index < config.serverRoomLimit.length; index++) {
+    const element = config.serverRoomLimit[index];
+    if (index <= config.serverIndex) {
+      ignoreIndex += element
+    }
+  }
   console.log('---')
   liveUperInfo.forEach((info, index) => {
     if (info.wearMedal) {
@@ -365,18 +372,18 @@ async function DDVup (browser, liveUperInfo, DDVup) {
     } else if (info.timeDifference == 0) {
       msg = '牌子已满'
       limit++
-    } else if (index < config.liveRoomLimit * config.loadBalancer) {
-      msg = `由第${config.loadBalancer - 1}台服务器执行`
+    } else if (index < ignoreIndex) {
+      msg = `由其他服务器执行`
       limit++
       if (info.opened) {
         roomExit(null, info.uperId, browser)
-        msg += `转移至第${config.loadBalancer - 1}台服务器执行`
+        msg = `转移至其他服务器执行`
       }
     } else if (info.opened) {
         msg = '继续监控'
     } else if (info.configUnWatch) {
       msg = '配置不看'
-    } else if (config.liveRoomLimit > 0 && index >= limit) {
+    } else if (config.serverRoomLimit[config.serverIndex] > 0 && index >= limit) {
       msg = '数量限制'
     } else {
       msg = '进入直播'
@@ -386,7 +393,7 @@ async function DDVup (browser, liveUperInfo, DDVup) {
       console.log(`开播时间 ${formartDate(info.createTime)}`);
       console.log(`标题： ${info.title}`);
       console.log(`${info.level}级`, info.clubName, `(${info.timeLimitStr})`, info.uperName, info.uperId);
-      console.log(`[${ index + 1}/${liveUperInfo.length}] 状态：${msg}`);
+      console.log(`[${ index + 1}/${liveUperInfo.length}] ${msg}`);
       console.log('---')
     }
   })
