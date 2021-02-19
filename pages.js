@@ -54,18 +54,20 @@ async function startMonitor (page, times = 0, timeId = null) {
   console.log('===');
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
 
-  getPersonalInfo(page).then(personalInfoJson => {
-    if (personalInfoJson.info === undefined) {
-      console.log('读取用户信息失败', personalInfoJson);
-      return
-    }
-    console.log(`用户 ${personalInfoJson.info.userName} ${personalInfoJson.info.userId}`);
-    if (personalInfoJson.info.mediaWearInfo) {
-      console.log(`当前佩戴 ${personalInfoJson.info.mediaWearInfo.level} ${personalInfoJson.info.mediaWearInfo.clubName} ${personalInfoJson.info.mediaWearInfo.uperName}`);
-    } else {
-      console.log('当前未佩戴牌子');
-    }
-  })
+  if (config.checkWearMedal) {
+    getPersonalInfo(page).then(personalInfoJson => {
+      if (personalInfoJson === undefined || personalInfoJson.info === undefined) {
+        console.log('读取用户信息失败', personalInfoJson);
+        return
+      }
+      console.log(`用户 ${personalInfoJson.info.userName} ${personalInfoJson.info.userId}`);
+      if (personalInfoJson.info.mediaWearInfo) {
+        console.log(`当前佩戴 ${personalInfoJson.info.mediaWearInfo.level} ${personalInfoJson.info.mediaWearInfo.clubName} ${personalInfoJson.info.mediaWearInfo.uperName}`);
+      } else {
+        console.log('当前未佩戴牌子');
+      }
+    })
+  }
 
   page.evaluate(async () => {
     // 获取拥有粉丝牌的列表
@@ -105,8 +107,7 @@ async function startMonitor (page, times = 0, timeId = null) {
       }))
     )
 
-    // 所有有粉丝牌的直播间
-    let liveAndClub = await Promise.all([
+    const allLiveRoom = await Promise.all([
       fansClub,
       getFollowLiveUsers
     ]).then(responseList => {
@@ -135,8 +136,9 @@ async function startMonitor (page, times = 0, timeId = null) {
     })
 
     let checkLiveWatch = []
+    let liveAndClub = allLiveRoom.filter(e => e.fansClub)
     // console.log('liveAndClub', liveAndClub);
-    liveAndClub = liveAndClub.filter(e => e.fansClub)
+    // console.log(`关注的主播已开播${allLiveRoom.length}位，其中${liveAndClub.length}拥有粉丝牌`);
     // 获取当日时长
     liveAndClub.forEach(item => {
       // console.log('获取当日时长', item);
@@ -164,20 +166,23 @@ async function startMonitor (page, times = 0, timeId = null) {
       throw err
     })
   }).then(async isLiveList => {
-    // console.log('isLiveList', isLiveList);
+    console.log('拥有牌子并且开播的直播间数', isLiveList.length);
     DDVup(await page.browser(), isLiveList)
 
     setTimeout(id => {
       startMonitor(page, times + 1, id)
     }, 1000 * 60 * config.checkLiveTimeout)
   }).catch(err => {
-    console.log('执行失败，1分钟后重试');
+    console.log('执行失败，页面刷新1分钟后重试');
     console.log(err);
     clearTimeout(timeId)
-    // 1分钟后重试
-    setTimeout(id => {
-      startMonitor(page, times + 1, id)
-    }, 1000 * 60)
+    page.reload().then(() => {
+      console.log('页面刷新成功');
+      // 1分钟后重试
+      setTimeout(id => {
+        startMonitor(page, times + 1, id)
+      }, 1000 * 60)
+    })
   })
 }
 
@@ -210,6 +215,20 @@ async function checkOpenedPages (browser, list) {
         console.log('因佩戴牌子，退出直播间', target.uperName);
         roomExit(page, uid)
       }
+      page.waitForSelector('.main-tip .active').then(() => {
+        console.log('继续监控 刷新', target.uperName);
+        location.reload()
+        page.waitForNavigation().then(() => {
+          afterOpenRoom(page)
+        }).catch(err => {
+          console.log('继续监控 刷新 出错 退出直播间', target.uperName);
+          console.log(err);
+          roomExit(page, uid)
+        })
+      }).catch(err => {
+        // console.log('未找到页面提示信息，继续观看');
+        // console.log(err);
+      })
     }
   })
   return list
@@ -218,8 +237,25 @@ async function checkOpenedPages (browser, list) {
 /**
  * 退出直播间
  */
-function roomExit (page, uid) {
-  if (page.isClosed()) {
+async function roomExit (page, uid, browser=null) {
+  if (page === null) {
+    const pages = await browser.pages()
+    const patt = new RegExp("live.acfun.cn/live/")
+    page = pages.find(p => {
+      const isLiveRoom = patt.test(p.url())
+      if (!isLiveRoom) {
+        // 不是直播间则跳过
+        return false
+      }
+      const pageUid = Number(getUidByLink(p.url()))
+      if (uid === pageUid) {
+        return true
+      }
+      return false
+    })
+  }
+
+  if (page && page.isClosed()) {
     // 异步操作 检查牌子时已经执行退出
     return
   }
@@ -270,24 +306,32 @@ function roomOpen (browser, info, num = 0) {
 
     page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
       console.log('进入直播', info.uperName);
-      page.waitForSelector('.like-btn').then(() => {
-        page.evaluate(() => {
-          setTimeout(() => {
-            document.querySelector('.like-btn').click()
-            // 10分钟点赞一次
-          }, 1000 * 60 * 10)
-        }).catch(err => {
-          console.log(info.uperName, '执行点赞操作失败');
-          console.log(err);
-        })
-      }).catch(err => {
-        console.log(info.uperName, '等待点赞按钮超时');
-        console.log(err);
-      })
+      afterOpenRoom(page)
     }).catch(err => {
-      console.log(info.uperName, '进入直播间失败');
+      console.log('进入直播间失败');
       console.log(err);
     })
+  })
+}
+
+/**
+ * 点赞
+ * @param {Object} page 页面对象
+ */
+function afterOpenRoom (page) {
+  page.waitForSelector('.like-btn').then(() => {
+    page.evaluate(() => {
+      setTimeout(() => {
+        document.querySelector('.like-btn').click()
+        // 10分钟点赞一次
+      }, 1000 * 60 * 10)
+    }).catch(err => {
+      console.log('执行点赞操作失败');
+      console.log(err);
+    })
+  }).catch(err => {
+    console.log('等待点赞按钮超时');
+    console.log(err);
   })
 }
 
@@ -311,31 +355,49 @@ async function DDVup (browser, liveUperInfo, DDVup) {
   }
   liveUperInfo = await checkOpenedPages(browser, liveUperInfo)
   // console.log('liveUperInfo', liveUperInfo);
-  if (config.showLiveInfo) {
-    console.log('---')
-    liveUperInfo.forEach((info, index) => {
-      console.log(`开播时间 ${formartDate(info.createTime)}`, info.configUnWatch);
-      console.log(`${info.level}级`, info.clubName, `(${info.timeLimitStr})`, info.uperName, info.uperId);
-      console.log(`[${index + 1}/${liveUperInfo.length}]`, info.title);
-      console.log('---')
-    })
+  let limit = config.serverRoomLimit[config.serverIndex],
+    msg = '',
+    ignoreIndex = 0
+  for (let index = 0; index < config.serverRoomLimit.length; index++) {
+    const element = config.serverRoomLimit[index];
+    if (index < config.serverIndex) {
+      ignoreIndex += element
+    }
   }
-
-  let limit = config.liveRoomLimit
+  console.log('---')
   liveUperInfo.forEach((info, index) => {
+    // console.log(index, limit, config.serverIndex, ignoreIndex);
     if (info.wearMedal) {
-      console.log('佩戴牌子', info.uperName);
-    } else if (info.opened) {
-      console.log('继续监控', info.uperName);
-    } else if (info.configUnWatch) {
-      console.log('配置不看', info.uperName);
-    } else if (info.timeDifference <= 0) {
-      console.log('牌子已满', info.uperName);
+      msg = '佩戴牌子'
       limit++
-    } else if (config.liveRoomLimit > 0 && index >= limit) {
-      console.log('数量限制', info.uperName);
+      ignoreIndex ++
+    } else if (info.timeDifference == 0) {
+      msg = '牌子已满'
+      limit++
+      ignoreIndex ++
+    } else if (config.serverIndex > 0 && index < ignoreIndex) {
+      msg = `由其他服务器执行`
+      limit++
+      if (info.opened) {
+        roomExit(null, info.uperId, browser)
+        msg = `转移至其他服务器执行`
+      }
+    } else if (info.opened) {
+        msg = '继续监控'
+    } else if (info.configUnWatch) {
+      msg = '配置不看'
+    } else if (config.serverRoomLimit[config.serverIndex] > 0 && index >= limit) {
+      msg = '数量限制'
     } else {
+      msg = '进入直播'
       roomOpen(browser, info)
+    }
+    if (config.showLiveInfo) {
+      console.log(`开播时间 ${formartDate(info.createTime)}`);
+      console.log(`标题： ${info.title}`);
+      console.log(`${info.level}级`, info.clubName, `(${info.timeLimitStr})`, info.uperName, info.uperId);
+      console.log(`[${ index + 1}/${liveUperInfo.length}] ${msg}`);
+      console.log('---')
     }
   })
 }
@@ -362,6 +424,7 @@ function getPersonalInfo (page) {
   }).catch(err => {
     console.log('登录失败，请检查');
     console.log(err);
+    throw err
   })
 }
 
