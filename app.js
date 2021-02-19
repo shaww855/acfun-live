@@ -19,11 +19,11 @@ process.on("unhandledRejection", err => {
 
 console.log(`每(分钟)检查直播`, config.checkLiveTimeout);
 console.log(`异步操作最多等待(分钟)`, config.defaultTimeout);
-console.log('直播间数量限制', config.liveRoomLimit);
 console.log('设置了不看', config.uidUnwatchList);
 console.log('显示详细直播信息', config.showLiveInfo);
 console.log('佩戴牌子的主播不观看', config.checkWearMedal);
-console.log(`开源节流 当前第${config.loadBalancer}台服务器`);
+console.log('服务器矩阵配置', config.serverRoomLimit);
+console.log('当前第', config.serverIndex, '台');
 puppeteer.launch({
   // devtools: true, // 开发者工具
   // headless: false, // 无头模式

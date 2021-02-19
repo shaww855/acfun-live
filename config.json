@@ -5,9 +5,9 @@
   "checkLiveTimeout": 10,
   "defaultTimeout": 5,
   "executablePath": "",
-  "liveRoomLimit": 3,
   "uidUnwatchList": [],
   "showLiveInfo": true,
   "checkWearMedal": true,
-  "loadBalancer": 0
+  "serverRoomLimit": [3],
+  "serverIndex": 0
 }
