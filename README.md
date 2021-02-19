@@ -50,8 +50,7 @@ serverIndex | Array | 当前是第几台，从0开始
   - (node:10916) UnhandledPromiseRejectionWarning: Error: Failed to launch the browser process!
   path/node_modules/puppeteer/.local-chromium/linux-782078/chrome-linux/chrome: error while loading shared libraries: libXss.so.1: cannot open shared object file: No such file or directory
   - 查找缺少的依赖并安装  
-  `repoquery --nvr --whatprovides libXss.so.1`  
-  `yum install libXScrnSaver`
+  https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md
   ---
 
 ## 运行日志示例  

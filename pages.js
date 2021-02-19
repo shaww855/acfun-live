@@ -360,19 +360,22 @@ async function DDVup (browser, liveUperInfo, DDVup) {
     ignoreIndex = 0
   for (let index = 0; index < config.serverRoomLimit.length; index++) {
     const element = config.serverRoomLimit[index];
-    if (index <= config.serverIndex) {
+    if (index < config.serverIndex) {
       ignoreIndex += element
     }
   }
   console.log('---')
   liveUperInfo.forEach((info, index) => {
+    console.log(index, limit, config.serverIndex, ignoreIndex);
     if (info.wearMedal) {
       msg = '佩戴牌子'
       limit++
+      ignoreIndex ++
     } else if (info.timeDifference == 0) {
       msg = '牌子已满'
       limit++
-    } else if (index < 0 && index < ignoreIndex) {
+      ignoreIndex ++
+    } else if (config.serverIndex > 0 && index < ignoreIndex) {
       msg = `由其他服务器执行`
       limit++
       if (info.opened) {
