@@ -372,7 +372,7 @@ async function DDVup (browser, liveUperInfo, DDVup) {
     } else if (info.timeDifference == 0) {
       msg = '牌子已满'
       limit++
-    } else if (index < ignoreIndex) {
+    } else if (index < 0 && index < ignoreIndex) {
       msg = `由其他服务器执行`
       limit++
       if (info.opened) {
