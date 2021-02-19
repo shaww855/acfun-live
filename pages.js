@@ -366,7 +366,7 @@ async function DDVup (browser, liveUperInfo, DDVup) {
   }
   console.log('---')
   liveUperInfo.forEach((info, index) => {
-    console.log(index, limit, config.serverIndex, ignoreIndex);
+    // console.log(index, limit, config.serverIndex, ignoreIndex);
     if (info.wearMedal) {
       msg = '佩戴牌子'
       limit++
