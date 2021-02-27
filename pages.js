@@ -253,6 +253,10 @@ async function roomExit (page, uid, browser=null) {
       }
       return false
     })
+
+    if (page === undefined) {
+      return false
+    }
   }
 
   if (page && page.isClosed()) {
@@ -370,24 +374,28 @@ async function DDVup (browser, liveUperInfo, DDVup) {
     if (info.wearMedal) {
       msg = '佩戴牌子'
       limit++
-      ignoreIndex ++
+      ignoreIndex++
+      roomExit(null, info.uperId, browser)
     } else if (info.timeDifference == 0) {
       msg = '牌子已满'
       limit++
-      ignoreIndex ++
+      ignoreIndex++
+      roomExit(null, info.uperId, browser)
     } else if (config.serverIndex > 0 && index < ignoreIndex) {
       msg = `由其他服务器执行`
       limit++
       if (info.opened) {
-        roomExit(null, info.uperId, browser)
         msg = `转移至其他服务器执行`
       }
-    } else if (info.opened) {
-        msg = '继续监控'
+      roomExit(null, info.uperId, browser)
     } else if (info.configUnWatch) {
       msg = '配置不看'
+      roomExit(null, info.uperId, browser)
     } else if (config.serverRoomLimit[config.serverIndex] > 0 && index >= limit) {
       msg = '数量限制'
+      roomExit(null, info.uperId, browser)
+    } else if (info.opened) {
+      msg = '继续监控'
     } else {
       msg = '进入直播'
       roomOpen(browser, info)
