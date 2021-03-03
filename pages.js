@@ -211,6 +211,10 @@ async function checkOpenedPages (browser, list) {
       if (target.timeDifference === 0) {
         roomExit(page, uid)
       }
+      if (target.liveWatchDegree === 0) {
+        // 尝试修复偶先的问题：时长一直为0
+        console.log('继续监控 刷新', target.uperName);
+      }
       if (target.wearMedal && config.checkWearMedal) {
         console.log('因佩戴牌子，退出直播间', target.uperName);
         roomExit(page, uid)
@@ -371,7 +375,7 @@ async function DDVup (browser, liveUperInfo, DDVup) {
   console.log('---')
   liveUperInfo.forEach((info, index) => {
     // console.log(index, limit, config.serverIndex, ignoreIndex);
-    if (info.wearMedal) {
+    if (info.wearMedal && config.checkWearMedal) {
       msg = '佩戴牌子'
       limit++
       ignoreIndex++
@@ -440,7 +444,5 @@ module.exports = {
   userLogin,
   userLoginByCookies,
   startMonitor,
-  checkOpenedPages,
-  roomExit,
-  roomOpen
+  checkOpenedPages
 }

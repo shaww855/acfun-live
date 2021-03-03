@@ -1,7 +1,7 @@
 # AcFun-Live  
 使用 Puppeteer 开启 AcFun 直播监控室，挂牌子！😏  
 定时检查已开播并且拥有粉丝牌的直播间，根据设置进行操作。  
-支持多台服务器，保持每台服务器配置相同。  
+支持多台服务器，请保持每台服务器配置相同。  
 - dev 分支  
 主要用于功能测试、问题修复  
 - main 分支  
@@ -30,7 +30,7 @@ serverIndex | Array | 当前是第几台，从0开始
     - NodeJs 和 NPM
     - `npm i --registry=https://registry.npm.taobao.org`  
 2. 运行  
-  `npm run start` 或 `node  
+  `npm run start` 或 `node`  
 3. 进阶  
   使用进程守护挂载到服务器（我用的 PM2 ，配置文件是 ./ecosystem.config.js ，日志输出也靠它）
 
