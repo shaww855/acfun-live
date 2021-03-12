@@ -33,7 +33,19 @@ puppeteer.launch({
   //   height: 768
   // },
   executablePath: config.executablePath,
-  args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-extensions']
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-crash-reporte',
+    '--disable-extensions',
+    '--disable-smooth-scrolling',
+    '--enable-auto-reload', // 错误页自动刷新
+    '--enforce-gl-minimums', // Enforce GL minimums
+    '--no-crash-upload',
+    '--suppress-message-center-popups',
+    '–no-zygote',
+    '–single-process'
+  ]
 }).then(async browser => {
   const pageList = await browser.pages()
   const page = pageList[0]
@@ -76,6 +88,7 @@ puppeteer.launch({
     document.write('')
   });
 
+  const browserWSEndpoint = browser.wsEndpoint();
   // 起飞
-  startMonitor(page)
+  startMonitor(browserWSEndpoint)
 })
