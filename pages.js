@@ -2,6 +2,7 @@
 const config = require('./config.json')
 // 工具类函数
 const { formartDate, orderBy, getUidByLink } = require('./util.js')
+const puppeteer = require('puppeteer');
 
 /**
  * 用户登录
@@ -46,11 +47,34 @@ function userLoginByCookies (page) {
 
 /**
  * 开始监控室
- * @param {Object} page 页面
+ * @param {Object} browserWSEndpoint 浏览器连接断点
  * @param {Number} times 检查次数
  * @param {Number} timeId 定时器ID
  */
-async function startMonitor (page, times = 0, timeId = null) {
+async function startMonitor (browserWSEndpoint, times = 0, timeId = null) {
+  let page = null
+  const browser = await puppeteer.connect({
+    browserWSEndpoint
+  }).then(async browser => {
+    console.log('连接浏览器成功');
+    page = await browser.pages().then(pages => {
+      console.log('获取页面对象成功');
+      return pages[0]
+    }).catch(err => {
+      console.log('获取页面对象失败');
+      console.log(err);
+      // throw err
+      clearTimeout(timeId)
+    })
+    return browser
+  }).catch(err => {
+    console.log('连接浏览器失败');
+    console.log(err);
+  })
+  if (page === null) {
+    return
+  }
+
   console.log('===');
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
 
@@ -167,10 +191,9 @@ async function startMonitor (page, times = 0, timeId = null) {
     })
   }).then(async isLiveList => {
     console.log('拥有牌子并且开播的直播间数', isLiveList.length);
-    DDVup(await page.browser(), isLiveList)
-
+    DDVup(browser, isLiveList)
     setTimeout(id => {
-      startMonitor(page, times + 1, id)
+      startMonitor(browserWSEndpoint, times + 1, id)
     }, 1000 * 60 * config.checkLiveTimeout)
   }).catch(err => {
     console.log('执行失败，页面刷新1分钟后重试');
@@ -180,9 +203,11 @@ async function startMonitor (page, times = 0, timeId = null) {
       console.log('页面刷新成功');
       // 1分钟后重试
       setTimeout(id => {
-        startMonitor(page, times + 1, id)
+        startMonitor(browserWSEndpoint, times + 1, id)
       }, 1000 * 60)
     })
+  }).finally(() => {
+    browser.disconnect()
   })
 }
 
@@ -210,29 +235,29 @@ async function checkOpenedPages (browser, list) {
       target.opened = true
       if (target.timeDifference === 0) {
         roomExit(page, uid)
-      }
-      if (target.liveWatchDegree === 0) {
-        // 尝试修复偶先的问题：时长一直为0
-        console.log('继续监控 刷新', target.uperName);
+        return
       }
       if (target.wearMedal && config.checkWearMedal) {
         console.log('因佩戴牌子，退出直播间', target.uperName);
         roomExit(page, uid)
+        return
       }
-      page.waitForSelector('.main-tip .active').then(() => {
-        console.log('继续监控 刷新', target.uperName);
-        location.reload()
-        page.waitForNavigation().then(() => {
-          afterOpenRoom(page)
-        }).catch(err => {
-          console.log('继续监控 刷新 出错 退出直播间', target.uperName);
-          console.log(err);
-          roomExit(page, uid)
-        })
-      }).catch(err => {
-        // console.log('未找到页面提示信息，继续观看');
-        // console.log(err);
-      })
+      // page.waitForSelector('.main-tip .active').then(() => {
+      //   console.log('继续监控 刷新', target.uperName);
+      //   location.reload()
+      //   page.waitForNavigation().then(() => {
+      //     afterOpenRoom(page)
+      //   }).catch(err => {
+      //     console.log('继续监控 刷新 出错 退出直播间', target.uperName);
+      //     console.log(err);
+      //     roomExit(page, uid)
+      //   })
+      // }).catch(err => {
+      //   // console.log('未找到页面提示信息，继续观看');
+      //   // console.log(err);
+      // })
+      console.log('继续监控 刷新', target.uperName);
+      page.reload()
     }
   })
   return list
@@ -312,6 +337,10 @@ function roomOpen (browser, info, num = 0) {
       else request.continue();
     });
 
+    page.on('error', err => {
+      console.log('page error', err);
+    })
+
     page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
       console.log('进入直播', info.uperName);
       afterOpenRoom(page)
@@ -348,7 +377,7 @@ function afterOpenRoom (page) {
  * @param {Object} browser 浏览器对象
  * @param {Array} liveUperInfo 直播中的用户uid数组
  */
-async function DDVup (browser, liveUperInfo, DDVup) {
+async function DDVup (browser, liveUperInfo) {
   liveUperInfo = orderBy(liveUperInfo.map(info => ({
     // 配置不观看
     ...info,
@@ -359,7 +388,7 @@ async function DDVup (browser, liveUperInfo, DDVup) {
   if (liveUperInfo.length === 0) {
     console.log('---')
     console.log('拥有牌子的主播均未开播。')
-    console.log('---')
+    // console.log('---')
   }
   liveUperInfo = await checkOpenedPages(browser, liveUperInfo)
   // console.log('liveUperInfo', liveUperInfo);
@@ -443,6 +472,5 @@ function getPersonalInfo (page) {
 module.exports = {
   userLogin,
   userLoginByCookies,
-  startMonitor,
-  checkOpenedPages
+  startMonitor
 }
