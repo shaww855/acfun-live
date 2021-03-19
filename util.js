@@ -38,9 +38,19 @@ const orderBy = (arr, props, orders) =>
  */
 const getUidByLink = link => link.split('/')[4]
 
+/**
+ * 返回页面是否是直播间
+ * @param {Object} page 
+ */
+const isLiveTab = page => {
+  const patt = new RegExp("live.acfun.cn/live/")
+  return patt.test(page.url())
+}
+
 module.exports = {
   padNum,
   formartDate,
   orderBy,
-  getUidByLink
+  getUidByLink,
+  isLiveTab
 }
