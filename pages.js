@@ -1,7 +1,7 @@
 // 配置文件
 const config = require('./config.json')
 // 工具类函数
-const { formartDate, orderBy, getUidByLink } = require('./util.js')
+const { formartDate, orderBy, getUidByLink, isLiveTab } = require('./util.js')
 const puppeteer = require('puppeteer');
 
 /**
@@ -47,36 +47,40 @@ function userLoginByCookies (page) {
 
 /**
  * 开始监控室
- * @param {Object} browserWSEndpoint 浏览器连接断点
+ * @param {Object} browser 浏览器连接断点
  * @param {Number} times 检查次数
  * @param {Number} timeId 定时器ID
  */
-async function startMonitor (browserWSEndpoint, times = 0, timeId = null) {
-  let page = null
-  const browser = await puppeteer.connect({
-    browserWSEndpoint
-  }).then(async browser => {
-    console.log('连接浏览器成功');
-    page = await browser.pages().then(pages => {
-      console.log('获取页面对象成功');
-      return pages[0]
-    }).catch(err => {
-      console.log('获取页面对象失败');
-      console.log(err);
-      // throw err
-      clearTimeout(timeId)
-    })
-    return browser
-  }).catch(err => {
-    console.log('连接浏览器失败');
-    console.log(err);
-  })
-  if (page === null) {
-    return
-  }
-
+async function startMonitor (browser, times = 0, timeId = null) {
   console.log('===');
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
+
+  let page = null
+  // let browser = await puppeteer.connect({
+  //   browserWSEndpoint
+  // }).then(async browser => {
+  //   console.log('连接浏览器成功');
+    await browser.pages().then(pages => {
+      // console.log('获取页面对象成功');
+      // pages.forEach(async (page, index) => {
+      //   console.log(index, '标题', await page.title());
+      // })
+      let target = pages.find(page => !isLiveTab(page))
+      if (target === undefined) {
+        console.log('没有打开AC主页的标签');
+      }
+      page = target
+    }).catch(err => {
+      console.log('获取页面对象失败');
+      // console.log(err);
+      clearTimeout(timeId)
+      throw err
+    })
+  //   return browser
+  // }).catch(err => {
+  //   console.log('连接浏览器失败');
+  //   console.log(err);
+  // })
 
   if (config.checkWearMedal) {
     getPersonalInfo(page).then(personalInfoJson => {
@@ -93,7 +97,7 @@ async function startMonitor (browserWSEndpoint, times = 0, timeId = null) {
     })
   }
 
-  page.evaluate(async () => {
+  const handle = await page.evaluateHandle(async () => {
     // 获取拥有粉丝牌的列表
     const fansClub = fetch(
       'https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/list',
@@ -114,7 +118,10 @@ async function startMonitor (browserWSEndpoint, times = 0, timeId = null) {
         uperName: e.uperName,
         wearMedal: e.wearMedal
       }))
-    )
+    ).catch(err => {
+      console.log('失败');
+      console.log(err);
+    })
     // 获取已开播的
     const getFollowLiveUsers = fetch(
       `https://www.acfun.cn/rest/pc-direct/live/followLiveUsers`,
@@ -129,7 +136,10 @@ async function startMonitor (browserWSEndpoint, times = 0, timeId = null) {
         title: e.title,
         createTime: e.createTime
       }))
-    )
+    ).catch(err => {
+      console.log('失败');
+      console.log(err);
+    })
 
     const allLiveRoom = await Promise.all([
       fansClub,
@@ -184,31 +194,48 @@ async function startMonitor (browserWSEndpoint, times = 0, timeId = null) {
         noTimeLimit: e.liveWatchDegree < e.liveWatchDegreeLimit,
         timeDifference: e.liveWatchDegreeLimit - e.liveWatchDegree
       }))
+    }).then(isLiveList => {
+      // await handle.jsonValue()
+      console.log('拥有牌子并且开播的直播间数', isLiveList.length, isLiveList);
+      return isLiveList
     }).catch(err => {
       console.log('获取所有牌子的当日信息失败');
       console.log(err);
       throw err
     })
-  }).then(async isLiveList => {
-    console.log('拥有牌子并且开播的直播间数', isLiveList.length);
-    DDVup(browser, isLiveList)
-    setTimeout(id => {
-      startMonitor(browserWSEndpoint, times + 1, id)
-    }, 1000 * 60 * config.checkLiveTimeout)
   }).catch(err => {
     console.log('执行失败，页面刷新1分钟后重试');
     console.log(err);
     clearTimeout(timeId)
-    page.reload().then(() => {
-      console.log('页面刷新成功');
-      // 1分钟后重试
-      setTimeout(id => {
-        startMonitor(browserWSEndpoint, times + 1, id)
-      }, 1000 * 60)
-    })
-  }).finally(() => {
-    browser.disconnect()
+    // return page.title().then(title => {
+    //   console.log(title);
+    // }).then(() => {
+    //   return page.reload().then(() => {
+    //     console.log('页面刷新成功');
+    //     // 1分钟后重试
+    //     setTimeout(id => {
+    //       startMonitor(browserWSEndpoint, times + 1, id)
+    //     }, 1000 * 60)
+    //   })
+    // })
   })
+
+  DDVup(browser, handle)
+    // .then(() => {
+    setTimeout(id => {
+      startMonitor(browser, times + 1, id)
+    }, 1000 * 60 * config.checkLiveTimeout)
+  // browser = null
+  // }).catch(err => {
+  //   console.log('DDVup error');
+  //   console.log(err);
+  // }).finally(() => {
+    // if (handle && handle.dispose) {
+    //   handle.dispose()
+    //   console.log('handle被处置');
+    // }
+    // browser.disconnect()
+  // })
 }
 
 /**
@@ -218,47 +245,52 @@ async function startMonitor (browserWSEndpoint, times = 0, timeId = null) {
  */
 async function checkOpenedPages (browser, list) {
   // console.log('checkOpenedPages', list);
-  const patt = new RegExp("live.acfun.cn/live/")
   let pages = await browser.pages()
-  pages.forEach(page => {
-    const isLiveRoom = patt.test(page.url())
-    if (!isLiveRoom) {
+  // console.log('循环当前标签页');
+  const promiseList = []
+  for (let index = 0; index < pages.length; index++) {
+    const page = pages[index];
+    if (!isLiveTab(page)) {
       // 不是直播间则跳过
-      return
-    }
-    const uid = Number(getUidByLink(page.url()))
-    let target = list.find(e => e.uperId === uid)
-    // console.log('target', target);
-    if (target === undefined) {
-      roomExit(page, uid)
     } else {
-      target.opened = true
-      if (target.timeDifference === 0) {
-        roomExit(page, uid)
-        return
+      const uid = Number(getUidByLink(page.url()))
+      let target = list.find(e => e.uperId === uid)
+      // console.log('target', target);
+      if (target === undefined) {
+        promiseList.push(roomExit(page, uid))
+      } else {
+        target.opened = true
+        if (target.wearMedal && config.checkWearMedal) {
+          console.log('因佩戴牌子，退出直播间', target.uperName);
+          promiseList.push(roomExit(page, uid))
+        } else {
+          // await page.title().then(title => {
+          //   console.log('检查', title);
+          // })
+          promiseList.push(
+            page.$('.main-tip .active').then(elHandle => {
+              if (elHandle === null) {
+                return Promise.resolve()
+              }
+              console.log('继续监控 刷新', target.uperName);
+              return page.reload()
+            }).catch((err) => {
+              console.log('tipHandle fail');
+              console.log(err);
+            })
+          )
+        }
       }
-      if (target.wearMedal && config.checkWearMedal) {
-        console.log('因佩戴牌子，退出直播间', target.uperName);
-        roomExit(page, uid)
-        return
-      }
-      // page.waitForSelector('.main-tip .active').then(() => {
-      //   console.log('继续监控 刷新', target.uperName);
-      //   location.reload()
-      //   page.waitForNavigation().then(() => {
-      //     afterOpenRoom(page)
-      //   }).catch(err => {
-      //     console.log('继续监控 刷新 出错 退出直播间', target.uperName);
-      //     console.log(err);
-      //     roomExit(page, uid)
-      //   })
-      // }).catch(err => {
-      //   // console.log('未找到页面提示信息，继续观看');
-      //   // console.log(err);
-      // })
-      console.log('继续监控 刷新', target.uperName);
-      page.reload()
     }
+  }
+  // console.log('循环结束', promiseList);
+  await Promise.all(promiseList).then(() => {
+    // console.log('>>>>>checkOpenedPages', list);
+  }).catch(err => {
+    console.log('检查已打开的页面失败');
+    console.log(err);
+  }).finally(() => {
+    // console.log('>>>>>>checkOpenedPages done');
   })
   return list
 }
@@ -290,9 +322,9 @@ async function roomExit (page, uid, browser=null) {
 
   if (page && page.isClosed()) {
     // 异步操作 检查牌子时已经执行退出
-    return
+    return Promise.resolve()
   }
-  page
+  return page
     .evaluate(() => document.querySelector('.up-name').textContent)
     .then(uperName => {
       console.log('退出直播', uperName)
@@ -302,9 +334,9 @@ async function roomExit (page, uid, browser=null) {
     }).finally(() => {
       if (page.isClosed()) {
         // 异步操作
-        return
+        return Promise.resolve()
       }
-      page.close()
+      return page.close()
     })
 }
 
@@ -316,7 +348,7 @@ async function roomExit (page, uid, browser=null) {
  */
 function roomOpen (browser, info, num = 0) {
   // console.log('roomOpen', info);
-  browser.newPage().then(async page => {
+  return browser.newPage().then(async page => {
     await page.setRequestInterception(true);
     page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
     page.on('request', request => {
@@ -341,13 +373,14 @@ function roomOpen (browser, info, num = 0) {
       console.log('page error', err);
     })
 
-    page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
+    return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
       console.log('进入直播', info.uperName);
-      afterOpenRoom(page)
+      // afterOpenRoom(page)
     }).catch(err => {
       console.log('进入直播间失败');
       console.log(err);
     })
+    // return page.waitForNavigation()
   })
 }
 
@@ -377,8 +410,8 @@ function afterOpenRoom (page) {
  * @param {Object} browser 浏览器对象
  * @param {Array} liveUperInfo 直播中的用户uid数组
  */
-async function DDVup (browser, liveUperInfo) {
-  liveUperInfo = orderBy(liveUperInfo.map(info => ({
+async function DDVup (browser, handle) {
+  let liveUperInfo = orderBy((await handle.jsonValue()).map(info => ({
     // 配置不观看
     ...info,
     configUnWatch: config.uidUnwatchList.includes(info.uperId)
@@ -390,7 +423,16 @@ async function DDVup (browser, liveUperInfo) {
     console.log('拥有牌子的主播均未开播。')
     // console.log('---')
   }
-  liveUperInfo = await checkOpenedPages(browser, liveUperInfo)
+  // console.log('>>>>before', liveUperInfo);
+  await checkOpenedPages(browser, liveUperInfo)
+  //   .then(list => {
+  //   console.log('>>>>afert list', list);
+  // })
+
+  // liveUperInfo = await checkOpenedPages(browser, liveUperInfo)
+  // console.log('afert',liveUperInfo);
+
+  // console.log('await checkOpenedPages');
   // console.log('liveUperInfo', liveUperInfo);
   let limit = config.serverRoomLimit[config.serverIndex],
     msg = '',
@@ -402,36 +444,43 @@ async function DDVup (browser, liveUperInfo) {
     }
   }
   console.log('---')
+  let promiseList = []
   liveUperInfo.forEach((info, index) => {
     // console.log(index, limit, config.serverIndex, ignoreIndex);
     if (info.wearMedal && config.checkWearMedal) {
       msg = '佩戴牌子'
       limit++
       ignoreIndex++
-      roomExit(null, info.uperId, browser)
+      // roomExit(null, info.uperId, browser)
+      promiseList.push(roomExit(null, info.uperId, browser))
     } else if (info.timeDifference == 0) {
       msg = '牌子已满'
       limit++
       ignoreIndex++
-      roomExit(null, info.uperId, browser)
+      // roomExit(null, info.uperId, browser)
+      promiseList.push(roomExit(null, info.uperId, browser))
     } else if (config.serverIndex > 0 && index < ignoreIndex) {
       msg = `由其他服务器执行`
       limit++
       if (info.opened) {
         msg = `转移至其他服务器执行`
       }
-      roomExit(null, info.uperId, browser)
+      // roomExit(null, info.uperId, browser)
+      promiseList.push(roomExit(null, info.uperId, browser))
     } else if (info.configUnWatch) {
       msg = '配置不看'
-      roomExit(null, info.uperId, browser)
+      // roomExit(null, info.uperId, browser)
+      promiseList.push(roomExit(null, info.uperId, browser))
     } else if (config.serverRoomLimit[config.serverIndex] > 0 && index >= limit) {
       msg = '数量限制'
-      roomExit(null, info.uperId, browser)
+      // roomExit(null, info.uperId, browser)
+      promiseList.push(roomExit(null, info.uperId, browser))
     } else if (info.opened) {
       msg = '继续监控'
     } else {
       msg = '进入直播'
-      roomOpen(browser, info)
+      // roomOpen(browser, info)
+      promiseList.push(roomOpen(browser, info))
     }
     if (config.showLiveInfo) {
       console.log(`开播时间 ${formartDate(info.createTime)}`);
@@ -440,6 +489,20 @@ async function DDVup (browser, liveUperInfo) {
       console.log(`[${ index + 1}/${liveUperInfo.length}] ${msg}`);
       console.log('---')
     }
+  })
+  await Promise.all(promiseList).then(() => {
+  }).catch(err => {
+    console.log('DD行为失败');
+    console.log(err);
+  }).finally(() => {
+    // console.log('处理 handle');
+    handle.dispose()
+      // .then(() => {
+      //   // console.log('释放 browser');
+      //   // browser.disconnect()
+      // }).finally(() => {
+      //   console.log('处理完毕');
+      // })
   })
 }
 

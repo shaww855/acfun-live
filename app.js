@@ -43,7 +43,6 @@ puppeteer.launch({
     '--enforce-gl-minimums', // Enforce GL minimums
     '--no-crash-upload',
     '--suppress-message-center-popups',
-    '–no-zygote',
     '–single-process'
   ]
 }).then(async browser => {
@@ -88,7 +87,8 @@ puppeteer.launch({
     document.write('')
   });
 
-  const browserWSEndpoint = browser.wsEndpoint();
-  // 起飞
-  startMonitor(browserWSEndpoint)
+  // const browserWSEndpoint = browser.wsEndpoint();
+  // // 起飞
+  // startMonitor(browserWSEndpoint)
+  startMonitor(browser)
 })
