@@ -52,6 +52,7 @@ puppeteer.launch({
   page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
 
   page.on('error', async error => {
+    console.log('page error');
     console.log(error);
     process.exit(1)
   })
