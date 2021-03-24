@@ -97,7 +97,7 @@ async function startMonitor (browser, times = 0, timeId = null) {
     })
   }
 
-  const handle = await page.evaluateHandle(async () => {
+  await page.evaluateHandle(async () => {
     // 获取拥有粉丝牌的列表
     const fansClub = fetch(
       'https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/list',
@@ -203,7 +203,14 @@ async function startMonitor (browser, times = 0, timeId = null) {
       console.log(err);
       throw err
     })
-  }).catch(err => {
+  })
+    .then(handle => {
+      DDVup(browser, handle)
+      setTimeout(id => {
+        startMonitor(browser, times + 1, id)
+      }, 1000 * 60 * config.checkLiveTimeout)
+    })
+    .catch(err => {
     console.log('执行失败，页面刷新1分钟后重试');
     console.log(err);
     clearTimeout(timeId)
@@ -213,29 +220,29 @@ async function startMonitor (browser, times = 0, timeId = null) {
     //   return page.reload().then(() => {
     //     console.log('页面刷新成功');
     //     // 1分钟后重试
-    //     setTimeout(id => {
-    //       startMonitor(browserWSEndpoint, times + 1, id)
-    //     }, 1000 * 60)
+        setTimeout(id => {
+          startMonitor(browser, times + 1, id)
+        }, 1000 * 60)
     //   })
     // })
   })
 
-  DDVup(browser, handle)
-    // .then(() => {
-    setTimeout(id => {
-      startMonitor(browser, times + 1, id)
-    }, 1000 * 60 * config.checkLiveTimeout)
-  // browser = null
-  // }).catch(err => {
-  //   console.log('DDVup error');
-  //   console.log(err);
-  // }).finally(() => {
-    // if (handle && handle.dispose) {
-    //   handle.dispose()
-    //   console.log('handle被处置');
-    // }
-    // browser.disconnect()
-  // })
+  // DDVup(browser, handle)
+  //   // .then(() => {
+  //   setTimeout(id => {
+  //     startMonitor(browser, times + 1, id)
+  //   }, 1000 * 60 * config.checkLiveTimeout)
+  // // browser = null
+  // // }).catch(err => {
+  // //   console.log('DDVup error');
+  // //   console.log(err);
+  // // }).finally(() => {
+  //   // if (handle && handle.dispose) {
+  //   //   handle.dispose()
+  //   //   console.log('handle被处置');
+  //   // }
+  //   // browser.disconnect()
+  // // })
 }
 
 /**
@@ -369,8 +376,10 @@ function roomOpen (browser, info, num = 0) {
       else request.continue();
     });
 
-    page.on('error', err => {
-      console.log('page error', err);
+    page.on('error', async error => {
+      console.log('page error');
+      console.log(error);
+      process.exit(1)
     })
 
     return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
