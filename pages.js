@@ -166,10 +166,12 @@ async function checkOpenedPages (browser, list) {
           promiseList.push(
             page.$('.main-tip .active').then(elHandle => {
               if (elHandle === null) {
-                return Promise.resolve()
+                return elHandle.dispose()
               }
               console.log('继续监控 刷新', target.uperName);
-              return page.reload()
+              return elHandle.dispose().then(() =>
+                page.reload()
+              )
             }).catch((err) => {
               console.log('tipHandle fail');
               console.log(err);
@@ -266,7 +268,7 @@ function roomOpen (browser, info, num = 0) {
     // });
 
     page.on('pageerror', error => {
-      console.log(info.uperName, error);
+      console.log('pageerror:', info.uperName, error.name, error.message);
     })
 
     return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
@@ -304,9 +306,9 @@ async function afterOpenRoom (page) {
   page.evaluate(() => {
     const video = document.querySelector('video')
     video.pause()
-    // video.addEventListener('play', () => {
-    //   video.pause()
-    // })
+    video.addEventListener('play', () => {
+      video.pause()
+    })
     document.querySelector('.container-live-feed-messages').remove()
   })
   // videoHandle.evaluate(node => node.pause()).finally(() => {

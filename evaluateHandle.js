@@ -8,7 +8,7 @@ const handleProxy = async (page, action, url) => {
     ).then(
       res => res.json()
     ).catch(err => ({
-      msg: `POST ${url} 失败`,
+      handleError: `POST ${url} 失败`,
       name: err.name,
       message: err.message,
     })
@@ -17,7 +17,12 @@ const handleProxy = async (page, action, url) => {
   ).finally(() => {
     console.log(msg, url, 'evaluateHandle fetch done');
   })
-  return handle.jsonValue().finally(() => {
+  return handle.jsonValue().then(res => {
+    if (res.handleError) {
+      return Promise.reject(res)
+    }
+    return Promise.resolve(res)
+  }).finally(() => {
     console.log(msg, 'jsonValue done');
     handle.dispose()
   })
