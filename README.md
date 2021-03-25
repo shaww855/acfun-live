@@ -30,7 +30,7 @@ serverIndex | Array | 当前是第几台，从0开始
     - NodeJs 和 NPM
     - `npm i --registry=https://registry.npm.taobao.org`  
 2. 运行  
-  `npm run start` 或 `node`  
+  `npm run start` 或 `node app`  
 3. 进阶  
   使用进程守护挂载到服务器（我用的 PM2 ，配置文件是 ./ecosystem.config.js ，日志输出也靠它）
 
@@ -41,8 +41,9 @@ serverIndex | Array | 当前是第几台，从0开始
 
 ## 问题
   -  ERROR: Failed to set up Chromium r782078! Set  "PUPPETEER_SKIP_DOWNLOAD" env variable to skip download.  
-  `npm config set puppeteer_download_host=https://npm.taobao.org/mirrors`  
-  如果你本机已经安装 Chromium，可以跳过它，并在 config.json 里填入 executablePath  
+  下载浏览器失败，解决方法有两个  
+     -  设置淘宝预源 `npm config set puppeteer_download_host=https://npm.taobao.org/mirrors`  
+     -  如果你本机已经安装 Chromium，可以 `npm config set puppeteer_skip_chromium_download=true` 跳过下载，并在 config.json 里填入 executablePath  
   - npm默认不以root身份运行  
   `npm install puppeteer --unsafe-perm=true --allow-root`
   https://github.com/puppeteer/puppeteer/issues/1597
