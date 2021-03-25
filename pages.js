@@ -2,7 +2,8 @@
 const config = require('./config.json')
 // 工具类函数
 const { formartDate, orderBy, getUidByLink, isLiveTab } = require('./util.js')
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer');
+const getInfo = require('./evaluateHandle')
 
 /**
  * 用户登录
@@ -56,193 +57,81 @@ async function startMonitor (browser, times = 0, timeId = null) {
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
 
   let page = null
-  // let browser = await puppeteer.connect({
-  //   browserWSEndpoint
-  // }).then(async browser => {
-  //   console.log('连接浏览器成功');
-    await browser.pages().then(pages => {
-      // console.log('获取页面对象成功');
-      // pages.forEach(async (page, index) => {
-      //   console.log(index, '标题', await page.title());
-      // })
-      let target = pages.find(page => !isLiveTab(page))
-      if (target === undefined) {
-        console.log('没有打开AC主页的标签');
-      }
-      page = target
-    }).catch(err => {
-      console.log('获取页面对象失败');
-      // console.log(err);
-      clearTimeout(timeId)
-      throw err
-    })
-  //   return browser
-  // }).catch(err => {
-  //   console.log('连接浏览器失败');
-  //   console.log(err);
-  // })
+  await browser.pages().then(pages => {
+    let target = pages.find(page => !isLiveTab(page))
+    if (target === undefined) {
+      console.log('没有打开AC主页的标签');
+    }
+    page = target
+  }).catch(err => {
+    console.log('获取页面对象失败');
+    clearTimeout(timeId)
+    throw err
+  })
 
   if (config.checkWearMedal) {
-    getPersonalInfo(page).then(personalInfoJson => {
-      if (personalInfoJson === undefined || personalInfoJson.info === undefined) {
-        console.log('读取用户信息失败', personalInfoJson);
-        return
-      }
-      console.log(`用户 ${personalInfoJson.info.userName} ${personalInfoJson.info.userId}`);
-      if (personalInfoJson.info.mediaWearInfo) {
-        console.log(`当前佩戴 ${personalInfoJson.info.mediaWearInfo.level} ${personalInfoJson.info.mediaWearInfo.clubName} ${personalInfoJson.info.mediaWearInfo.uperName}`);
+    getInfo('个人信息', page).then(res => {
+      console.log(`用户 ${res.userName} ${res.userId}`);
+      if (res.mediaWearInfo) {
+        console.log(`当前佩戴 ${res.mediaWearInfo.level} ${res.mediaWearInfo.clubName} ${res.mediaWearInfo.uperName}`);
       } else {
         console.log('当前未佩戴牌子');
       }
     })
   }
 
-  await page.evaluateHandle(async () => {
-    // 获取拥有粉丝牌的列表
-    const fansClub = fetch(
-      'https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/list',
-      {
-        method: 'POST'
-      }
-    ).then(
-      res => res.json()
-    ).then(
-      res => res.medalList.map(e => ({
-        clubName: e.clubName,
-        currentDegreeLimit: e.currentDegreeLimit,
-        friendshipDegree: e.friendshipDegree,
-        friendshipToLevelUp: e.currentDegreeLimit - e.friendshipDegree,
-        joinClubTime: e.joinClubTime,
-        level: e.level,
-        uperId: e.uperId,
-        uperName: e.uperName,
-        wearMedal: e.wearMedal
-      }))
-    ).catch(err => {
-      console.log('失败');
-      console.log(err);
-    })
-    // 获取已开播的
-    const getFollowLiveUsers = fetch(
-      `https://www.acfun.cn/rest/pc-direct/live/followLiveUsers`,
-      {
-        method: 'POST',
-      }
-    ).then(
-      res => res.json()
-    ).then(
-      res => res.liveUsers.map(e => ({
-        authorId: e.authorId,
-        title: e.title,
-        createTime: e.createTime
-      }))
-    ).catch(err => {
-      console.log('失败');
-      console.log(err);
-    })
-
-    const allLiveRoom = await Promise.all([
-      fansClub,
-      getFollowLiveUsers
-    ]).then(responseList => {
-      // console.log('responseList', responseList);
-      return responseList[1].map(e => {
-        const target = responseList[0].find(clubList => clubList.uperId === e.authorId)
-        // console.log('target', target, e.authorId);
-        if (target === undefined) {
-          return {
-            ...e,
-            onLive: true,
-            fansClub: false,
-            wearMedal: false
-          }
-        }
+  const allLiveRoom = await Promise.all([
+    getInfo('粉丝牌列表', page),
+    getInfo('关注并开播列表', page)
+  ]).then(responseList => {
+    return responseList[1].map(e => {
+      const target = responseList[0].find(clubList => clubList.uperId === e.authorId)
+      if (target === undefined) {
         return {
           ...e,
           onLive: true,
-          fansClub: true,
-          ...target
+          fansClub: false,
+          wearMedal: false
         }
-      })
-    }).catch(err => {
-      console.log('获取粉丝牌列表和已开播房间信息时失败', err);
-      throw err
+      }
+      return {
+        ...e,
+        onLive: true,
+        fansClub: true,
+        ...target
+      }
     })
-
-    let checkLiveWatch = []
-    let liveAndClub = allLiveRoom.filter(e => e.fansClub)
-    // console.log('liveAndClub', liveAndClub);
-    // console.log(`关注的主播已开播${allLiveRoom.length}位，其中${liveAndClub.length}拥有粉丝牌`);
-    // 获取当日时长
-    liveAndClub.forEach(item => {
-      // console.log('获取当日时长', item);
-      checkLiveWatch.push(
-        fetch(
-          `https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/degreeLimit?uperId=${item.uperId}`
-        ).then(
-          res => res.json()
-        ).then(res => {
-          return res.medalDegreeLimit
-        })
-      )
-    })
-    return Promise.all(checkLiveWatch).then(list => {
-      // console.log('list', list)
-      return list.map((e, i) => ({
-        ...liveAndClub[i],
-        timeLimitStr: e.liveWatchDegree + '/' + e.liveWatchDegreeLimit,
-        noTimeLimit: e.liveWatchDegree < e.liveWatchDegreeLimit,
-        timeDifference: e.liveWatchDegreeLimit - e.liveWatchDegree
-      }))
-    }).then(isLiveList => {
-      // await handle.jsonValue()
-      console.log('拥有牌子并且开播的直播间数', isLiveList.length, isLiveList);
-      return isLiveList
-    }).catch(err => {
-      console.log('获取所有牌子的当日信息失败');
-      console.log(err);
-      throw err
-    })
+  }).catch(err => {
+    console.log('整合粉丝牌列表和已开播房间信息时失败', err);
+    throw err
   })
-    .then(handle => {
-      DDVup(browser, handle)
-      setTimeout(id => {
-        startMonitor(browser, times + 1, id)
-      }, 1000 * 60 * config.checkLiveTimeout)
-    })
-    .catch(err => {
-    console.log('执行失败，页面刷新1分钟后重试');
+
+  let checkLiveWatch = []
+  let liveAndClub = allLiveRoom.filter(e => e.fansClub)
+  liveAndClub.forEach(item => {
+    checkLiveWatch.push(getInfo('当日时长', page, item.uperId))
+  })
+  const liveUperInfo = await Promise.all(checkLiveWatch).then(list => {
+    // console.log('list', list)
+    return list.map((e, i) => ({
+      ...liveAndClub[i],
+      timeLimitStr: e.liveWatchDegree + '/' + e.liveWatchDegreeLimit,
+      noTimeLimit: e.liveWatchDegree < e.liveWatchDegreeLimit,
+      timeDifference: e.liveWatchDegreeLimit - e.liveWatchDegree
+    }))
+  }).then(isLiveList => {
+    console.log('拥有牌子并且开播的直播间数', isLiveList.length);
+    return isLiveList
+  }).catch(err => {
+    console.log('获取所有牌子的当日信息失败');
     console.log(err);
-    clearTimeout(timeId)
-    // return page.title().then(title => {
-    //   console.log(title);
-    // }).then(() => {
-    //   return page.reload().then(() => {
-    //     console.log('页面刷新成功');
-    //     // 1分钟后重试
-        setTimeout(id => {
-          startMonitor(browser, times + 1, id)
-        }, 1000 * 60)
-    //   })
-    // })
+    throw err
   })
 
-  // DDVup(browser, handle)
-  //   // .then(() => {
-  //   setTimeout(id => {
-  //     startMonitor(browser, times + 1, id)
-  //   }, 1000 * 60 * config.checkLiveTimeout)
-  // // browser = null
-  // // }).catch(err => {
-  // //   console.log('DDVup error');
-  // //   console.log(err);
-  // // }).finally(() => {
-  //   // if (handle && handle.dispose) {
-  //   //   handle.dispose()
-  //   //   console.log('handle被处置');
-  //   // }
-  //   // browser.disconnect()
-  // // })
+  DDVup(browser, liveUperInfo)
+  setTimeout(id => {
+    startMonitor(browser, times + 1, id)
+  }, 1000 * 60 * config.checkLiveTimeout)
 }
 
 /**
@@ -419,8 +308,8 @@ function afterOpenRoom (page) {
  * @param {Object} browser 浏览器对象
  * @param {Array} liveUperInfo 直播中的用户uid数组
  */
-async function DDVup (browser, handle) {
-  let liveUperInfo = orderBy((await handle.jsonValue()).map(info => ({
+async function DDVup (browser, liveUperInfo) {
+  liveUperInfo = orderBy(liveUperInfo.map(info => ({
     // 配置不观看
     ...info,
     configUnWatch: config.uidUnwatchList.includes(info.uperId)
@@ -503,41 +392,6 @@ async function DDVup (browser, handle) {
   }).catch(err => {
     console.log('DD行为失败');
     console.log(err);
-  }).finally(() => {
-    // console.log('处理 handle');
-    handle.dispose()
-      // .then(() => {
-      //   // console.log('释放 browser');
-      //   // browser.disconnect()
-      // }).finally(() => {
-      //   console.log('处理完毕');
-      // })
-  })
-}
-
-/**
- * 获取个人信息
- */
-function getPersonalInfo (page) {
-  return page.waitForFunction(() => {
-    return fetch(
-      'https://www.acfun.cn/rest/pc-direct/user/personalInfo',
-      {
-        method: 'POST'
-      }
-    ).then(res => {
-      return res.json()
-    }).catch(err => {
-      return err
-    })
-  }).then(async info => {
-    let infoJson = await info.jsonValue()
-    info.dispose()
-    return infoJson
-  }).catch(err => {
-    console.log('登录失败，请检查');
-    console.log(err);
-    throw err
   })
 }
 
