@@ -245,35 +245,33 @@ async function roomExit (page, uid, browser=null) {
 function roomOpen (browser, info, num = 0) {
   // console.log('roomOpen', info);
   return browser.newPage().then(async page => {
-    await page.setRequestInterception(true);
+    // await page.setRequestInterception(true);
     page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
-    page.on('request', request => {
-      if (request.resourceType() === 'image') {
-        request.continue({
-          url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
-        })
-      } else if (request.url().includes('.flv')) {
-        // 拦截直播流
-        request.abort()
-      } else if (request.url().includes('/log')) {
-        // 拦截疑似日志
-        request.abort()
-      } else if (request.url().includes('/collect')) {
-        // 拦截疑似错误信息收集
-        request.abort()
-      }
-      else request.continue();
-    });
+    // page.on('request', request => {
+    //   if (request.resourceType() === 'image') {
+    //     request.continue({
+    //       url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
+    //     })
+    //   } else if (request.url().includes('.flv')) {
+    //     // 拦截直播流
+    //     request.abort()
+    //   } else if (request.url().includes('/log')) {
+    //     // 拦截疑似日志
+    //     request.abort()
+    //   } else if (request.url().includes('/collect')) {
+    //     // 拦截疑似错误信息收集
+    //     request.abort()
+    //   }
+    //   else request.continue();
+    // });
 
-    page.on('error', async error => {
-      console.log('page error');
-      console.log(error);
-      process.exit(1)
+    page.on('pageerror', error => {
+      console.log(info.uperName, error);
     })
 
     return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
       console.log('进入直播', info.uperName);
-      // afterOpenRoom(page)
+      afterOpenRoom(page)
     }).catch(err => {
       console.log('进入直播间失败');
       console.log(err);
@@ -286,21 +284,35 @@ function roomOpen (browser, info, num = 0) {
  * 点赞
  * @param {Object} page 页面对象
  */
-function afterOpenRoom (page) {
-  page.waitForSelector('.like-btn').then(() => {
-    page.evaluate(() => {
-      setTimeout(() => {
-        document.querySelector('.like-btn').click()
-        // 10分钟点赞一次
-      }, 1000 * 60 * 10)
-    }).catch(err => {
-      console.log('执行点赞操作失败');
-      console.log(err);
-    })
-  }).catch(err => {
-    console.log('等待点赞按钮超时');
-    console.log(err);
+async function afterOpenRoom (page) {
+  // page.waitForSelector('.like-btn').then(() => {
+  //   page.evaluate(() => {
+  //     setTimeout(() => {
+  //       document.querySelector('.like-btn').click()
+  //       // 10分钟点赞一次
+  //     }, 1000 * 60 * 10)
+  //   }).catch(err => {
+  //     console.log('执行点赞操作失败');
+  //     console.log(err);
+  //   })
+  // }).catch(err => {
+  //   console.log('等待点赞按钮超时');
+  //   console.log(err);
+  // })
+  const videoHandle = await page.waitForSelector('video')
+  videoHandle.dispose()
+  page.evaluate(() => {
+    const video = document.querySelector('video')
+    video.pause()
+    // video.addEventListener('play', () => {
+    //   video.pause()
+    // })
+    document.querySelector('.container-live-feed-messages').remove()
   })
+  // videoHandle.evaluate(node => node.pause()).finally(() => {
+  //   console.log('videoHandle evaluate');
+  //   videoHandle.dispose()
+  // })
 }
 
 /**
