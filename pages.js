@@ -124,7 +124,6 @@ async function startMonitor (browser, times = 0, timeId = null) {
     return isLiveList
   }).catch(err => {
     console.log('获取所有牌子的当日信息失败');
-    console.log(err);
     throw err
   })
 
