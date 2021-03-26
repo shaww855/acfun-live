@@ -82,9 +82,9 @@ puppeteer.launch({
     console.log('登录方式 账号');
     await userLogin(page)
   }
-  page.evaluate(() => {
-    document.write('')
-  });
+  // page.evaluate(() => {
+  //   document.write('')
+  // });
 
   // const browserWSEndpoint = browser.wsEndpoint();
   // // 起飞
