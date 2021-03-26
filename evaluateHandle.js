@@ -15,13 +15,13 @@ const handleProxy = async (page, action, url) => {
     ),
     url
   ).finally(() => {
-    console.log(msg, url, 'evaluateHandle fetch done');
+    console.log(msg, url, 'done');
   })
   return handle.jsonValue().then(res => {
     if (res.handleError) {
-      return Promise.reject(res)
+      throw res
     }
-    return Promise.resolve(res)
+    return res
   }).finally(() => {
     console.log(msg, 'jsonValue done');
     handle.dispose()

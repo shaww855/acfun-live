@@ -166,7 +166,7 @@ async function checkOpenedPages (browser, list) {
           promiseList.push(
             page.$('.main-tip .active').then(elHandle => {
               if (elHandle === null) {
-                return elHandle.dispose()
+                return Promise.resolve()
               }
               console.log('继续监控 刷新', target.uperName);
               return elHandle.dispose().then(() =>
@@ -247,33 +247,33 @@ async function roomExit (page, uid, browser=null) {
 function roomOpen (browser, info, num = 0) {
   // console.log('roomOpen', info);
   return browser.newPage().then(async page => {
-    // await page.setRequestInterception(true);
+    await page.setRequestInterception(true);
     page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
-    // page.on('request', request => {
-    //   if (request.resourceType() === 'image') {
-    //     request.continue({
-    //       url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
-    //     })
-    //   } else if (request.url().includes('.flv')) {
-    //     // 拦截直播流
-    //     request.abort()
-    //   } else if (request.url().includes('/log')) {
-    //     // 拦截疑似日志
-    //     request.abort()
-    //   } else if (request.url().includes('/collect')) {
-    //     // 拦截疑似错误信息收集
-    //     request.abort()
-    //   }
-    //   else request.continue();
-    // });
+    page.on('request', request => {
+      if (request.resourceType() === 'image') {
+        request.continue({
+          url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
+        })
+      } else if (request.url().includes('.flv')) {
+        // 拦截直播流
+        request.abort()
+      } else if (request.url().includes('/log')) {
+        // 拦截疑似日志
+        request.abort()
+      } else if (request.url().includes('/collect')) {
+        // 拦截疑似错误信息收集
+        request.abort()
+      }
+      else request.continue();
+    });
 
     page.on('pageerror', error => {
       console.log('pageerror:', info.uperName, error.name, error.message);
     })
 
-    return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
+    return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(async () => {
       console.log('进入直播', info.uperName);
-      afterOpenRoom(page)
+      await afterOpenRoom(page)
     }).catch(err => {
       console.log('进入直播间失败');
       console.log(err);
@@ -303,12 +303,14 @@ async function afterOpenRoom (page) {
   // })
   const videoHandle = await page.waitForSelector('video')
   videoHandle.dispose()
-  page.evaluate(() => {
+  await page.evaluate(() => {
+    // 这里不能用video.pause，因为video.play是个Promise
     const video = document.querySelector('video')
-    video.pause()
-    video.addEventListener('play', () => {
-      video.pause()
-    })
+    video.src = ''
+    // video.addEventListener('play', () => {
+    //   video.pause()
+    // })
+    // 干掉弹幕池
     document.querySelector('.container-live-feed-messages').remove()
   })
   // videoHandle.evaluate(node => node.pause()).finally(() => {
