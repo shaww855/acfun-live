@@ -1,4 +1,4 @@
-const handleProxy = async (page, action, url) => {
+const handleProxy = async (page, action, url, retry = 0) => {
   const msg = '获取' + action
   console.log(msg, 'start');
   const handle = await page.evaluateHandle(url =>
@@ -19,7 +19,11 @@ const handleProxy = async (page, action, url) => {
   })
   return handle.jsonValue().then(res => {
     if (res.handleError) {
-      throw res
+      if (retry < 3) {
+        return handleProxy(page, action, url, retry + 1)
+      } else {
+        throw res
+      }
     }
     return res
   }).finally(() => {
