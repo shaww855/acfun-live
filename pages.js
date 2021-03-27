@@ -24,7 +24,7 @@ function userLogin (page) {
     await page.waitForNavigation()
   }).catch(err => {
     console.log('使用账号密码登录失败');
-    console.log(err);
+    console.error(err);
     page.browser().close()
   })
 }
@@ -172,8 +172,8 @@ async function checkOpenedPages (browser, list) {
                 page.reload()
               )
             }).catch((err) => {
-              console.log('tipHandle fail');
-              console.log(err);
+              console.log('检查直播间提示失败');
+              console.error(err);
             })
           )
         }
@@ -185,7 +185,7 @@ async function checkOpenedPages (browser, list) {
     // console.log('>>>>>checkOpenedPages', list);
   }).catch(err => {
     console.log('检查已打开的页面失败');
-    console.log(err);
+    console.error(err);
   }).finally(() => {
     // console.log('>>>>>>checkOpenedPages done');
   })
@@ -227,7 +227,7 @@ async function roomExit (page, uid, browser=null) {
       console.log('退出直播', uperName)
     }).catch(err => {
       console.log('退出直播', uid)
-      console.log(err)
+      console.error(err)
     }).finally(() => {
       if (page.isClosed()) {
         // 异步操作
@@ -246,28 +246,11 @@ async function roomExit (page, uid, browser=null) {
 function roomOpen (browser, info, num = 0) {
   // console.log('roomOpen', info);
   return browser.newPage().then(async page => {
-    await page.setRequestInterception(true);
     page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
-    page.on('request', request => {
-      if (request.resourceType() === 'image') {
-        request.continue({
-          url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
-        })
-      } else if (request.url().includes('.flv')) {
-        // 拦截直播流
-        request.abort()
-      } else if (request.url().includes('/log')) {
-        // 拦截疑似日志
-        request.abort()
-      } else if (request.url().includes('/collect')) {
-        // 拦截疑似错误信息收集
-        request.abort()
-      }
-      else request.continue();
-    });
+    await requestFliter(page)
 
     page.on('pageerror', error => {
-      console.log('pageeError:', info.uperName, error.name, error.message);
+      console.error('pageeError:', info.uperName, error.name, error.message);
     })
 
     return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(async () => {
@@ -275,31 +258,32 @@ function roomOpen (browser, info, num = 0) {
       await afterOpenRoom(page)
     }).catch(err => {
       console.log('进入直播间失败');
-      console.log(err);
+      console.error(err);
     })
     // return page.waitForNavigation()
   })
 }
 
 /**
- * 点赞
+ * 直播间开启的后续操作
  * @param {Object} page 页面对象
  */
 async function afterOpenRoom (page) {
-  // page.waitForSelector('.like-btn').then(() => {
-  //   page.evaluate(() => {
-  //     setTimeout(() => {
-  //       document.querySelector('.like-btn').click()
-  //       // 10分钟点赞一次
-  //     }, 1000 * 60 * 10)
-  //   }).catch(err => {
-  //     console.log('执行点赞操作失败');
-  //     console.log(err);
-  //   })
-  // }).catch(err => {
-  //   console.log('等待点赞按钮超时');
-  //   console.log(err);
-  // })
+  if (config.likeBtnTimeout > 0) {
+    // 点赞
+    page.waitForSelector('.like-btn').then(() => {
+      console.log('点赞按钮已就绪', config.likeBtnTimeout);
+      page.evaluate(minute => {
+        setTimeout(() => {
+          document.querySelector('.like-btn').click()
+          // 10分钟点赞一次
+        }, 1000 * 60 * minute)
+      }, config.likeBtnTimeout).catch(err => {
+        console.log('执行点赞操作失败');
+        console.error(err);
+      })
+    })
+  }
   const videoHandle = await page.waitForSelector('video')
   videoHandle.dispose()
   await page.evaluate(() => {
@@ -406,12 +390,41 @@ async function DDVup (browser, liveUperInfo) {
   await Promise.all(promiseList).then(() => {
   }).catch(err => {
     console.log('DD行为失败');
-    console.log(err);
+    console.error(err);
   })
+}
+
+/**
+ * 拦截页面请求
+ * @param {Object} page 页面
+ */
+const requestFliter = async page => {
+  await page.setRequestInterception(true);
+  page.on('request', request => {
+    if (request.resourceType() === 'image') {
+      request.continue({
+        url: 'https://ali-imgs.acfun.cn/kos/nlav10360/static/common/widget/appGuide/img/appclose.192fa4f1ecb6c48661d8.png'
+      })
+    } else if (request.url().includes('.flv')) {
+      // 拦截直播流
+      request.abort()
+    } else if (request.url().includes('log')) {
+      // 拦截疑似日志
+      request.abort()
+    } else if (request.url().includes('hm.baidu.com')) {
+      // 拦截疑似日志
+      request.abort()
+    } else if (request.url().includes('/collect')) {
+      // 拦截疑似错误信息收集
+      request.abort()
+    }
+    else request.continue();
+  });
 }
 
 module.exports = {
   userLogin,
   userLoginByCookies,
-  startMonitor
+  startMonitor,
+  requestFliter
 }

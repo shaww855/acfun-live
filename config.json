@@ -3,11 +3,12 @@
   "account": "",
   "password": "",
   "checkLiveTimeout": 10,
+  "likeBtnTimeout": 0,
   "defaultTimeout": 5,
   "executablePath": "",
   "uidUnwatchList": [],
   "showLiveInfo": true,
-  "checkWearMedal": true,
-  "serverRoomLimit": [3],
+  "checkWearMedal": false,
+  "serverRoomLimit": [0],
   "serverIndex": 0
 }
