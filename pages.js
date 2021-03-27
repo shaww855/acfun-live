@@ -255,7 +255,7 @@ function roomOpen (browser, info, num = 0) {
 
     return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(async () => {
       console.log('进入直播', info.uperName);
-      await afterOpenRoom(page)
+      await afterOpenRoom(page, info.uperName)
     }).catch(err => {
       console.log('进入直播间失败');
       console.error(err);
@@ -272,14 +272,14 @@ async function afterOpenRoom (page) {
   if (config.likeBtnTimeout > 0) {
     // 点赞
     page.waitForSelector('.like-btn').then(() => {
-      console.log('点赞按钮已就绪', config.likeBtnTimeout);
+      // console.log('uperName', '点赞按钮已就绪', config.likeBtnTimeout);
       page.evaluate(minute => {
         setTimeout(() => {
           document.querySelector('.like-btn').click()
           // 10分钟点赞一次
         }, 1000 * 60 * minute)
       }, config.likeBtnTimeout).catch(err => {
-        console.log('执行点赞操作失败');
+        // console.log('uperName', '执行点赞操作失败');
         console.error(err);
       })
     })

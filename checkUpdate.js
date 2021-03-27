@@ -4,9 +4,8 @@ const { version } = require('./package.json')
 module.exports = function () {
   return new Promise((resolve, reject) => {
     console.log('当前版本', version);
-    console.log('https.get https://raw.githubusercontent.com/shilx/acfun-live/main/package.json');
+    // console.log('https.get https://raw.githubusercontent.com/shilx/acfun-live/main/package.json');
     https.get('https://raw.githubusercontent.com/shilx/acfun-live/main/package.json', (res) => {
-    // https.get('https://log-sdk.gifshow.com/rest/wd/common/log/collect/acfun', (res) => {
       const { statusCode } = res;
       const contentType = res.headers['content-type'];
     
@@ -15,9 +14,9 @@ module.exports = function () {
       if (statusCode !== 200) {
         error = new Error('请求失败\n' +
           `状态码: ${statusCode}`);
-      } else if (!/^application\/json/.test(contentType)) {
-        error = new Error('无效的 content-type.\n' +
-          `期望的是 application/json 但接收到的是 ${contentType}`);
+      // } else if (!/^application\/json/.test(contentType)) {
+      //   error = new Error('无效的 content-type.\n' +
+      //     `期望的是 application/json 但接收到的是 ${contentType}`);
       }
       if (error) {
         // console.error(error.message);
@@ -43,7 +42,11 @@ module.exports = function () {
     });
   }).then(res => {
     if (res.version) {
-      console.log(`服务器版本是${res.version}，请前往查看 https://github.com/shilx/acfun-live`);
+      if (res.version === version) {
+        console.log('当前已是最新');
+        return
+      }
+      console.log(`GitHub版本 ${res.version}，请前往查看 https://github.com/shilx/acfun-live`);
     } else {
       throw new Error('读取版本号失败')
     }
