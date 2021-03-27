@@ -1,6 +1,6 @@
 const handleProxy = async (page, action, url, retry = 0) => {
   const msg = '获取' + action
-  console.log(msg, 'start');
+  console.log(msg, url);
   const handle = await page.evaluateHandle(url =>
     fetch(
       url,
@@ -8,14 +8,14 @@ const handleProxy = async (page, action, url, retry = 0) => {
     ).then(
       res => res.json()
     ).catch(err => ({
-      handleError: `POST ${url} 失败`,
+      handleError: `POST ${action} 失败`,
       name: err.name,
       message: err.message,
     })
     ),
     url
   ).finally(() => {
-    console.log(msg, url, 'done');
+    console.log(msg, 'Fetch done');
   })
   return handle.jsonValue().then(res => {
     if (res.handleError) {
@@ -27,7 +27,7 @@ const handleProxy = async (page, action, url, retry = 0) => {
     }
     return res
   }).finally(() => {
-    console.log(msg, 'jsonValue done');
+    console.log(msg, 'evaluateHandle done');
     handle.dispose()
   })
 }
@@ -59,12 +59,12 @@ module.exports = (action, page, data) => {
       return handleProxy(page, action, 'https://www.acfun.cn/rest/pc-direct/live/followLiveUsers')
         .then(res =>
           res.liveUsers.map(e =>
-          ({
-            authorId: e.authorId,
-            title: e.title,
-            createTime: e.createTime
-          })
-        )
+            ({
+              authorId: e.authorId,
+              title: e.title,
+              createTime: e.createTime
+            })
+          )
       )
     case '当日时长':
       return handleProxy(page, action + data, `https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/degreeLimit?uperId=${data}`)
@@ -73,6 +73,8 @@ module.exports = (action, page, data) => {
         )
 
     default:
-      return Promise.reject()
+      return Promise.reject({
+        handleError: '位置请求'
+      })
   }
 }

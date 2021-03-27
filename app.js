@@ -48,26 +48,26 @@ puppeteer.launch({
 }).then(async browser => {
   const pageList = await browser.pages()
   const page = pageList[0]
-  // await page.setRequestInterception(true);
+  await page.setRequestInterception(true);
   page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
 
   page.on('pageerror', error => {
-    console.log('pageerror:', 'mainPage', error.name, error.message);
+    console.log('pageError:', 'mainPage', error.name, error.message);
   })
 
-  // page.on('request', request => {
-  //   if (request.resourceType() === 'image') {
-  //     // 随便塞一个小图片，减少资源占用
-  //     request.continue({
-  //       url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
-  //     })
-  //   } else if (request.url().includes('/perfLog')) {
-  //     // 拦截日志
-  //     request.abort()
-  //   } else {
-  //     request.continue();
-  //   }
-  // });
+  page.on('request', request => {
+    if (request.resourceType() === 'image') {
+      // 随便塞一个小图片，减少资源占用
+      request.continue({
+        url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
+      })
+    } else if (request.url().includes('/perfLog')) {
+      // 拦截日志
+      request.abort()
+    } else {
+      request.continue();
+    }
+  });
 
   // 开始登录
   if (config.cookies !== '') {
