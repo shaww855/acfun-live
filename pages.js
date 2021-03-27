@@ -102,7 +102,7 @@ async function startMonitor (browser, times = 0, timeId = null) {
       }
     })
   }).catch(err => {
-    console.log('整合粉丝牌列表和已开播房间信息时失败', err);
+    console.log('整合粉丝牌列表和已开播房间信息时失败');
     throw err
   })
 
@@ -267,7 +267,7 @@ function roomOpen (browser, info, num = 0) {
     });
 
     page.on('pageerror', error => {
-      console.log('pageerror:', info.uperName, error.name, error.message);
+      console.log('pageeError:', info.uperName, error.name, error.message);
     })
 
     return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(async () => {
