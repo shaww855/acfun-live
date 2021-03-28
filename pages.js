@@ -1,7 +1,9 @@
 // 配置文件
 const config = require('./config.json')
 // 工具类函数
-const { formartDate, orderBy, getUidByLink } = require('./util.js')
+const { formartDate, orderBy, getUidByLink, isLiveTab } = require('./util.js')
+// const puppeteer = require('puppeteer');
+const getInfo = require('./evaluateHandle')
 
 /**
  * 用户登录
@@ -22,7 +24,7 @@ function userLogin (page) {
     await page.waitForNavigation()
   }).catch(err => {
     console.log('使用账号密码登录失败');
-    console.log(err);
+    console.error(err);
     page.browser().close()
   })
 }
@@ -46,144 +48,89 @@ function userLoginByCookies (page) {
 
 /**
  * 开始监控室
- * @param {Object} page 页面
+ * @param {Object} browser 浏览器连接断点
  * @param {Number} times 检查次数
  * @param {Number} timeId 定时器ID
  */
-async function startMonitor (page, times = 0, timeId = null) {
+async function startMonitor (browser, times = 0, timeId = null) {
   console.log('===');
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
 
+  let page = null
+  await browser.pages().then(pages => {
+    let target = pages.find(page => !isLiveTab(page))
+    if (target === undefined) {
+      console.log('没有打开AC主页的标签');
+    }
+    page = target
+  }).catch(err => {
+    console.log('获取页面对象失败');
+    clearTimeout(timeId)
+    throw err
+  })
+
   if (config.checkWearMedal) {
-    getPersonalInfo(page).then(personalInfoJson => {
-      if (personalInfoJson === undefined || personalInfoJson.info === undefined) {
-        console.log('读取用户信息失败', personalInfoJson);
-        return
-      }
-      console.log(`用户 ${personalInfoJson.info.userName} ${personalInfoJson.info.userId}`);
-      if (personalInfoJson.info.mediaWearInfo) {
-        console.log(`当前佩戴 ${personalInfoJson.info.mediaWearInfo.level} ${personalInfoJson.info.mediaWearInfo.clubName} ${personalInfoJson.info.mediaWearInfo.uperName}`);
+    getInfo('个人信息', page).then(res => {
+      console.log(`用户 ${res.userName} ${res.userId}`);
+      if (res.mediaWearInfo) {
+        console.log(`当前佩戴 ${res.mediaWearInfo.level} ${res.mediaWearInfo.clubName} ${res.mediaWearInfo.uperName}`);
       } else {
         console.log('当前未佩戴牌子');
       }
     })
   }
 
-  page.evaluate(async () => {
-    // 获取拥有粉丝牌的列表
-    const fansClub = fetch(
-      'https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/list',
-      {
-        method: 'POST'
-      }
-    ).then(
-      res => res.json()
-    ).then(
-      res => res.medalList.map(e => ({
-        clubName: e.clubName,
-        currentDegreeLimit: e.currentDegreeLimit,
-        friendshipDegree: e.friendshipDegree,
-        friendshipToLevelUp: e.currentDegreeLimit - e.friendshipDegree,
-        joinClubTime: e.joinClubTime,
-        level: e.level,
-        uperId: e.uperId,
-        uperName: e.uperName,
-        wearMedal: e.wearMedal
-      }))
-    )
-    // 获取已开播的
-    const getFollowLiveUsers = fetch(
-      `https://www.acfun.cn/rest/pc-direct/live/followLiveUsers`,
-      {
-        method: 'POST',
-      }
-    ).then(
-      res => res.json()
-    ).then(
-      res => res.liveUsers.map(e => ({
-        authorId: e.authorId,
-        title: e.title,
-        createTime: e.createTime
-      }))
-    )
-
-    const allLiveRoom = await Promise.all([
-      fansClub,
-      getFollowLiveUsers
-    ]).then(responseList => {
-      // console.log('responseList', responseList);
-      return responseList[1].map(e => {
-        const target = responseList[0].find(clubList => clubList.uperId === e.authorId)
-        // console.log('target', target, e.authorId);
-        if (target === undefined) {
-          return {
-            ...e,
-            onLive: true,
-            fansClub: false,
-            wearMedal: false
-          }
-        }
+  const allLiveRoom = await Promise.all([
+    getInfo('粉丝牌列表', page),
+    getInfo('关注并开播列表', page)
+  ]).then(responseList => {
+    return responseList[1].map(e => {
+      const target = responseList[0].find(clubList => clubList.uperId === e.authorId)
+      if (target === undefined) {
         return {
           ...e,
           onLive: true,
-          fansClub: true,
-          ...target
+          fansClub: false,
+          wearMedal: false
         }
-      })
-    }).catch(err => {
-      console.log('获取粉丝牌列表和已开播房间信息时失败', err);
-      throw err
+      }
+      return {
+        ...e,
+        onLive: true,
+        fansClub: true,
+        ...target
+      }
     })
-
-    let checkLiveWatch = []
-    let liveAndClub = allLiveRoom.filter(e => e.fansClub)
-    // console.log('liveAndClub', liveAndClub);
-    // console.log(`关注的主播已开播${allLiveRoom.length}位，其中${liveAndClub.length}拥有粉丝牌`);
-    // 获取当日时长
-    liveAndClub.forEach(item => {
-      // console.log('获取当日时长', item);
-      checkLiveWatch.push(
-        fetch(
-          `https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/degreeLimit?uperId=${item.uperId}`
-        ).then(
-          res => res.json()
-        ).then(res => {
-          return res.medalDegreeLimit
-        })
-      )
-    })
-    return Promise.all(checkLiveWatch).then(list => {
-      // console.log('list', list)
-      return list.map((e, i) => ({
-        ...liveAndClub[i],
-        timeLimitStr: e.liveWatchDegree + '/' + e.liveWatchDegreeLimit,
-        noTimeLimit: e.liveWatchDegree < e.liveWatchDegreeLimit,
-        timeDifference: e.liveWatchDegreeLimit - e.liveWatchDegree
-      }))
-    }).catch(err => {
-      console.log('获取所有牌子的当日信息失败');
-      console.log(err);
-      throw err
-    })
-  }).then(async isLiveList => {
-    console.log('拥有牌子并且开播的直播间数', isLiveList.length);
-    DDVup(await page.browser(), isLiveList)
-
-    setTimeout(id => {
-      startMonitor(page, times + 1, id)
-    }, 1000 * 60 * config.checkLiveTimeout)
   }).catch(err => {
-    console.log('执行失败，页面刷新1分钟后重试');
-    console.log(err);
-    clearTimeout(timeId)
-    page.reload().then(() => {
-      console.log('页面刷新成功');
-      // 1分钟后重试
-      setTimeout(id => {
-        startMonitor(page, times + 1, id)
-      }, 1000 * 60)
-    })
+    console.log('整合粉丝牌列表和已开播房间信息时失败');
+    throw err
   })
+
+  let checkLiveWatch = []
+  let liveAndClub = allLiveRoom.filter(e => e.fansClub)
+  liveAndClub.forEach(item => {
+    checkLiveWatch.push(getInfo('当日时长', page, item.uperId))
+  })
+  const liveUperInfo = await Promise.all(checkLiveWatch).then(list => {
+    // console.log('list', list)
+    return list.map((e, i) => ({
+      ...liveAndClub[i],
+      timeLimitStr: e.liveWatchDegree + '/' + e.liveWatchDegreeLimit,
+      noTimeLimit: e.liveWatchDegree < e.liveWatchDegreeLimit,
+      timeDifference: e.liveWatchDegreeLimit - e.liveWatchDegree
+    }))
+  }).then(isLiveList => {
+    console.log('拥有牌子并且开播的直播间数', isLiveList.length);
+    return isLiveList
+  }).catch(err => {
+    console.log('获取所有牌子的当日信息失败');
+    throw err
+  })
+
+  DDVup(browser, liveUperInfo)
+  setTimeout(id => {
+    startMonitor(browser, times + 1, id)
+  }, 1000 * 60 * config.checkLiveTimeout)
 }
 
 /**
@@ -193,47 +140,54 @@ async function startMonitor (page, times = 0, timeId = null) {
  */
 async function checkOpenedPages (browser, list) {
   // console.log('checkOpenedPages', list);
-  const patt = new RegExp("live.acfun.cn/live/")
   let pages = await browser.pages()
-  pages.forEach(page => {
-    const isLiveRoom = patt.test(page.url())
-    if (!isLiveRoom) {
+  // console.log('循环当前标签页');
+  const promiseList = []
+  for (let index = 0; index < pages.length; index++) {
+    const page = pages[index];
+    if (!isLiveTab(page)) {
       // 不是直播间则跳过
-      return
-    }
-    const uid = Number(getUidByLink(page.url()))
-    let target = list.find(e => e.uperId === uid)
-    // console.log('target', target);
-    if (target === undefined) {
-      roomExit(page, uid)
     } else {
-      target.opened = true
-      if (target.timeDifference === 0) {
-        roomExit(page, uid)
+      const uid = Number(getUidByLink(page.url()))
+      let target = list.find(e => e.uperId === uid)
+      // console.log('target', target);
+      if (target === undefined) {
+        promiseList.push(roomExit(page, uid))
+      } else {
+        target.opened = true
+        if (target.wearMedal && config.checkWearMedal) {
+          console.log('因佩戴牌子，退出直播间', target.uperName);
+          promiseList.push(roomExit(page, uid))
+        } else {
+          // await page.title().then(title => {
+          //   console.log('检查', title);
+          // })
+          promiseList.push(
+            page.$('.main-tip .active').then(elHandle => {
+              if (elHandle === null) {
+                return Promise.resolve()
+              }
+              console.log('继续监控 刷新', target.uperName);
+              return elHandle.dispose().then(() =>
+                page.reload()
+              )
+            }).catch((err) => {
+              console.log('检查直播间提示失败');
+              console.error(err);
+            })
+          )
+        }
       }
-      if (target.liveWatchDegree === 0) {
-        // 尝试修复偶先的问题：时长一直为0
-        console.log('继续监控 刷新', target.uperName);
-      }
-      if (target.wearMedal && config.checkWearMedal) {
-        console.log('因佩戴牌子，退出直播间', target.uperName);
-        roomExit(page, uid)
-      }
-      page.waitForSelector('.main-tip .active').then(() => {
-        console.log('继续监控 刷新', target.uperName);
-        location.reload()
-        page.waitForNavigation().then(() => {
-          afterOpenRoom(page)
-        }).catch(err => {
-          console.log('继续监控 刷新 出错 退出直播间', target.uperName);
-          console.log(err);
-          roomExit(page, uid)
-        })
-      }).catch(err => {
-        // console.log('未找到页面提示信息，继续观看');
-        // console.log(err);
-      })
     }
+  }
+  // console.log('循环结束', promiseList);
+  await Promise.all(promiseList).then(() => {
+    // console.log('>>>>>checkOpenedPages', list);
+  }).catch(err => {
+    console.log('检查已打开的页面失败');
+    console.error(err);
+  }).finally(() => {
+    // console.log('>>>>>>checkOpenedPages done');
   })
   return list
 }
@@ -265,21 +219,21 @@ async function roomExit (page, uid, browser=null) {
 
   if (page && page.isClosed()) {
     // 异步操作 检查牌子时已经执行退出
-    return
+    return Promise.resolve()
   }
-  page
+  return page
     .evaluate(() => document.querySelector('.up-name').textContent)
     .then(uperName => {
       console.log('退出直播', uperName)
     }).catch(err => {
       console.log('退出直播', uid)
-      console.log(err)
+      console.error(err)
     }).finally(() => {
       if (page.isClosed()) {
         // 异步操作
-        return
+        return Promise.resolve()
       }
-      page.close()
+      return page.close()
     })
 }
 
@@ -291,56 +245,61 @@ async function roomExit (page, uid, browser=null) {
  */
 function roomOpen (browser, info, num = 0) {
   // console.log('roomOpen', info);
-  browser.newPage().then(async page => {
-    await page.setRequestInterception(true);
+  return browser.newPage().then(async page => {
     page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
-    page.on('request', request => {
-      if (request.resourceType() === 'image') {
-        request.continue({
-          url: 'https://cdnfile.aixifan.com/static/common/widget/header/img/shop.e1c6992ee499e90d79e9.png'
-        })
-      } else if (request.url().includes('.flv')) {
-        // 拦截直播流
-        request.abort()
-      } else if (request.url().includes('/log')) {
-        // 拦截疑似日志
-        request.abort()
-      } else if (request.url().includes('/collect')) {
-        // 拦截疑似错误信息收集
-        request.abort()
-      }
-      else request.continue();
-    });
+    await requestFliter(page)
 
-    page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(() => {
+    page.on('pageerror', error => {
+      console.error('pageeError:', info.uperName, error.name, error.message);
+    })
+
+    return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(async () => {
       console.log('进入直播', info.uperName);
-      afterOpenRoom(page)
+      await afterOpenRoom(page, info.uperName)
     }).catch(err => {
       console.log('进入直播间失败');
-      console.log(err);
+      console.error(err);
     })
+    // return page.waitForNavigation()
   })
 }
 
 /**
- * 点赞
+ * 直播间开启的后续操作
  * @param {Object} page 页面对象
  */
-function afterOpenRoom (page) {
-  page.waitForSelector('.like-btn').then(() => {
-    page.evaluate(() => {
-      setTimeout(() => {
-        document.querySelector('.like-btn').click()
-        // 10分钟点赞一次
-      }, 1000 * 60 * 10)
-    }).catch(err => {
-      console.log('执行点赞操作失败');
-      console.log(err);
+async function afterOpenRoom (page) {
+  if (config.likeBtnTimeout > 0) {
+    // 点赞
+    page.waitForSelector('.like-btn').then(() => {
+      // console.log('uperName', '点赞按钮已就绪', config.likeBtnTimeout);
+      page.evaluate(minute => {
+        setTimeout(() => {
+          document.querySelector('.like-btn').click()
+          // 10分钟点赞一次
+        }, 1000 * 60 * minute)
+      }, config.likeBtnTimeout).catch(err => {
+        // console.log('uperName', '执行点赞操作失败');
+        console.error(err);
+      })
     })
-  }).catch(err => {
-    console.log('等待点赞按钮超时');
-    console.log(err);
+  }
+  const videoHandle = await page.waitForSelector('video')
+  videoHandle.dispose()
+  await page.evaluate(() => {
+    // 这里不能用video.pause，因为video.play是个Promise
+    const video = document.querySelector('video')
+    video.src = ''
+    // video.addEventListener('play', () => {
+    //   video.pause()
+    // })
+    // 干掉弹幕池
+    document.querySelector('.container-live-feed-messages').remove()
   })
+  // videoHandle.evaluate(node => node.pause()).finally(() => {
+  //   console.log('videoHandle evaluate');
+  //   videoHandle.dispose()
+  // })
 }
 
 /**
@@ -348,7 +307,7 @@ function afterOpenRoom (page) {
  * @param {Object} browser 浏览器对象
  * @param {Array} liveUperInfo 直播中的用户uid数组
  */
-async function DDVup (browser, liveUperInfo, DDVup) {
+async function DDVup (browser, liveUperInfo) {
   liveUperInfo = orderBy(liveUperInfo.map(info => ({
     // 配置不观看
     ...info,
@@ -359,9 +318,18 @@ async function DDVup (browser, liveUperInfo, DDVup) {
   if (liveUperInfo.length === 0) {
     console.log('---')
     console.log('拥有牌子的主播均未开播。')
-    console.log('---')
+    // console.log('---')
   }
-  liveUperInfo = await checkOpenedPages(browser, liveUperInfo)
+  // console.log('>>>>before', liveUperInfo);
+  await checkOpenedPages(browser, liveUperInfo)
+  //   .then(list => {
+  //   console.log('>>>>afert list', list);
+  // })
+
+  // liveUperInfo = await checkOpenedPages(browser, liveUperInfo)
+  // console.log('afert',liveUperInfo);
+
+  // console.log('await checkOpenedPages');
   // console.log('liveUperInfo', liveUperInfo);
   let limit = config.serverRoomLimit[config.serverIndex],
     msg = '',
@@ -373,36 +341,43 @@ async function DDVup (browser, liveUperInfo, DDVup) {
     }
   }
   console.log('---')
+  let promiseList = []
   liveUperInfo.forEach((info, index) => {
     // console.log(index, limit, config.serverIndex, ignoreIndex);
     if (info.wearMedal && config.checkWearMedal) {
       msg = '佩戴牌子'
       limit++
       ignoreIndex++
-      roomExit(null, info.uperId, browser)
+      // roomExit(null, info.uperId, browser)
+      promiseList.push(roomExit(null, info.uperId, browser))
     } else if (info.timeDifference == 0) {
       msg = '牌子已满'
       limit++
       ignoreIndex++
-      roomExit(null, info.uperId, browser)
+      // roomExit(null, info.uperId, browser)
+      promiseList.push(roomExit(null, info.uperId, browser))
     } else if (config.serverIndex > 0 && index < ignoreIndex) {
       msg = `由其他服务器执行`
       limit++
       if (info.opened) {
         msg = `转移至其他服务器执行`
       }
-      roomExit(null, info.uperId, browser)
+      // roomExit(null, info.uperId, browser)
+      promiseList.push(roomExit(null, info.uperId, browser))
     } else if (info.configUnWatch) {
       msg = '配置不看'
-      roomExit(null, info.uperId, browser)
+      // roomExit(null, info.uperId, browser)
+      promiseList.push(roomExit(null, info.uperId, browser))
     } else if (config.serverRoomLimit[config.serverIndex] > 0 && index >= limit) {
       msg = '数量限制'
-      roomExit(null, info.uperId, browser)
+      // roomExit(null, info.uperId, browser)
+      promiseList.push(roomExit(null, info.uperId, browser))
     } else if (info.opened) {
       msg = '继续监控'
     } else {
       msg = '进入直播'
-      roomOpen(browser, info)
+      // roomOpen(browser, info)
+      promiseList.push(roomOpen(browser, info))
     }
     if (config.showLiveInfo) {
       console.log(`开播时间 ${formartDate(info.createTime)}`);
@@ -412,37 +387,44 @@ async function DDVup (browser, liveUperInfo, DDVup) {
       console.log('---')
     }
   })
+  await Promise.all(promiseList).then(() => {
+  }).catch(err => {
+    console.log('DD行为失败');
+    console.error(err);
+  })
 }
 
 /**
- * 获取个人信息
+ * 拦截页面请求
+ * @param {Object} page 页面
  */
-function getPersonalInfo (page) {
-  return page.waitForFunction(() => {
-    return fetch(
-      'https://www.acfun.cn/rest/pc-direct/user/personalInfo',
-      {
-        method: 'POST'
-      }
-    ).then(res => {
-      return res.json()
-    }).catch(err => {
-      return err
-    })
-  }).then(async info => {
-    let infoJson = await info.jsonValue()
-    info.dispose()
-    return infoJson
-  }).catch(err => {
-    console.log('登录失败，请检查');
-    console.log(err);
-    throw err
-  })
+const requestFliter = async page => {
+  await page.setRequestInterception(true);
+  page.on('request', request => {
+    if (request.resourceType() === 'image') {
+      request.continue({
+        url: 'https://ali-imgs.acfun.cn/kos/nlav10360/static/common/widget/appGuide/img/appclose.192fa4f1ecb6c48661d8.png'
+      })
+    } else if (request.url().includes('.flv')) {
+      // 拦截直播流
+      request.abort()
+    } else if (request.url().includes('log')) {
+      // 拦截疑似日志
+      request.abort()
+    } else if (request.url().includes('hm.baidu.com')) {
+      // 拦截疑似日志
+      request.abort()
+    } else if (request.url().includes('/collect')) {
+      // 拦截疑似错误信息收集
+      request.abort()
+    }
+    else request.continue();
+  });
 }
 
 module.exports = {
   userLogin,
   userLoginByCookies,
   startMonitor,
-  checkOpenedPages
+  requestFliter
 }
