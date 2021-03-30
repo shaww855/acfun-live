@@ -6,7 +6,8 @@ const {
   userLogin,
   userLoginByCookies,
   startMonitor,
-  requestFliter
+  requestFliter,
+  handlePageError
 } = require('./pages.js')
 // 检查更新
 const checkUpdate = require('./checkUpdate')
@@ -62,7 +63,7 @@ checkUpdate().finally(() => {
     page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
 
     page.on('pageerror', error => {
-      console.error('pageError:', 'mainPage', error.name, error.message);
+      handlePageError(page, '主页', error)
     })
 
     // 开始登录
