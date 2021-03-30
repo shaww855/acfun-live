@@ -250,7 +250,7 @@ function roomOpen (browser, info, num = 0) {
     await requestFliter(page)
 
     page.on('pageerror', error => {
-      console.error('pageeError:', info.uperName, error.name, error.message);
+      handlePageError(page, info.uperName, error)
     })
 
     return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(async () => {
@@ -422,9 +422,18 @@ const requestFliter = async page => {
   });
 }
 
+const handlePageError = (page, pageNamge, err) => {
+  console.error('handlePageError', pageNamge, err.name)
+  console.error(err.message)
+  if (err.message.toLowerCase().includes('websocket')) {
+    page.reload()
+  }
+}
+
 module.exports = {
   userLogin,
   userLoginByCookies,
   startMonitor,
-  requestFliter
+  requestFliter,
+  handlePageError
 }
