@@ -77,6 +77,8 @@ async function startMonitor (browser, times = 0, timeId = null) {
       } else {
         console.log('当前未佩戴牌子');
       }
+    }).catch(err => {
+      console.error('获取个人信息失败')
     })
   }
 
