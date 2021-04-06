@@ -29,6 +29,10 @@ const handleProxy = async (page, action, url, retry = 0) => {
         }
       }
     }
+    if (res.result && res.result !== 0) {
+      // 登录失效以及其他情况处理
+      throw res
+    }
     return res
   }).finally(() => {
     handle.dispose()
