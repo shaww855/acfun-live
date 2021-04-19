@@ -24,6 +24,7 @@ executablePath | String | Chromium 路径 <br> 例 `C:/Program Files (x86)/Googl
 uidUnwatchList | Array | 这些 UID 的直播间不看
 showLiveInfo | Boolean | 检查直播状态时是否展示主播详细信息
 checkWearMedal | Boolean | 佩戴牌子的主播不观看 <br> （戴着牌子说明你正在D TA，不需要服务器挂牌子）
+checkAllRoom | Boolean | 只要有牌子，不管是否关注都监控
 serverRoomLimit | Array | 支持多台服务器 <br> 假如你有三台服务器，并填入了 [3, 2, 0]  <br>  第一台服务器负责挂第0、1、2个直播间 <br> 第二台服务器挂第3、4个直播间  <br>  第三台服务器挂剩余的所有直播   <br>  直播间按开播时间从早到晚 <br> 自己测试自己的机子能挂多少直播间，参考值：2个直播间/1G内存 
 serverIndex | Array | 当前是第几台，从0开始
 ## 运行  
