@@ -23,10 +23,10 @@ const handleProxy = async (page, action, url, method = 'POST', retry = 0) => {
         console.log(`${msg} 第${retry}次失败`);
         return handleProxy(page, action, url, method, retry + 1)
       } else {
-        console.log({
+        throw {
           ...res,
           handleError: `${msg} 失败`
-        })
+        }
       }
     }
     if (res.result && res.result !== 0) {
@@ -39,10 +39,6 @@ const handleProxy = async (page, action, url, method = 'POST', retry = 0) => {
   })
 }
 
-const getAllLiveingRoom = async () => {
-  let page = 0
-  await handleProxy(page, action, `https://live.acfun.cn/api/channel/list?count=0&pcursor=${page}`)
-}
 
 module.exports = (action, page, data) => {
   switch (action) {
