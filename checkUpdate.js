@@ -43,10 +43,10 @@ module.exports = function () {
   }).then(res => {
     if (res.version) {
       if (res.version === version) {
-        console.log('当前已是最新');
+        console.log('已是最新');
         return
       }
-      console.log(`GitHub版本 ${res.version}，请前往查看 https://github.com/shilx/acfun-live`);
+      console.log(`GitHub版本 ${res.version}，请前往查看 https://github.com/shilx/acfun-live/releases`);
     } else {
       throw new Error('读取版本号失败')
     }

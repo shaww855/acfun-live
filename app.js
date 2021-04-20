@@ -6,7 +6,8 @@ const {
   userLogin,
   userLoginByCookies,
   startMonitor,
-  requestFliter
+  requestFliter,
+  handlePageError
 } = require('./pages.js')
 // 检查更新
 const checkUpdate = require('./checkUpdate')
@@ -31,6 +32,7 @@ checkUpdate().finally(() => {
   console.log('设置了不看', config.uidUnwatchList);
   console.log('显示详细直播信息', config.showLiveInfo);
   console.log('佩戴牌子的主播不观看', config.checkWearMedal);
+  console.log('监控未关注但是有牌子的主播', config.checkAllRoom);
   console.log('服务器矩阵配置', config.serverRoomLimit);
   console.log('当前第', config.serverIndex, '台');
   puppeteer.launch({
@@ -62,7 +64,7 @@ checkUpdate().finally(() => {
     page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
 
     page.on('pageerror', error => {
-      console.error('pageError:', 'mainPage', error.name, error.message);
+      handlePageError(page, '主页', error)
     })
 
     // 开始登录
