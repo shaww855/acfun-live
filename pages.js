@@ -77,13 +77,18 @@ async function startMonitor (browser, times = 0, timeId = null) {
       } else {
         console.log('当前未佩戴牌子');
       }
+    }).catch(err => {
+      console.error('获取个人信息失败')
     })
   }
 
-  const allLiveRoom = await Promise.all([
-    getInfo('粉丝牌列表', page),
-    getInfo('关注并开播列表', page)
-  ]).then(responseList => {
+  const promiseList = [
+    getInfo('粉丝牌列表', page)
+  ]
+
+  promiseList.push(config.checkAllRoom ? getInfo('所有正在直播列表', page) : getInfo('关注并开播列表', page))
+
+  const allLiveRoom = await Promise.all(promiseList).then(responseList => {
     return responseList[1].map(e => {
       const target = responseList[0].find(clubList => clubList.uperId === e.authorId)
       if (target === undefined) {
@@ -250,7 +255,7 @@ function roomOpen (browser, info, num = 0) {
     await requestFliter(page)
 
     page.on('pageerror', error => {
-      console.error('pageeError:', info.uperName, error.name, error.message);
+      handlePageError(page, info.uperName, error)
     })
 
     return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(async () => {
@@ -422,9 +427,18 @@ const requestFliter = async page => {
   });
 }
 
+const handlePageError = (page, pageNamge, err) => {
+  console.error('handlePageError', pageNamge, err.name)
+  console.error(err.message)
+  if (err.message.toLowerCase().includes('websocket')) {
+    page.reload()
+  }
+}
+
 module.exports = {
   userLogin,
   userLoginByCookies,
   startMonitor,
-  requestFliter
+  requestFliter,
+  handlePageError
 }
