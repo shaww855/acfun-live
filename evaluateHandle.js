@@ -1,10 +1,10 @@
-const handleProxy = async (page, action, url, retry = 0) => {
+const handleProxy = async (page, action, url, method = 'POST', retry = 0) => {
   const msg = '获取 ' + action
   console.log('Fetch', url);
-  const handle = await page.evaluateHandle(url =>
+  const handle = await page.evaluateHandle(({url, method}) =>
     fetch(
       url,
-      { method: 'POST' }
+      { method }
     ).then(
       res => res.json()
     ).catch(err => ({
@@ -13,7 +13,7 @@ const handleProxy = async (page, action, url, retry = 0) => {
       message: err.message,
     })
     ),
-    url
+    {url, method}
   ).finally(() => {
     console.log(msg, 'done');
   })
@@ -21,7 +21,7 @@ const handleProxy = async (page, action, url, retry = 0) => {
     if (res.handleError) {
       if (retry < 3) {
         console.log(`${msg} 第${retry}次失败`);
-        return handleProxy(page, action, url, retry + 1)
+        return handleProxy(page, action, url, method, retry + 1)
       } else {
         throw {
           ...res,
@@ -29,11 +29,16 @@ const handleProxy = async (page, action, url, retry = 0) => {
         }
       }
     }
+    if (res.result && res.result !== 0) {
+      // 登录失效以及其他情况处理
+      throw res
+    }
     return res
   }).finally(() => {
     handle.dispose()
   })
 }
+
 
 module.exports = (action, page, data) => {
   switch (action) {
@@ -73,11 +78,31 @@ module.exports = (action, page, data) => {
       return handleProxy(page, `${data} ${action}`, `https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/degreeLimit?uperId=${data}`)
         .then(res => 
           res.medalDegreeLimit
+      )
+    case '所有正在直播列表':
+      return page.browser().newPage().then(async page => {
+        await page.goto('https://live.acfun.cn/settings/help').catch(err => {
+          console.log('打开live.acfun.cn相关页面失败');
+          console.error(err);
+        })
+        return handleProxy(page, action, `https://live.acfun.cn/api/channel/list?count=1000&pcursor=0`, 'GET').then(res => {
+          // console.log(res.liveList.length)
+          // return []
+          return res.liveList.map(e =>
+            ({
+              authorId: e.authorId,
+              title: e.title,
+              createTime: e.createTime
+            })
+          )
+        }).finally(() =>
+          page.close()
         )
+      })
 
     default:
       return Promise.reject({
-        handleError: '未知请求'
+        handleError: `未知请求 ${action}`
       })
   }
 }

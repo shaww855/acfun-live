@@ -10,5 +10,6 @@
   "showLiveInfo": true,
   "checkWearMedal": false,
   "serverRoomLimit": [0],
-  "serverIndex": 0
+  "serverIndex": 0,
+  "checkAllRoom": false
 }
