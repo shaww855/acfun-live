@@ -1,7 +1,7 @@
 // 配置文件
 const config = require('./config.json')
 // 工具类函数
-const { formartDate, orderBy, getUidByLink, isLiveTab } = require('./util.js')
+const { formartDate, orderBy, getUidByUrl, isLiveTab} = require('./util.js')
 // const puppeteer = require('puppeteer');
 const getInfo = require('./evaluateHandle')
 
@@ -153,7 +153,7 @@ async function checkOpenedPages (browser, list) {
     if (!isLiveTab(page)) {
       // 不是直播间则跳过
     } else {
-      const uid = Number(getUidByLink(page.url()))
+      const uid = getUidByUrl(page.url())
       let target = list.find(e => e.uperId === uid)
       // console.log('target', target);
       if (target === undefined) {
@@ -203,14 +203,13 @@ async function checkOpenedPages (browser, list) {
 async function roomExit (page, uid, browser=null) {
   if (page === null) {
     const pages = await browser.pages()
-    const patt = new RegExp("live.acfun.cn/live/")
     page = pages.find(p => {
-      const isLiveRoom = patt.test(p.url())
-      if (!isLiveRoom) {
+      const url = p.url()
+      if (!isLiveTab(p)) {
         // 不是直播间则跳过
         return false
       }
-      const pageUid = Number(getUidByLink(p.url()))
+      const pageUid = getUidByUrl(url)
       if (uid === pageUid) {
         return true
       }
@@ -258,9 +257,10 @@ function roomOpen (browser, info, num = 0) {
       handlePageError(page, info.uperName, error)
     })
 
-    return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(async () => {
+    const url = config.useObsDanmaku ? `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false` : `https://live.acfun.cn/live/${info.uperId}`
+    return page.goto(url).then(async () => {
       console.log('进入直播', info.uperName);
-      await afterOpenRoom(page, info.uperName)
+      // await afterOpenRoom(page, info.uperName)
     }).catch(err => {
       console.log('进入直播间失败');
       console.error(err);
