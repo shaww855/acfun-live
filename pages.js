@@ -5,6 +5,8 @@ const { formartDate, orderBy, getUidByUrl, isLiveTab} = require('./util.js')
 // const puppeteer = require('puppeteer');
 const getInfo = require('./evaluateHandle')
 
+const uperInfoCache = {}
+
 /**
  * 用户登录
  * @param {Object} page 页面
@@ -83,7 +85,12 @@ async function startMonitor (browser, times = 0, timeId = null) {
   }
 
   const promiseList = [
-    getInfo('粉丝牌列表', page)
+    getInfo('粉丝牌列表', page).then(res => {
+      res.forEach(element => {
+        uperInfoCache[element.uperId] = element.uperName
+      });
+      return res
+    })
   ]
 
   promiseList.push(config.checkAllRoom ? getInfo('所有正在直播列表', page) : getInfo('关注并开播列表', page))
@@ -200,7 +207,8 @@ async function checkOpenedPages (browser, list) {
 /**
  * 退出直播间
  */
-async function roomExit (page, uid, browser=null) {
+async function roomExit (page, uid, browser = null) {
+  const uperName = uperInfoCache[uid]
   if (page === null) {
     const pages = await browser.pages()
     page = pages.find(p => {
@@ -225,20 +233,8 @@ async function roomExit (page, uid, browser=null) {
     // 异步操作 检查牌子时已经执行退出
     return Promise.resolve()
   }
-  return page
-    .evaluate(() => document.querySelector('.up-name').textContent)
-    .then(uperName => {
-      console.log('退出直播', uperName)
-    }).catch(err => {
-      console.log('退出直播', uid)
-      console.error(err)
-    }).finally(() => {
-      if (page.isClosed()) {
-        // 异步操作
-        return Promise.resolve()
-      }
-      return page.close()
-    })
+  console.log('退出直播', uperName)
+  return Promise.resolve()
 }
 
 /**
@@ -429,7 +425,7 @@ const requestFliter = async page => {
 
 const handlePageError = (page, pageNamge, err) => {
   console.error('handlePageError', pageNamge, err.name)
-  console.error(err.message)
+  console.error(typeof err.message === 'object' ? JSON.stringify(err.message) : err.message)
   if (err.message.toLowerCase().includes('websocket')) {
     page.reload()
   }
