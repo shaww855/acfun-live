@@ -424,11 +424,18 @@ const requestFliter = async page => {
 }
 
 const handlePageError = (page, pageNamge, err) => {
-  console.error('handlePageError', pageNamge, err.name)
-  console.error(typeof err.message === 'object' ? JSON.stringify(err.message) : err.message)
-  if (err.message.toLowerCase().includes('websocket')) {
+  console.error('---');
+  console.error('handlePageError', pageNamge)
+  console.error(err.message instanceof Object, typeof err.message)
+  console.error(err)
+  console.error('JSON.stringify:');
+  console.error(JSON.stringify(err))
+  console.error("includes('WebSocket')", JSON.stringify(err.message).includes('WebSocket'))
+  if (JSON.stringify(err.message).includes('WebSocket')) {
+    console.log('捕捉到WebSocket错误 刷新', pageNamge);
     page.reload()
   }
+  console.error('---');
 }
 
 module.exports = {
