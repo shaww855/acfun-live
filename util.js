@@ -45,10 +45,10 @@ const orderBy = (arr, props, orders) =>
 
 /**
  * 返回页面是否是直播间
- * @param {Object} page 
+ * @param {String} url 
  */
- const isLiveTab = page => {
-  return page.url().includes(useObsDanmaku ? "live.acfun.cn/room/" : "live.acfun.cn/live/")
+ const isLiveTab = url => {
+  return url.includes(useObsDanmaku ? "live.acfun.cn/room/" : "live.acfun.cn/live/")
 }
 
 module.exports = {
