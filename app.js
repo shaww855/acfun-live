@@ -49,8 +49,8 @@ checkUpdate().finally(() => {
     // },
     executablePath: config.executablePath,
     args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
+      // '--no-sandbox',
+      // '--disable-setuid-sandbox',
       '--disable-crash-reporte',
       '--disable-extensions',
       '--disable-smooth-scrolling',
@@ -58,7 +58,6 @@ checkUpdate().finally(() => {
       '--enforce-gl-minimums', // Enforce GL minimums
       '--no-crash-upload',
       '--suppress-message-center-popups',
-      '–single-process'
     ]
   }).then(async browser => {
     const pageList = await browser.pages()
@@ -81,18 +80,13 @@ checkUpdate().finally(() => {
         page.browser().close()
       })
     } else if (config.account !== '' && config.password !== ''){
-      console.log('登录方式 账号');
+      console.log('登录方式 账号密码');
       await userLogin(page)
     } else {
-      throw new Error('请填写 Cookie 或者 账号密码 以便登录')
+      console.error('请填写 Cookie 或者 账号密码 以便登录')
     }
-    // page.evaluate(() => {
-    //   document.write('')
-    // });
 
-    // const browserWSEndpoint = browser.wsEndpoint();
-    // // 起飞
-    // startMonitor(browserWSEndpoint)
+    // 起飞
     startMonitor(browser)
   })
 })
