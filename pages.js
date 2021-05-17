@@ -162,10 +162,7 @@ async function checkOpenedPages (browser, list) {
         if (target.wearMedal && config.checkWearMedal) {
           console.log('因佩戴牌子，退出直播间', target.uperName);
           promiseList.push(roomExit(page, uid))
-        } else {
-          // await page.title().then(title => {
-          //   console.log('检查', title);
-          // })
+        } else if (config.useObsDanmaku === false){
           promiseList.push(
             page.$('.main-tip .active').then(elHandle => {
               if (elHandle === null) {
@@ -249,7 +246,7 @@ function roomOpen (browser, info, num = 0) {
     await requestFliter(page)
 
     page.on('pageerror', error => {
-      handlePageError(page, info.uperName, error)
+      handlePageError(page, info.uperId, info.uperName, error)
     })
 
     const url = config.useObsDanmaku ? `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false` : `https://live.acfun.cn/live/${info.uperId}`
@@ -423,12 +420,12 @@ const requestFliter = async page => {
   });
 }
 
-const handlePageError = async (page, pageNamge, err) => {
-  console.error('handlePageError', pageNamge)
-  console.error(JSON.stringify(err))
+const handlePageError = async (page, uperId, uperName, err) => {
+  console.error('handlePageError', uperName)
+  console.error(err)
   if (JSON.stringify(err.message).includes('WebSocket')) {
-    console.log('捕捉到WebSocket错误 关闭', pageNamge);
-    await page.close()
+    console.log('捕捉到WebSocket错误', uperName);
+    await roomExit(page, uperId)
   }
 }
 
