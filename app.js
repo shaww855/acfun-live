@@ -12,14 +12,17 @@ const {
 // 检查更新
 const checkUpdate = require('./checkUpdate')
 
-process.on('uncaughtException', err => {
+const handleError = err => {
+  if (err.result === -401) {
+    console.error('**登录过期，请检查**');
+    return
+  }
   console.log(err)
   process.exit(1)
-})
-process.on("unhandledRejection", err => {
-  console.log(err)
-  process.exit(1)
-});
+}
+
+process.on('uncaughtException', handleError)
+process.on("unhandledRejection", handleError);
 
 checkUpdate().finally(() => {
   console.log(`每(分钟)检查直播`, config.checkLiveTimeout);
