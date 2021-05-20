@@ -221,9 +221,7 @@ async function roomExit (page, uid, browser = null) {
     // 异步操作 检查牌子时已经执行退出
     return Promise.resolve()
   }
-  return page.evaluate(uperName => {
-    document.title = uperName
-  }, info.uperName).then(uperName => {
+  return page.title().then(uperName => {
     console.log('退出直播', uperName)
   }).catch(err => {
     console.error(err);
@@ -423,9 +421,9 @@ const requestFliter = async page => {
 const handlePageError = async (page, uperId, uperName, err) => {
   console.error('handlePageError', uperName)
   console.error(err)
-  if (JSON.stringify(err.message).includes('WebSocket')) {
+  if (err && err.message && JSON.stringify(err.message).includes('WebSocket')) {
     console.log('捕捉到WebSocket错误', uperName);
-    await roomExit(page, uperId)
+    await page.close()
   }
 }
 
