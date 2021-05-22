@@ -1,3 +1,5 @@
+const { useObsDanmaku } = require('./config.json')
+
 /**
 * 补零
 * @param {*} value
@@ -33,24 +35,26 @@ const orderBy = (arr, props, orders) =>
   )
 
 /**
- * 从网址中获取uid
- * @param {String} link 网址
+ * 返回网址中的UID
+ * @param {String} url 网址
+ * @returns {Number}
  */
-const getUidByLink = link => link.split('/')[4]
+ function getUidByUrl(url) {
+  return Number(useObsDanmaku ? url.split('/')[4].split('?')[0] : url.split('/')[4])
+}
 
 /**
  * 返回页面是否是直播间
- * @param {Object} page 
+ * @param {String} url 
  */
-const isLiveTab = page => {
-  const patt = new RegExp("live.acfun.cn/live/")
-  return patt.test(page.url())
+ const isLiveTab = url => {
+  return url.includes(useObsDanmaku ? "live.acfun.cn/room/" : "live.acfun.cn/live/")
 }
 
 module.exports = {
   padNum,
   formartDate,
   orderBy,
-  getUidByLink,
+  getUidByUrl,
   isLiveTab
 }

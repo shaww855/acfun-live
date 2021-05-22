@@ -12,14 +12,17 @@ const {
 // 检查更新
 const checkUpdate = require('./checkUpdate')
 
-process.on('uncaughtException', err => {
+const handleError = err => {
+  if (err.result === -401) {
+    console.error('**登录过期，请检查**');
+    return
+  }
   console.log(err)
   process.exit(1)
-})
-process.on("unhandledRejection", err => {
-  console.log(err)
-  process.exit(1)
-});
+}
+
+process.on('uncaughtException', handleError)
+process.on("unhandledRejection", handleError);
 
 checkUpdate().finally(() => {
   console.log(`每(分钟)检查直播`, config.checkLiveTimeout);
@@ -29,6 +32,7 @@ checkUpdate().finally(() => {
     console.log('自动点赞已关闭');
   }
   console.log(`异步操作最多等待(分钟)`, config.defaultTimeout);
+  console.log('使用OBS弹幕工具监控', config.useObsDanmaku,);
   console.log('设置了不看', config.uidUnwatchList);
   console.log('显示详细直播信息', config.showLiveInfo);
   console.log('佩戴牌子的主播不观看', config.checkWearMedal);
@@ -45,8 +49,8 @@ checkUpdate().finally(() => {
     // },
     executablePath: config.executablePath,
     args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
+      // '--no-sandbox',
+      // '--disable-setuid-sandbox',
       '--disable-crash-reporte',
       '--disable-extensions',
       '--disable-smooth-scrolling',
@@ -54,7 +58,6 @@ checkUpdate().finally(() => {
       '--enforce-gl-minimums', // Enforce GL minimums
       '--no-crash-upload',
       '--suppress-message-center-popups',
-      '–single-process'
     ]
   }).then(async browser => {
     const pageList = await browser.pages()
@@ -77,18 +80,13 @@ checkUpdate().finally(() => {
         page.browser().close()
       })
     } else if (config.account !== '' && config.password !== ''){
-      console.log('登录方式 账号');
+      console.log('登录方式 账号密码');
       await userLogin(page)
     } else {
-      throw new Error('请填写 Cookie 或者 账号密码 以便登录')
+      console.error('请填写 Cookie 或者 账号密码 以便登录')
     }
-    // page.evaluate(() => {
-    //   document.write('')
-    // });
 
-    // const browserWSEndpoint = browser.wsEndpoint();
-    // // 起飞
-    // startMonitor(browserWSEndpoint)
+    // 起飞
     startMonitor(browser)
   })
 })
