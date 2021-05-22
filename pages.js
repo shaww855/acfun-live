@@ -1,7 +1,7 @@
 // 配置文件
 const config = require('./config.json')
 // 工具类函数
-const { formartDate, orderBy, getUidByLink, isLiveTab } = require('./util.js')
+const { formartDate, orderBy, getUidByUrl, isLiveTab} = require('./util.js')
 // const puppeteer = require('puppeteer');
 const getInfo = require('./evaluateHandle')
 
@@ -20,12 +20,11 @@ function userLogin (page) {
     const loginBtnSelector = '.btn-login'
     await page.waitForSelector(loginBtnSelector);
     await page.click(loginBtnSelector)
-    // console.log('logged!');
     await page.waitForNavigation()
   }).catch(err => {
     console.log('使用账号密码登录失败');
     console.error(err);
-    page.browser().close()
+    return page.browser().close()
   })
 }
 
@@ -58,7 +57,7 @@ async function startMonitor (browser, times = 0, timeId = null) {
 
   let page = null
   await browser.pages().then(pages => {
-    let target = pages.find(page => !isLiveTab(page))
+    let target = pages.find(page => !isLiveTab(page.url()))
     if (target === undefined) {
       console.log('没有打开AC主页的标签');
     }
@@ -150,10 +149,10 @@ async function checkOpenedPages (browser, list) {
   const promiseList = []
   for (let index = 0; index < pages.length; index++) {
     const page = pages[index];
-    if (!isLiveTab(page)) {
+    if (!isLiveTab(page.url())) {
       // 不是直播间则跳过
     } else {
-      const uid = Number(getUidByLink(page.url()))
+      const uid = getUidByUrl(page.url())
       let target = list.find(e => e.uperId === uid)
       // console.log('target', target);
       if (target === undefined) {
@@ -163,10 +162,7 @@ async function checkOpenedPages (browser, list) {
         if (target.wearMedal && config.checkWearMedal) {
           console.log('因佩戴牌子，退出直播间', target.uperName);
           promiseList.push(roomExit(page, uid))
-        } else {
-          // await page.title().then(title => {
-          //   console.log('检查', title);
-          // })
+        } else if (config.useObsDanmaku === false){
           promiseList.push(
             page.$('.main-tip .active').then(elHandle => {
               if (elHandle === null) {
@@ -200,17 +196,16 @@ async function checkOpenedPages (browser, list) {
 /**
  * 退出直播间
  */
-async function roomExit (page, uid, browser=null) {
+async function roomExit (page, uid, browser = null) {
   if (page === null) {
     const pages = await browser.pages()
-    const patt = new RegExp("live.acfun.cn/live/")
     page = pages.find(p => {
-      const isLiveRoom = patt.test(p.url())
-      if (!isLiveRoom) {
+      const url = p.url()
+      if (!isLiveTab(url)) {
         // 不是直播间则跳过
         return false
       }
-      const pageUid = Number(getUidByLink(p.url()))
+      const pageUid = getUidByUrl(url)
       if (uid === pageUid) {
         return true
       }
@@ -226,20 +221,14 @@ async function roomExit (page, uid, browser=null) {
     // 异步操作 检查牌子时已经执行退出
     return Promise.resolve()
   }
-  return page
-    .evaluate(() => document.querySelector('.up-name').textContent)
-    .then(uperName => {
-      console.log('退出直播', uperName)
-    }).catch(err => {
-      console.log('退出直播', uid)
-      console.error(err)
-    }).finally(() => {
-      if (page.isClosed()) {
-        // 异步操作
-        return Promise.resolve()
-      }
-      return page.close()
-    })
+  return page.title().then(uperName => {
+    console.log('退出直播', uperName)
+  }).catch(err => {
+    console.error(err);
+    console.log('退出直播', uid);
+  }).finally(() => {
+    return page.close()
+  })
 }
 
 /**
@@ -255,12 +244,19 @@ function roomOpen (browser, info, num = 0) {
     await requestFliter(page)
 
     page.on('pageerror', error => {
-      handlePageError(page, info.uperName, error)
+      handlePageError(page, info.uperId, info.uperName, error)
     })
 
-    return page.goto(`https://live.acfun.cn/live/${info.uperId}`).then(async () => {
+    const url = config.useObsDanmaku ? `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false` : `https://live.acfun.cn/live/${info.uperId}`
+    return page.goto(url).then(async () => {
       console.log('进入直播', info.uperName);
-      await afterOpenRoom(page, info.uperName)
+      await page.evaluate(x => {
+        return Promise.resolve(8 * x);
+      }, 7);
+      await page.evaluate(uperName => {
+        document.title = uperName
+      }, info.uperName)
+      // await afterOpenRoom(page, info.uperName)
     }).catch(err => {
       console.log('进入直播间失败');
       console.error(err);
@@ -353,13 +349,11 @@ async function DDVup (browser, liveUperInfo) {
       msg = '佩戴牌子'
       limit++
       ignoreIndex++
-      // roomExit(null, info.uperId, browser)
       promiseList.push(roomExit(null, info.uperId, browser))
     } else if (info.timeDifference == 0) {
       msg = '牌子已满'
       limit++
       ignoreIndex++
-      // roomExit(null, info.uperId, browser)
       promiseList.push(roomExit(null, info.uperId, browser))
     } else if (config.serverIndex > 0 && index < ignoreIndex) {
       msg = `由其他服务器执行`
@@ -367,15 +361,12 @@ async function DDVup (browser, liveUperInfo) {
       if (info.opened) {
         msg = `转移至其他服务器执行`
       }
-      // roomExit(null, info.uperId, browser)
       promiseList.push(roomExit(null, info.uperId, browser))
     } else if (info.configUnWatch) {
       msg = '配置不看'
-      // roomExit(null, info.uperId, browser)
       promiseList.push(roomExit(null, info.uperId, browser))
     } else if (config.serverRoomLimit[config.serverIndex] > 0 && index >= limit) {
       msg = '数量限制'
-      // roomExit(null, info.uperId, browser)
       promiseList.push(roomExit(null, info.uperId, browser))
     } else if (info.opened) {
       msg = '继续监控'
@@ -413,7 +404,7 @@ const requestFliter = async page => {
     } else if (request.url().includes('.flv')) {
       // 拦截直播流
       request.abort()
-    } else if (request.url().includes('log')) {
+    } else if (request.url().includes('/perfLog')) {
       // 拦截疑似日志
       request.abort()
     } else if (request.url().includes('hm.baidu.com')) {
@@ -427,11 +418,12 @@ const requestFliter = async page => {
   });
 }
 
-const handlePageError = (page, pageNamge, err) => {
-  console.error('handlePageError', pageNamge, err.name)
-  console.error(err.message)
-  if (err.message.toLowerCase().includes('websocket')) {
-    page.reload()
+const handlePageError = async (page, uperId, uperName, err) => {
+  console.error('handlePageError', uperName)
+  console.error(err)
+  if (err && err.message && JSON.stringify(err.message).includes('WebSocket')) {
+    console.log('捕捉到WebSocket错误', uperName);
+    await page.close()
   }
 }
 
