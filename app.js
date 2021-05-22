@@ -32,11 +32,11 @@ checkUpdate().finally(() => {
     console.log('自动点赞已关闭');
   }
   console.log(`异步操作最多等待(分钟)`, config.defaultTimeout);
+  console.log('使用OBS弹幕工具监控', config.useObsDanmaku,);
   console.log('设置了不看', config.uidUnwatchList);
   console.log('显示详细直播信息', config.showLiveInfo);
   console.log('佩戴牌子的主播不观看', config.checkWearMedal);
   console.log('监控未关注但是有牌子的主播', config.checkAllRoom);
-  console.log('使用OBS弹幕工具监控', config.useObsDanmaku,);
   console.log('服务器矩阵配置', config.serverRoomLimit);
   console.log('当前第', config.serverIndex, '台');
   puppeteer.launch({
