@@ -3,6 +3,10 @@
   "version": "1.2.1",
   "description": "使用 Puppeteer 开启 acfun 直播监控室，挂牌子！😏",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shilx/acfun-live"
+  },
   "scripts": {
     "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
