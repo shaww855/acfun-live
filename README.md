@@ -29,6 +29,9 @@ serverRoomLimit | Array | 支持多台服务器 <br> 假如你有三台服务器
 serverIndex | Array | 当前是第几台，从0开始
 checkAllRoom | Boolean | 只要有牌子，不管是否关注都监控
 useObsDanmaku | Boolean | 使用官方OBS弹幕工具监控
+notification | Boolean | 是否开启 已关注并且有粉丝牌主播 的开播通知
+iftttKey | String | [IFTTT](https://github.com/Finb/Bark) 密钥 （需要自己创建Applets）
+barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥 （建议IOS用户使用，送达率高）
 ## 运行  
 1. 安装  
     - NodeJs 和 NPM
@@ -55,7 +58,9 @@ useObsDanmaku | Boolean | 使用官方OBS弹幕工具监控
     at https://ali-imgs.acfun.cn/kos/nlav10360/static/js/0.2b0f2cd0.js:2:256372
     at Object.next (https://ali-imgs.acfun.cn/kos/nlav10360/static/js/0.2b0f2cd0.js:2:256477)
     at a (https://ali-imgs.acfun.cn/kos/nlav10360/static/js/0.2b0f2cd0.js:2:255215)
-  ```
+  ```  
+- ### ARM机器 😆  
+  安装npm包时照着提示来就行  
 
 ## 安装时出现的问题
   * ERROR: Failed to set up Chromium r782078! Set  "PUPPETEER_SKIP_DOWNLOAD" env variable to skip download.  
