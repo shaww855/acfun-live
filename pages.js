@@ -4,6 +4,7 @@ const config = require('./config.json')
 const { formartDate, orderBy, getUidByUrl, isLiveTab} = require('./util.js')
 // const puppeteer = require('puppeteer');
 const getInfo = require('./evaluateHandle')
+const notification = require('./notification')
 
 /**
  * 用户登录
@@ -112,6 +113,9 @@ async function startMonitor (browser, times = 0, timeId = null) {
 
   let checkLiveWatch = []
   let liveAndClub = allLiveRoom.filter(e => e.fansClub)
+
+  notification(liveAndClub)
+
   liveAndClub.forEach(item => {
     checkLiveWatch.push(getInfo('当日时长', page, item.uperId))
   })
@@ -132,6 +136,7 @@ async function startMonitor (browser, times = 0, timeId = null) {
   })
 
   DDVup(browser, liveUperInfo)
+  
   setTimeout(id => {
     startMonitor(browser, times + 1, id)
   }, 1000 * 60 * config.checkLiveTimeout)
