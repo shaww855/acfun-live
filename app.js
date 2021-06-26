@@ -57,7 +57,7 @@ checkUpdate().finally(() => {
   }
   
   puppeteer.launch({
-    devtools: true, // 开发者工具
+    // devtools: true, // 开发者工具
     // headless: false, // 无头模式
     product: 'chrome',
     // defaultViewport: {
