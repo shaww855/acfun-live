@@ -4,6 +4,10 @@ let data = {}
 
 module.exports = (liveUperInfo) => {
   if (!notification) return
+  if (new Date().getHours() === 0) {
+    // 每天0点清空发送记录
+    data = {}
+  }
   
   let sendFn = undefined
   if (iftttKey !== '') {
