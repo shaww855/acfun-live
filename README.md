@@ -30,7 +30,7 @@ serverIndex | Array | 当前是第几台，从0开始
 checkAllRoom | Boolean | 只要有牌子，不管是否关注都监控
 useObsDanmaku | Boolean | 使用官方OBS弹幕工具监控
 notification | Boolean | 是否开启 已关注并且有粉丝牌主播 的开播通知
-iftttKey | String | [IFTTT](https://ifttt.com/) 密钥 （需要自己创建Applets）
+iftttKey | String | [IFTTT](https://ifttt.com/) 密钥 （需要自己创建Applets）测试webhook https://maker.ifttt.com/use/你的key
 barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥 （建议IOS用户使用，送达率高）
 ## 运行  
 1. 安装  
