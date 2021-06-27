@@ -4,8 +4,9 @@ const { useObsDanmaku } = require('./config.json')
 * 补零
 * @param {*} value
 * @param {Number} digits 理想位数 默认2
+* @param {String} pad 填充的字符 默认0
 */
-const padNum = (value, digits = 2) => Array(digits - value.toString().length + 1).join('0') + value
+const padNum = (value, digits = 2, pad = '0') => String(value).padStart(digits, pad)
 
 /**
  * 格式化时间
@@ -13,7 +14,7 @@ const padNum = (value, digits = 2) => Array(digits - value.toString().length + 1
  */
 const formartDate = (time) => {
   let date = new Date(time)
-  return `${date.getFullYear()}/${padNum(date.getMonth() + 1)}/${padNum(date.getDate())} ${padNum(date.getHours())}:${padNum(date.getMinutes())}:${padNum(date.getSeconds())}`
+  return `${date.getFullYear()}-${padNum(date.getMonth() + 1)}-${padNum(date.getDate())} ${padNum(date.getHours())}:${padNum(date.getMinutes())}:${padNum(date.getSeconds())}`
 }
 
 /**

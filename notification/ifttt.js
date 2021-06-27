@@ -1,16 +1,9 @@
 const https = require('https')
-const { formartDate } = require('../../util.js')
-const { iftttKey } = require('../../config.json')
-module.exports = (uperList) => {
+const { iftttKey } = require('../config.json')
+module.exports = ({ title, message, url }) => {
   return new Promise((resolve, reject) => {
-    let uperNameList = ''
-    if (uperList.length > 6) {
-      uperNameList = uperList[0].uperName + ` 等${uperList.length}名主播`
-    } else {
-      uperNameList = uperList.map(e => e.uperName).join('，') + ' '
-    }
 
-    let path = encodeURI(`/trigger/acfun_live/with/key/${iftttKey}?value1=${uperNameList}&value2=${formartDate(new Date)}&value3=https://m.acfun.cn/live/detail?${uperList[0].authorId}`)
+    let path = encodeURI(`/trigger/acfun_live/with/key/${iftttKey}?value1=${title}&value2=${message}&value3=${url}`)
 
     const options = {
       hostname: 'maker.ifttt.com',
