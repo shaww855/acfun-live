@@ -29,9 +29,9 @@ serverRoomLimit | Array | 支持多台服务器 <br> 假如你有三台服务器
 serverIndex | Array | 当前是第几台，从0开始
 checkAllRoom | Boolean | 只要有牌子，不管是否关注都监控
 useObsDanmaku | Boolean | 使用官方OBS弹幕工具监控
-notification | Boolean<br>Array  | 是否开启 已关注并且有粉丝牌主播 的开播通知<br>true: 所有粉丝牌主播的通知<br>false: 不推送开播通知<br> [ Number ]: 指定uid开播推送，前提是已关注并有粉丝牌
-iftttKey | String | [IFTTT](https://ifttt.com/) 密钥 （需要自己创建Applets）测试webhook https://maker.ifttt.com/use/你的key
-barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥 （建议IOS用户使用，送达率高）
+notification | Boolean<br>Array  | 借助第三方APP推送开播通知<br>true: 所有粉丝牌主播的通知<br>false: 不推送开播通知<br> [ Number ]: 指定uid开播推送，前提是已关注并有粉丝牌<br>此配置项会受 `checkAllRoom` 影响
+iftttKey | String | [IFTTT](https://ifttt.com/) 密钥<br>[配置方法](#IFTTT)
+barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥<br>限IOS用户
 ## 运行  
 1. 安装  
     - NodeJs 和 NPM
@@ -62,7 +62,7 @@ barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥 （建议IOS用�
 - ### ARM机器 😆  
   安装npm包时照着提示来就行  
 
-## 安装时出现的问题
+## 安装时可能出现的问题
   * ERROR: Failed to set up Chromium r782078! Set  "PUPPETEER_SKIP_DOWNLOAD" env variable to skip download.  
   一般是网络慢导致下载浏览器失败，解决方法有二  
      -  设置淘宝预源后再次尝试安装    
@@ -101,3 +101,24 @@ barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥 （建议IOS用�
 [1/1] 牌子已满
 ---
 ```
+## IFTTT
+
+### 创建Applets：
+1. My Applets - Create
+2. If This - Add
+    - 搜索 webhooks 并进入配置
+    - Event Name 输入 acfun_live
+3. Then That - Add
+    - 搜索选择 Notifications
+    - 选择 Send a rich notification from the IFTTT app
+    - Title 选择变量 Value1
+    - Message 选择变量 Value2
+    - Link URL 选择变量 Value3
+    - Create action
+4. Continue
+5. Finish
+### 获取 Webhooks Key
+  1. 打开 https://ifttt.com/maker_webhooks
+  2. 点击 Documentation
+  3. 此页面会显示你的 key
+  可以顺便在这个页面测试你的 Webhook
