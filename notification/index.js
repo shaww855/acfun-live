@@ -3,7 +3,7 @@ const IFTTT = require('./ifttt')
 let data = {}
 
 module.exports = (liveUperInfo) => {
-  if (!notification) return
+  if (notification === false || notification.length === 0) return
   const hours = new Date().getHours()
   if (hours === 0 && new Date().getMinutes() < 10) {
     // 每天0点10分触发 清空
@@ -27,7 +27,7 @@ module.exports = (liveUperInfo) => {
   }
 
 
-  const needToSend = []
+  let needToSend = []
   liveUperInfo.forEach(element => {
     const target = data[element.uperId]
     if (target !== undefined) {
@@ -41,6 +41,8 @@ module.exports = (liveUperInfo) => {
     needToSend.push(element)
     data[element.uperId] = element
   });
+  
+  if(typeof notification === 'object') needToSend = needToSend.filter(e => notification.includes(e.uperId))
 
   if (needToSend.length === 0) return
 
