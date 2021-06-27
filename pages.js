@@ -249,7 +249,7 @@ function roomOpen (browser, info, num = 0) {
     await requestFliter(page)
 
     page.on('pageerror', error => {
-      handlePageError(page, info.uperId, info.uperName, error)
+      handlePageError(page, info.uperName, error)
     })
 
     const url = config.useObsDanmaku ? `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false` : `https://live.acfun.cn/live/${info.uperId}`
@@ -423,7 +423,7 @@ const requestFliter = async page => {
   });
 }
 
-const handlePageError = async (page, uperId, uperName, err) => {
+const handlePageError = async (page, uperName, err) => {
   console.error('handlePageError', uperName)
   console.error(err)
   if (err && err.message && JSON.stringify(err.message).includes('WebSocket')) {
