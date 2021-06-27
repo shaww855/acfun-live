@@ -39,21 +39,10 @@ checkUpdate().finally(() => {
   console.log('监控未关注但是有牌子的主播', config.checkAllRoom);
   console.log('服务器矩阵配置', config.serverRoomLimit);
   console.log('当前第', config.serverIndex, '台');
+  console.log('开播通知', config.notification);
   if (config.notification) {
-    let msg = '开播通知将通过'
-    let action = ''
-    if (config.iftttKey !== '') {
-      action = 'IFTTT'
-    } else if (config.barkKey !== '') {
-      action = 'Bark'
-    }
-    if (action === '') {
-      console.log('开播通知已开启，但未配置密钥');
-      return
-    }
-    console.log(`开播通知将通过 ${action} 发送`);
-  } else {
-    console.log('开播通知未启用');
+    console.log('IFTTT', config.iftttKey ? '已启用' : '未启用')
+    console.log('BARK', config.barkKey ? '已启用' : '未启用')
   }
   
   puppeteer.launch({
