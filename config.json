@@ -12,5 +12,8 @@
   "serverRoomLimit": [0],
   "serverIndex": 0,
   "checkAllRoom": false,
-  "useObsDanmaku": true
+  "useObsDanmaku": true,
+  "notification": false,
+  "iftttKey": "",
+  "barkKey": ""
 }
