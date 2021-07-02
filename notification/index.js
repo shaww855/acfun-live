@@ -12,7 +12,7 @@ module.exports = (liveUperInfo) => {
     data = {}
   }
   if (hours < 6) {
-    console.log('开播通知 0~6点默认不发送');
+    console.log('开播通知 0 ~ 6 点默认不发送');
     return
   }
 
@@ -37,7 +37,7 @@ module.exports = (liveUperInfo) => {
 
   let message = ''
   if (needToSend.length > 6) {
-    message = needToSend[0].uperName + ` 等${needToSend.length}名主播`
+    message = needToSend[0].uperName + ` 等${needToSend.length}位主播`
   } else {
     message = needToSend.map(e => e.uperName).join('，') + ' '
   }
