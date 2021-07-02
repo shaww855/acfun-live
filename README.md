@@ -1,7 +1,7 @@
 - [说明](#AcFun-Live)  
 - [注意事项](#注意事项)  
 - [配置](#配置)  
-- [运行方法](#运行方法)  
+- [运行](#运行)  
 - [当前状态](#当前状态) 
   - [Win10](#Win10)
   - [WSL](#WSL)
@@ -9,7 +9,7 @@
 - [推送配置](#推送配置)  
   - [IFTTT](#IFTTT)  
   - [BARK](#BARK)  
-- [推送说明&示例](#推送说明&示例)  
+- [推送说明及示例](#推送说明及示例)  
 - [安装时可能出现的问题](#安装时可能出现的问题)  
 
 # AcFun-Live  
@@ -84,7 +84,7 @@ barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  IOS用户专享<
       at Object.next (https://ali-imgs.acfun.cn/kos/nlav10360/static/js/0.2b0f2cd0.js:2:256477)
       at a (https://ali-imgs.acfun.cn/kos/nlav10360/static/js/0.2b0f2cd0.js:2:255215)
     ```  
-# 推送
+# 推送配置
 ## IFTTT
 
 - 创建Applets  
@@ -112,7 +112,7 @@ barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  IOS用户专享<
 1. App Store 搜索并下载安装  
 2. 打开 app 就可以看到链接  https://api.day.app/你的key/
 
-# 推送说明&示例   
+# 推送说明及示例 
 推送文本中的时间是检测时间  
 点击推送会打开对应主播主页  
 开播通知 0 ~ 6 点默认不发送  
