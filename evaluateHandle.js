@@ -69,6 +69,7 @@ module.exports = (action, page, data) => {
           res.liveUsers.map(e =>
             ({
               authorId: e.authorId,
+              uperName: e.user.name,
               title: e.title,
               createTime: e.createTime
             })
