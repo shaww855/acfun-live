@@ -39,6 +39,12 @@ checkUpdate().finally(() => {
   console.log('监控未关注但是有牌子的主播', config.checkAllRoom);
   console.log('服务器矩阵配置', config.serverRoomLimit);
   console.log('当前第', config.serverIndex, '台');
+  console.log('开播通知', config.notification);
+  if (config.notification) {
+    console.log('IFTTT', config.iftttKey ? '已启用' : '未启用')
+    console.log('BARK', config.barkKey ? '已启用' : '未启用')
+  }
+  
   puppeteer.launch({
     // devtools: true, // 开发者工具
     // headless: false, // 无头模式
