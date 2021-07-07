@@ -424,12 +424,16 @@ const requestFliter = async page => {
 }
 
 const handlePageError = async (page, uperName, err) => {
+  console.log('----->');
   console.error('handlePageError', uperName)
+  console.error(err.message)
   console.error(err)
+  console.error(JSON.stringify(err))
   if (err && err.message && JSON.stringify(err.message).includes('WebSocket')) {
     console.log('捕捉到WebSocket错误', uperName);
     await page.close()
   }
+  console.log('<-----');
 }
 
 module.exports = {
