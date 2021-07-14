@@ -15,5 +15,6 @@
   "useObsDanmaku": true,
   "notification": false,
   "iftttKey": "",
-  "barkKey": ""
+  "barkKey": "",
+  "mux": "auto"
 }
