@@ -116,24 +116,37 @@ async function startMonitor (browser, times = 0, timeId = null) {
 
   notification(liveAndClub)
 
-  liveAndClub.forEach(item => {
-    checkLiveWatch.push(getInfo('当日时长', page, item.uperId))
-  })
-  const liveUperInfo = await Promise.all(checkLiveWatch).then(list => {
-    // console.log('list', list)
-    return list.map((e, i) => ({
-      ...liveAndClub[i],
-      timeLimitStr: e.liveWatchDegree + '/' + e.liveWatchDegreeLimit,
-      noTimeLimit: e.liveWatchDegree < e.liveWatchDegreeLimit,
-      timeDifference: e.liveWatchDegreeLimit - e.liveWatchDegree
-    }))
-  }).then(isLiveList => {
-    console.log('拥有牌子并且开播的直播间数', isLiveList.length);
-    return isLiveList
-  }).catch(err => {
-    console.log('获取所有牌子的当日信息失败');
-    throw err
-  })
+  let liveUperInfo = []
+  if (config.mux === true || (config.mux === 'auto' && liveAndClub.length < 10)) {
+    // 并发
+    // auto 开播主播超过小于10个并发
+    console.log('并发获取粉丝牌信息');
+    liveAndClub.forEach(item => {
+      checkLiveWatch.push(getInfo('当日时长', page, item.uperId))
+    })
+    liveUperInfo = await Promise.all(checkLiveWatch).then(list => {
+      return list
+    }).catch(err => {
+      console.log('获取所有牌子的当日信息失败');
+      throw err
+    })
+  } else {
+    // 顺序获取
+    console.log('顺序获取粉丝牌信息');
+    for (const iterator of liveAndClub) {
+      await getInfo('当日时长', page, iterator.uperId).then(res => {
+        liveUperInfo.push(res)
+      })
+    }
+  }
+
+  console.log('拥有牌子并且开播的直播间数', liveUperInfo.length);
+  liveUperInfo = liveUperInfo.map((e, i) => ({
+    ...liveAndClub[i],
+    timeLimitStr: e.liveWatchDegree + '/' + e.liveWatchDegreeLimit,
+    noTimeLimit: e.liveWatchDegree < e.liveWatchDegreeLimit,
+    timeDifference: e.liveWatchDegreeLimit - e.liveWatchDegree
+  }))
 
   DDVup(browser, liveUperInfo)
   
@@ -426,9 +439,11 @@ const requestFliter = async page => {
 const handlePageError = async (page, uperName, err) => {
   console.log('----->');
   console.error('handlePageError', uperName)
-  console.error(err.message)
-  console.error(err)
-  console.error(JSON.stringify(err))
+  if (err.message) {
+    console.log(typeof err.message === 'object' ? JSON.stringify(err.message) : err.message);
+  } else {
+    console.error(err)
+  }
   if (err && err.message && JSON.stringify(err.message).includes('WebSocket')) {
     console.log('捕捉到WebSocket错误', uperName);
     await page.close()
