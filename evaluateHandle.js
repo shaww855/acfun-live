@@ -1,7 +1,7 @@
 const handleProxy = async (page, action, url, method = 'POST', retry = 0) => {
   const msg = '获取 ' + action
   console.log('Fetch', url);
-  const handle = await page.evaluateHandle(({url, method}) =>
+  const handle = await page.evaluateHandle(({ url, method }) =>
     fetch(
       url,
       { method }
@@ -13,7 +13,7 @@ const handleProxy = async (page, action, url, method = 'POST', retry = 0) => {
       message: err.message,
     })
     ),
-    {url, method}
+    { url, method }
   ).finally(() => {
     console.log(msg, 'done');
   })
@@ -67,19 +67,19 @@ module.exports = (action, page, data) => {
       return handleProxy(page, action, 'https://www.acfun.cn/rest/pc-direct/live/followLiveUsers')
         .then(res =>
           res.liveUsers.map(e =>
-            ({
-              authorId: e.authorId,
-              uperName: e.user.name,
-              title: e.title,
-              createTime: e.createTime
-            })
+          ({
+            authorId: e.authorId,
+            uperName: e.user.name,
+            title: e.title,
+            createTime: e.createTime
+          })
           )
-      )
+        )
     case '当日时长':
       return handleProxy(page, `${data} ${action}`, `https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/degreeLimit?uperId=${data}`)
-        .then(res => 
+        .then(res =>
           res.medalDegreeLimit
-      )
+        )
     case '所有正在直播列表':
       return page.browser().newPage().then(async page => {
         await page.goto('https://live.acfun.cn/settings/help').catch(err => {
@@ -90,11 +90,11 @@ module.exports = (action, page, data) => {
           // console.log(res.liveList.length)
           // return []
           return res.liveList.map(e =>
-            ({
-              authorId: e.authorId,
-              title: e.title,
-              createTime: e.createTime
-            })
+          ({
+            authorId: e.authorId,
+            title: e.title,
+            createTime: e.createTime
+          })
           )
         }).finally(() =>
           page.close()
