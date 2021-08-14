@@ -1,7 +1,7 @@
 // 配置文件
 const config = require('./config.json')
 // 工具类函数
-const { formartDate, orderBy, getUidByUrl, isLiveTab} = require('./util.js')
+const { formartDate, orderBy, getUidByUrl, isLiveTab } = require('./util.js')
 // const puppeteer = require('puppeteer');
 const getInfo = require('./evaluateHandle')
 const notification = require('./notification')
@@ -149,7 +149,7 @@ async function startMonitor (browser, times = 0, timeId = null) {
   }))
 
   DDVup(browser, liveUperInfo)
-  
+
   setTimeout(id => {
     startMonitor(browser, times + 1, id)
   }, 1000 * 60 * config.checkLiveTimeout)
@@ -180,7 +180,7 @@ async function checkOpenedPages (browser, list) {
         if (target.wearMedal && config.checkWearMedal) {
           console.log('因佩戴牌子，退出直播间', target.uperName);
           promiseList.push(roomExit(page, uid))
-        } else if (config.useObsDanmaku === false){
+        } else if (config.useObsDanmaku === false) {
           promiseList.push(
             page.$('.main-tip .active').then(elHandle => {
               if (elHandle === null) {
@@ -397,7 +397,7 @@ async function DDVup (browser, liveUperInfo) {
       console.log(`开播时间 ${formartDate(info.createTime)}`);
       console.log(`标题： ${info.title}`);
       console.log(`${info.level}级`, info.clubName, `(${info.timeLimitStr})`, info.uperName, info.uperId);
-      console.log(`[${ index + 1}/${liveUperInfo.length}] ${msg}`);
+      console.log(`[${index + 1}/${liveUperInfo.length}] ${msg}`);
       console.log('---')
     }
   })

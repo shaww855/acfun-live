@@ -40,7 +40,7 @@ const orderBy = (arr, props, orders) =>
  * @param {String} url 网址
  * @returns {Number}
  */
- function getUidByUrl(url) {
+function getUidByUrl (url) {
   return Number(useObsDanmaku ? url.split('/')[4].split('?')[0] : url.split('/')[4])
 }
 
@@ -48,7 +48,7 @@ const orderBy = (arr, props, orders) =>
  * 返回页面是否是直播间
  * @param {String} url 
  */
- const isLiveTab = url => {
+const isLiveTab = url => {
   return url.includes(useObsDanmaku ? "live.acfun.cn/room/" : "live.acfun.cn/live/")
 }
 
