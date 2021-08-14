@@ -47,7 +47,7 @@ serverRoomLimit | Array | 支持多台服务器 <br> 假如你有三台服务器
 serverIndex | Array | 当前是第几台，从0开始
 checkAllRoom | Boolean | 只要有牌子，不管是否关注都监控
 useObsDanmaku | Boolean | 使用官方OBS弹幕工具监控
-notification | Boolean<br>Array  | 借助第三方APP推送开播通知<br>true: 所有粉丝牌主播的通知<br>false: 不推送开播通知<br> [ Number ]: 指定uid开播推送，前提是已关注并有粉丝牌<br>此配置项会受 `checkAllRoom` 影响
+notification | Boolean<br>Array  | 借助第三方APP推送开播通知<br>true: 所有粉丝牌主播的通知<br>false: 不推送开播通知<br> [ Number ]: 指定uid开播推送，前提是已关注并有粉丝牌<br>此配置项会受 `checkAllRoom` 影响<br>服务器时间的 0~6 点不推送
 iftttKey | String | [IFTTT](https://ifttt.com/) 密钥<br>[配置方法](#IFTTT)
 barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  IOS用户专享<br>[配置方法](#BARK)
 mux | Boolean<br>String | 获取粉丝牌详情时是否并发<br>true：开启（D太多有可能被服务器拒绝请求）<br>false：关闭<br>"auto"：超过 10 个就不并发获取
