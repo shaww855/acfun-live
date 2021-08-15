@@ -8,15 +8,15 @@ module.exports = function () {
     https.get('https://raw.githubusercontent.com/shilx/acfun-live/main/package.json', (res) => {
       const { statusCode } = res;
       const contentType = res.headers['content-type'];
-    
+
       let error;
       // 任何 2xx 状态码都表示成功的响应，但是这里只检查 200。
       if (statusCode !== 200) {
         error = new Error('请求失败\n' +
           `状态码: ${statusCode}`);
-      // } else if (!/^application\/json/.test(contentType)) {
-      //   error = new Error('无效的 content-type.\n' +
-      //     `期望的是 application/json 但接收到的是 ${contentType}`);
+        // } else if (!/^application\/json/.test(contentType)) {
+        //   error = new Error('无效的 content-type.\n' +
+        //     `期望的是 application/json 但接收到的是 ${contentType}`);
       }
       if (error) {
         // console.error(error.message);
@@ -24,7 +24,7 @@ module.exports = function () {
         res.resume();
         reject(error.message)
       }
-    
+
       res.setEncoding('utf8');
       let rawData = '';
       res.on('data', (chunk) => { rawData += chunk; });

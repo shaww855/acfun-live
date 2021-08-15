@@ -45,7 +45,7 @@ checkUpdate().finally(() => {
     console.log('BARK', config.barkKey ? '已启用' : '未启用')
   }
   console.log('获取粉丝牌方式', config.mux);
-  
+
   puppeteer.launch({
     // devtools: true, // 开发者工具
     // headless: false, // 无头模式
@@ -86,7 +86,7 @@ checkUpdate().finally(() => {
         console.log(err);
         page.browser().close()
       })
-    } else if (config.account !== '' && config.password !== ''){
+    } else if (config.account !== '' && config.password !== '') {
       console.log('登录方式 账号密码');
       await userLogin(page)
     } else {
