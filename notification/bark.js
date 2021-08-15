@@ -3,7 +3,7 @@ const { barkKey } = require('../config.json')
 module.exports = ({ title, message, url }) => {
   return new Promise((resolve, reject) => {
 
-    let path = encodeURI(`/${barkKey}/${title}/${message}?url=${url}`)
+    let path = encodeURI(`/${barkKey}/${title}/${message}?url=${url}&group=acfun`)
 
     const options = {
       hostname: 'api.day.app',
