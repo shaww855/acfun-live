@@ -274,7 +274,11 @@ function roomOpen (browser, info, num = 0) {
       await page.evaluate(uperName => {
         document.title = uperName
       }, info.uperName)
-      // await afterOpenRoom(page, info.uperName)
+
+      if (!config.useObsDanmaku) {
+        // 不使用OBS工具监控时才能点赞
+        await afterOpenRoom(page, info.uperName)
+      }
     }).catch(err => {
       console.log('进入直播间失败');
       console.error(err);
