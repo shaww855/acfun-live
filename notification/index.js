@@ -36,9 +36,17 @@ module.exports = (liveUperInfo) => {
   if (needToSend.length === 0) return
 
   const sendFn = (fn) => {
+    let message = ''
+    if (needToSend.length === 1) {
+      message = `主播：${ needToSend[0].uperName } 开播于${formartDate(needToSend[0].createTime, '时间')}\n标题：${needToSend[0].title}` 
+    } else if (needToSend.length > 10) {
+      message = `${ needToSend.slice(0, 10).map(e => e.uperName).join('、 ') } 等 ${needToSend.length} 位主播已开播` 
+    } else {
+      message = `${needToSend.map(e => e.uperName).join('、 ')} 已经开播`
+    }
     fn({
       title: 'Acfun 开播通知',
-      message: `${needToSend.map(e => e.uperName).join('、 ')} 已经开播 \n ${formartDate(needToSend[0].createTime)}`,
+      message,
       url: `https://m.acfun.cn/live/detail/${needToSend[0].authorId}`
     }).then(res => {
       console.log(`开播通知 ${fn.name}发送成功`);
