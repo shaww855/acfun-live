@@ -1,5 +1,6 @@
 // 配置文件
-const config = require('./config.json')
+// const config = require('./config.json')
+const { config } = require('./getConfig.js')
 // 工具类函数
 const { formartDate, orderBy, getUidByUrl, isLiveTab } = require('./util.js')
 // const puppeteer = require('puppeteer');

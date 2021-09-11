@@ -1,4 +1,7 @@
-const { checkLiveTimeout, notification, iftttKey, barkKey } = require('../config.json')
+// const { checkLiveTimeout, notification, iftttKey, barkKey } = require('../config.json')
+const { config } = require('../getConfig.js')
+const { checkLiveTimeout, notification, iftttKey, barkKey } = config
+
 const IFTTT = require('./ifttt')
 const BARK = require('./bark')
 const { formartDate } = require('../util')
