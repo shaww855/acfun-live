@@ -1,8 +1,7 @@
-// 配置文件
-// const config = require('./config.json')
-const { config } = require('./getConfig.js')
 // 工具类函数
-const { formartDate, orderBy, getUidByUrl, isLiveTab } = require('./util.js')
+const { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig } = require('./util.js')
+// 配置文件
+const config = getConfig()
 // const puppeteer = require('puppeteer');
 const getInfo = require('./evaluateHandle')
 const notification = require('./notification')
@@ -23,6 +22,9 @@ function userLogin (page) {
     await page.waitForSelector(loginBtnSelector);
     await page.click(loginBtnSelector)
     await page.waitForNavigation()
+    page.cookies().then(cookieList => {
+      setConfig(cookieList, 'cookies')
+    })
   }).catch(err => {
     console.log('使用账号密码登录失败');
     console.error(err);
@@ -36,14 +38,24 @@ function userLogin (page) {
  */
 function userLoginByCookies (page) {
   let list = []
-  config.cookies.split('; ').forEach(e => {
-    const cookie = e.split('=')
-    list.push(page.setCookie({
-      name: cookie[0],
-      value: cookie[1],
-      domain: '.acfun.cn'
-    }))
-  })
+  if (config.cookies instanceof Object) {
+    config.cookies.forEach(e => {
+      list.push(page.setCookie({
+        name: e.name,
+        value: e.value,
+        domain: e.domain
+      }))
+    })
+  } else {
+    config.cookies.split('; ').forEach(e => {
+      const cookie = e.split('=')
+      list.push(page.setCookie({
+        name: cookie[0],
+        value: cookie[1],
+        domain: '.acfun.cn'
+      }))
+    })
+  }
   return Promise.all(list)
 }
 
