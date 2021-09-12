@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 // 配置文件
-// const config = require('./config.json')
-const { config } = require('./getConfig.js')
+const { getConfig, setConfig } = require('./util.js')
+const config = getConfig()
 // 页面操作
 const {
   userLogin,
@@ -16,6 +16,7 @@ const checkUpdate = require('./checkUpdate')
 const handleError = err => {
   if (err.result === -401) {
     console.error('**登录过期，请检查**');
+    setConfig('', 'cookies')
     throw '**登录过期，请检查**'
   }
   console.log(err)
