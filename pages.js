@@ -6,6 +6,9 @@ const config = getConfig()
 const getInfo = require('./evaluateHandle')
 const notification = require('./notification')
 
+// 报错计数
+const errorTimes = {}
+
 /**
  * 用户登录
  * @param {Object} page 页面
@@ -248,6 +251,8 @@ async function roomExit (page, uid, browser = null) {
     }
   }
 
+  errorTimes[info.uperName] = 0
+
   if (page && page.isClosed()) {
     // 异步操作 检查牌子时已经执行退出
     return Promise.resolve()
@@ -281,12 +286,8 @@ function roomOpen (browser, info, num = 0) {
     const url = config.useObsDanmaku ? `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false` : `https://live.acfun.cn/live/${info.uperId}`
     return page.goto(url).then(async () => {
       console.log('进入直播', info.uperName);
-      await page.evaluate(x => {
-        return Promise.resolve(8 * x);
-      }, 7);
-      await page.evaluate(uperName => {
-        document.title = uperName
-      }, info.uperName)
+
+      errorTimes[info.uperName] = 0
 
       if (!config.useObsDanmaku) {
         // 不使用OBS工具监控时才能点赞
@@ -454,18 +455,23 @@ const requestFliter = async page => {
 }
 
 const handlePageError = async (page, uperName, err) => {
-  console.log('----->');
-  console.error('handlePageError', uperName)
-  if (err.message) {
-    console.log(typeof err.message === 'object' ? JSON.stringify(err.message) : err.message);
-  } else {
-    console.error(err)
+  errorTimes[info.uperName] += 1
+  console.error(`第${errorTimes[info.uperName]}次 handlePageError`, uperName)
+  if (errorTimes[info.uperName] > 5) {
+    console.log(uperName, `handlePageError 超过5次，刷新页面`);
+    page.reload().then(() => {
+      errorTimes[info.uperName] = 0
+    })
   }
-  if (err && err.message && JSON.stringify(err.message).includes('WebSocket')) {
-    console.log('捕捉到WebSocket错误', uperName);
-    await page.close()
-  }
-  console.log('<-----');
+  // if (err.message) {
+  //   console.log(typeof err.message === 'object' ? JSON.stringify(err.message) : err.message);
+  // } else {
+  //   console.error(err)
+  // }
+  // if (err && err.message && JSON.stringify(err.message).includes('WebSocket')) {
+  //   console.log('捕捉到WebSocket错误', uperName);
+  //   await page.close()
+  // }
 }
 
 module.exports = {
