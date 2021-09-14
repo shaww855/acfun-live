@@ -289,10 +289,7 @@ function roomOpen (browser, info, num = 0) {
 
       errorTimes[info.uperName] = 0
 
-      const changeTitle = await page.evaluate(uperName => {
-        document.title = uperName
-      }, info.uperName)
-      changeTitle.dispose()
+      page.evaluate(uperName => document.title = uperName, info.uperName)
 
       if (!config.useObsDanmaku) {
         // 不使用OBS工具监控时才能点赞
