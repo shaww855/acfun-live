@@ -251,13 +251,13 @@ async function roomExit (page, uid, browser = null) {
     }
   }
 
-  errorTimes[info.uperName] = 0
-
+  
   if (page && page.isClosed()) {
     // 异步操作 检查牌子时已经执行退出
     return Promise.resolve()
   }
   return page.title().then(uperName => {
+    errorTimes[uperName] = 0
     console.log('退出直播', uperName)
   }).catch(err => {
     console.error(err);
@@ -455,12 +455,12 @@ const requestFliter = async page => {
 }
 
 const handlePageError = async (page, uperName, err) => {
-  errorTimes[info.uperName] += 1
-  console.error(`第${errorTimes[info.uperName]}次 handlePageError`, uperName)
-  if (errorTimes[info.uperName] > 5) {
+  errorTimes[uperName] += 1
+  console.error(`第${errorTimes[uperName]}次 handlePageError`, uperName)
+  if (errorTimes[uperName] > 5) {
     console.log(uperName, `handlePageError 超过5次，刷新页面`);
     page.reload().then(() => {
-      errorTimes[info.uperName] = 0
+      errorTimes[uperName] = 0
     })
   }
   // if (err.message) {
