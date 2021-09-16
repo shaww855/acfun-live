@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 // 配置文件
-const config = require('./config.json')
+const { getConfig, setConfig } = require('./util.js')
+const config = getConfig()
 // 页面操作
 const {
   userLogin,
@@ -15,11 +16,13 @@ const checkUpdate = require('./checkUpdate')
 const handleError = err => {
   if (err.result === -401) {
     console.error('**登录过期，请检查**');
-    return
+    setConfig('', 'cookies')
+    throw '**登录过期，请检查**'
   }
   console.log(err)
   process.exit(1)
 }
+process.title = 'acfun直播监控'
 
 process.on('uncaughtException', handleError)
 process.on("unhandledRejection", handleError);

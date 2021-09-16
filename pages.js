@@ -1,10 +1,13 @@
-// 配置文件
-const config = require('./config.json')
 // 工具类函数
-const { formartDate, orderBy, getUidByUrl, isLiveTab } = require('./util.js')
+const { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig } = require('./util.js')
+// 配置文件
+const config = getConfig()
 // const puppeteer = require('puppeteer');
 const getInfo = require('./evaluateHandle')
 const notification = require('./notification')
+
+// 报错计数
+const errorTimes = {}
 
 /**
  * 用户登录
@@ -22,6 +25,9 @@ function userLogin (page) {
     await page.waitForSelector(loginBtnSelector);
     await page.click(loginBtnSelector)
     await page.waitForNavigation()
+    page.cookies().then(cookieList => {
+      setConfig(cookieList, 'cookies')
+    })
   }).catch(err => {
     console.log('使用账号密码登录失败');
     console.error(err);
@@ -35,14 +41,24 @@ function userLogin (page) {
  */
 function userLoginByCookies (page) {
   let list = []
-  config.cookies.split('; ').forEach(e => {
-    const cookie = e.split('=')
-    list.push(page.setCookie({
-      name: cookie[0],
-      value: cookie[1],
-      domain: '.acfun.cn'
-    }))
-  })
+  if (config.cookies instanceof Object) {
+    config.cookies.forEach(e => {
+      list.push(page.setCookie({
+        name: e.name,
+        value: e.value,
+        domain: e.domain
+      }))
+    })
+  } else {
+    config.cookies.split('; ').forEach(e => {
+      const cookie = e.split('=')
+      list.push(page.setCookie({
+        name: cookie[0],
+        value: cookie[1],
+        domain: '.acfun.cn'
+      }))
+    })
+  }
   return Promise.all(list)
 }
 
@@ -235,11 +251,13 @@ async function roomExit (page, uid, browser = null) {
     }
   }
 
+  
   if (page && page.isClosed()) {
     // 异步操作 检查牌子时已经执行退出
     return Promise.resolve()
   }
   return page.title().then(uperName => {
+    errorTimes[uperName] = 0
     console.log('退出直播', uperName)
   }).catch(err => {
     console.error(err);
@@ -268,12 +286,10 @@ function roomOpen (browser, info, num = 0) {
     const url = config.useObsDanmaku ? `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false` : `https://live.acfun.cn/live/${info.uperId}`
     return page.goto(url).then(async () => {
       console.log('进入直播', info.uperName);
-      await page.evaluate(x => {
-        return Promise.resolve(8 * x);
-      }, 7);
-      await page.evaluate(uperName => {
-        document.title = uperName
-      }, info.uperName)
+
+      errorTimes[info.uperName] = 0
+
+      page.evaluate(uperName => document.title = uperName, info.uperName)
 
       if (!config.useObsDanmaku) {
         // 不使用OBS工具监控时才能点赞
@@ -441,18 +457,23 @@ const requestFliter = async page => {
 }
 
 const handlePageError = async (page, uperName, err) => {
-  console.log('----->');
-  console.error('handlePageError', uperName)
-  if (err.message) {
-    console.log(typeof err.message === 'object' ? JSON.stringify(err.message) : err.message);
-  } else {
-    console.error(err)
+  errorTimes[uperName] += 1
+  console.error(`第${errorTimes[uperName]}次 handlePageError`, uperName)
+  if (errorTimes[uperName] > 5) {
+    console.log(uperName, `handlePageError 超过5次，刷新页面`);
+    page.reload().then(() => {
+      errorTimes[uperName] = 0
+    })
   }
-  if (err && err.message && JSON.stringify(err.message).includes('WebSocket')) {
-    console.log('捕捉到WebSocket错误', uperName);
-    await page.close()
-  }
-  console.log('<-----');
+  // if (err.message) {
+  //   console.log(typeof err.message === 'object' ? JSON.stringify(err.message) : err.message);
+  // } else {
+  //   console.error(err)
+  // }
+  // if (err && err.message && JSON.stringify(err.message).includes('WebSocket')) {
+  //   console.log('捕捉到WebSocket错误', uperName);
+  //   await page.close()
+  // }
 }
 
 module.exports = {
