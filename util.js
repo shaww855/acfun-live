@@ -1,4 +1,6 @@
-const { useObsDanmaku } = require('./config.json')
+"use strict";
+
+const fs = require("fs");
 
 /**
 * 补零
@@ -15,10 +17,11 @@ const padNum = (value, digits = 2, pad = '0') => String(value).padStart(digits, 
  */
 const formartDate = (time, action = '日期时间') => {
   let date = new Date(time)
-  if (action === '时间') {
-    return `${padNum(date.getHours())}:${padNum(date.getMinutes())}:${padNum(date.getSeconds())}`
+  const dateString = `${date.getFullYear()}-${padNum(date.getMonth() + 1)}-${padNum(date.getDate())}`
+  if (action === '日期') {
+    return dateString
   }
-  return `${date.getFullYear()}-${padNum(date.getMonth() + 1)}-${padNum(date.getDate())} `
+  return `${dateString} ${padNum(date.getHours())}:${padNum(date.getMinutes())}:${padNum(date.getSeconds())}`
 }
 
 /**
@@ -45,7 +48,7 @@ const orderBy = (arr, props, orders) =>
  * @returns {Number}
  */
 function getUidByUrl (url) {
-  return Number(useObsDanmaku ? url.split('/')[4].split('?')[0] : url.split('/')[4])
+  return Number(getConfig().useObsDanmaku ? url.split('/')[4].split('?')[0] : url.split('/')[4])
 }
 
 /**
@@ -53,7 +56,44 @@ function getUidByUrl (url) {
  * @param {String} url 
  */
 const isLiveTab = url => {
-  return url.includes(useObsDanmaku ? "live.acfun.cn/room/" : "live.acfun.cn/live/")
+  return url.includes(getConfig().useObsDanmaku ? "live.acfun.cn/room/" : "live.acfun.cn/live/")
+}
+
+const configPath = "config.json"
+let config = null
+
+/**
+ * 获取配置文件
+ */
+const getConfig = () => {
+  if (config !== null) {
+    return config
+  }
+  if (fs.existsSync(configPath)) {
+    config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    console.log(`= config.json config 已读取 =`);
+    return config
+  } else {
+    throw '未找到config.json';
+  }
+}
+
+const setConfig = (val = '', prop) => {
+  if (prop === 'cookies') {
+    if (val === '') {
+      config.cookies = ''
+    } else {
+      config.cookies = val.map(e => ({
+        name: e.name,
+        value: e.value,
+        domain: e.domain
+      }))
+    }
+  } else {
+    config[prop] = val
+  }
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 4));
+  console.log(`= config.json cookies 已保存 =`);
 }
 
 module.exports = {
@@ -61,5 +101,7 @@ module.exports = {
   formartDate,
   orderBy,
   getUidByUrl,
-  isLiveTab
+  isLiveTab,
+  getConfig,
+  setConfig
 }
