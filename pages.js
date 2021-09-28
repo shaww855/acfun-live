@@ -7,7 +7,9 @@ const getInfo = require('./evaluateHandle')
 const notification = require('./notification')
 
 // 报错计数
-const errorTimes = {}
+const errorTimes = {
+  主页: 0
+}
 
 /**
  * 用户登录
@@ -458,10 +460,12 @@ const requestFliter = async page => {
 
 const handlePageError = async (page, uperName, err) => {
   errorTimes[uperName] += 1
-  console.error(`第${errorTimes[uperName]}次 handlePageError`, uperName)
+  console.error(`第${errorTimes[uperName]}次 handlePageError`, uperName, errorTimes[uperName] > 5)
+  console.error(err.message ? err.message : JSON.stringify(err));
   if (errorTimes[uperName] > 5) {
     console.log(uperName, `handlePageError 超过5次，刷新页面`);
     page.reload().then(() => {
+      console.log(uperName, `handlePageError 刷新完毕`);
       errorTimes[uperName] = 0
     })
   }
