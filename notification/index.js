@@ -40,7 +40,7 @@ module.exports = (liveUperInfo) => {
   const sendFn = (fn) => {
     let message = ''
     if (needToSend.length === 1) {
-      message = `主播：${ needToSend[0].uperName }\n开播：${formartDate(needToSend[0].createTime, '时间')}\n标题：${needToSend[0].title}` 
+      message = `主播：${ needToSend[0].uperName }\n时间：${formartDate(needToSend[0].createTime, '时间')}\n标题：${needToSend[0].title}` 
     } else if (needToSend.length > 10) {
       message = `${ needToSend.slice(0, 10).map(e => e.uperName).join('、 ') } 等 ${needToSend.length} 位主播已开播` 
     } else {
