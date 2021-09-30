@@ -49,7 +49,8 @@ module.exports = (liveUperInfo) => {
     fn({
       title: 'Acfun 开播通知',
       message,
-      url: `https://m.acfun.cn/live/detail/${needToSend[0].authorId}`
+      url: `https://m.acfun.cn/live/detail/${needToSend[0].authorId}`,
+      headUrl: needToSend[0].headUrl
     }).then(res => {
       console.log(`开播通知 ${fn.name}发送成功`);
     }).catch(err => {
