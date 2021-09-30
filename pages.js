@@ -466,6 +466,7 @@ const handlePageError = async (page, uperName, err) => {
     console.log(uperName, `handlePageError 超过5次，刷新页面`);
     page.reload().then(() => {
       console.log(uperName, `handlePageError 刷新完毕`);
+      page.evaluate(uperName => document.title = uperName, uperName)
       errorTimes[uperName] = 0
     })
   }
