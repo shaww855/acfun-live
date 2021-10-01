@@ -3,7 +3,7 @@ const { version } = require('./package.json')
 
 new Promise((resolve, reject) => {
   // console.log('https.get https://raw.githubusercontent.com/shilx/acfun-live/main/package.json');
-  https.get('https://raw.githubusercontent.com/shilx/acfun-live/main/package.json', (res) => {
+  https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', (res) => {
     const { statusCode } = res;
     const contentType = res.headers['content-type'];
 
