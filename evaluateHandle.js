@@ -71,7 +71,8 @@ module.exports = (action, page, data) => {
             authorId: e.authorId,
             uperName: e.user.name,
             title: e.title,
-            createTime: e.createTime
+            createTime: e.createTime,
+            headUrl: e.user.headUrl
           })
           )
         )

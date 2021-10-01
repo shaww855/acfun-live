@@ -1,9 +1,9 @@
 const https = require('https')
 const { barkKey } = require('../config.json')
-module.exports = ({ title, message, url }) => {
+module.exports = ({ title, message, url, headUrl }) => {
   return new Promise((resolve, reject) => {
 
-    let path = encodeURI(`/${barkKey}/${title}/${message}?url=${url}&group=acfun`)
+    let path = encodeURI(`/${barkKey}/${title}/${message}?url=${url}&group=acfun&icon=${headUrl}`)
 
     const options = {
       hostname: 'api.day.app',
