@@ -461,7 +461,11 @@ const requestFliter = async page => {
 const handlePageError = async (page, uperName, err) => {
   errorTimes[uperName] += 1
   console.error(`第${errorTimes[uperName]}次 handlePageError`, uperName, errorTimes[uperName] > 5)
-  console.error(err.message ? err.message : JSON.stringify(err));
+  if (err.message) {
+    console.log(typeof err.message === 'string' ? err.message : JSON.stringify(err.message));
+  } else {
+    console.log(err);
+  }
   if (errorTimes[uperName] > 5) {
     console.log(uperName, `handlePageError 超过5次，刷新页面`);
     page.reload().then(() => {
