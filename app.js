@@ -16,9 +16,9 @@ require('./checkUpdate')
 
 const handleError = err => {
   if (err.result === -401) {
-    console.error('**登录过期，请检查**');
+    console.error('**登录过期，尝试账号密码重新登录**');
     setConfig('', 'cookies')
-    throw '**登录过期，请检查**'
+    Start()
   }
   console.log(err)
   process.exit(1)
@@ -50,53 +50,58 @@ if (config.notification) {
 }
 console.log('获取粉丝牌方式', config.mux);
 
-puppeteer.launch({
-  // devtools: true, // 开发者工具
-  // headless: false, // 无头模式
-  product: 'chrome',
-  // defaultViewport: {
-  //   width: 1366,
-  //   height: 768
-  // },
-  executablePath: config.executablePath,
-  args: [
-    // '--no-sandbox',
-    // '--disable-setuid-sandbox',
-    '--disable-crash-reporte',
-    '--disable-extensions',
-    '--disable-smooth-scrolling',
-    '--enable-auto-reload', // 错误页自动刷新
-    '--enforce-gl-minimums', // Enforce GL minimums
-    '--no-crash-upload',
-    '--suppress-message-center-popups',
-  ]
-}).then(async browser => {
-  const pageList = await browser.pages()
-  const page = pageList[0]
-  await requestFliter(page)
 
-  page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
-
-  page.on('pageerror', error => {
-    handlePageError(page, '主页', error)
-  })
-
-  // 开始登录
-  if (config.cookies !== '') {
-    console.log('登录方式 Cookie');
-    await userLoginByCookies(page)
-    await page.goto('https://www.acfun.cn').catch(err => {
-      console.log('跳转主页失败');
-      console.log(err);
-      page.browser().close()
+const Start = () => {
+  puppeteer.launch({
+    // devtools: true, // 开发者工具
+    // headless: false, // 无头模式
+    product: 'chrome',
+    // defaultViewport: {
+    //   width: 1366,
+    //   height: 768
+    // },
+    executablePath: config.executablePath,
+    args: [
+      // '--no-sandbox',
+      // '--disable-setuid-sandbox',
+      '--disable-crash-reporte',
+      '--disable-extensions',
+      '--disable-smooth-scrolling',
+      '--enable-auto-reload', // 错误页自动刷新
+      '--enforce-gl-minimums', // Enforce GL minimums
+      '--no-crash-upload',
+      '--suppress-message-center-popups',
+    ]
+  }).then(async browser => {
+    const pageList = await browser.pages()
+    const page = pageList[0]
+    await requestFliter(page)
+  
+    page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
+  
+    page.on('pageerror', error => {
+      handlePageError(page, '主页', error)
     })
-  } else if (config.account !== '' && config.password !== '') {
-    console.log('登录方式 账号密码');
-    await userLogin(page)
-  } else {
-    console.error('请填写 Cookie 或者 账号密码 以便登录')
-  }
+  
+    // 开始登录
+    if (config.cookies !== '') {
+      console.log('登录方式 Cookie');
+      await userLoginByCookies(page)
+      await page.goto('https://www.acfun.cn').catch(err => {
+        console.log('跳转主页失败');
+        console.log(err);
+        page.browser().close()
+      })
+    } else if (config.account !== '' && config.password !== '') {
+      console.log('登录方式 账号密码');
+      await userLogin(page)
+    } else {
+      console.error('请填写 Cookie 或者 账号密码 以便登录')
+    }
+  
+    // 起飞
+    startMonitor(browser)
+  })
+}
 
-  // 起飞
-  startMonitor(browser)
-})
+Start()
