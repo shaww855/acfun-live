@@ -104,7 +104,7 @@ async function startMonitor (browser, times = 0, timeId = null) {
     getInfo('粉丝牌列表', page)
   ]
 
-  promiseList.push(config.checkAllRoom ? getInfo('所有正在直播列表', page) : getInfo('关注并开播列表', page))
+  promiseList.push(config.checkAllRoom ? getInfo('所有正在直播列表', page) : getInfo('关注并开播列表2', page))
 
   const allLiveRoom = await Promise.all(promiseList).then(responseList => {
     return responseList[1].map(e => {
