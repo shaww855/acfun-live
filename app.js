@@ -21,7 +21,7 @@ const handleError = err => {
     Start()
   }
   console.log(err)
-  process.exit(1)
+  // process.exit(1)
 }
 process.title = 'acfun直播监控'
 
@@ -53,7 +53,7 @@ console.log('获取粉丝牌方式', config.mux);
 
 const Start = () => {
   puppeteer.launch({
-    // devtools: true, // 开发者工具
+    devtools: true, // 开+发者工具
     // headless: false, // 无头模式
     product: 'chrome',
     // defaultViewport: {
