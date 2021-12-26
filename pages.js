@@ -410,6 +410,27 @@ async function DDVup (browser, liveUperInfo) {
       promiseList.push(roomExit(null, info.uperId, browser))
     } else if (info.opened) {
       msg = '继续监控'
+      promiseList.push(
+        browser.pages().then(pages => {
+          const page = pages.find(p => {
+            const url = p.url()
+            if (!isLiveTab(url)) {
+              // 不是直播间则跳过
+              return false
+            }
+            const pageUid = getUidByUrl(url)
+            if (info.uperId === pageUid) {
+              return true
+            }
+            return false
+          })
+          if (page === null) {
+            return Promise.resolve()
+          } else {
+            return page.title().then(uperName => page.reload().then(() => page.evaluate(uperName => document.title = uperName, uperName)))
+          }
+        })
+      )
     } else {
       msg = '进入直播'
       // roomOpen(browser, info)
