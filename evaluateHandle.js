@@ -42,13 +42,19 @@ const handleProxy = async ({ page, action, url, method = 'POST', retry = 0 }) =>
   })
 }
 
-const OpenLivePage = page => {
-  return page.browser().newPage().then(page =>
-    page.goto('https://live.acfun.cn/settings/help').then(() => page).catch(err => {
-      console.log('打开live.acfun.cn相关页面失败');
-      console.error(err);
-    })
-  )
+const OpenLivePage = async page => {
+  const newPage = await page.browser().newPage()
+  await newPage.goto('https://live.acfun.cn/settings/help').catch(err => {
+    console.log('打开live.acfun.cn相关页面失败');
+    console.error(err);
+  })
+  return newPage
+  // return page.browser().newPage().then(page =>
+  //   page.goto('https://live.acfun.cn/settings/help').catch(err => {
+  //     console.log('打开live.acfun.cn相关页面失败');
+  //     console.error(err);
+  //   })
+  // )
 }
 
 
