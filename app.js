@@ -87,7 +87,7 @@ const Start = () => {
     if (config.cookies !== '') {
       console.log('登录方式 Cookie');
       await userLoginByCookies(page)
-      await page.goto('https://www.acfun.cn').catch(err => {
+      await page.goto('https://www.acfun.cn', {timeout: 1000 * 60 * 5}).catch(err => {
         console.log('跳转主页失败');
         console.log(err);
         page.browser().close()
