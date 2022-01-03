@@ -13,15 +13,18 @@ const padNum = (value, digits = 2, pad = '0') => String(value).padStart(digits, 
 /**
  * 格式化时间
  * @param {Date} time 时间戳
- * @param {String} action 
+ * @param {String} action 日期\时间\日期时间\
  */
 const formartDate = (time, action = '日期时间') => {
   let date = new Date(time)
-  const dateString = `${date.getFullYear()}-${padNum(date.getMonth() + 1)}-${padNum(date.getDate())}`
+  const DateString = `${date.getFullYear()}-${padNum(date.getMonth() + 1)}-${padNum(date.getDate())}`
+  const TimeString = `${padNum(date.getHours())}:${padNum(date.getMinutes())}:${padNum(date.getSeconds())}`
   if (action === '日期') {
-    return dateString
+    return DateString
+  } else if (action === '时间') {
+    return TimeString
   }
-  return `${dateString} ${padNum(date.getHours())}:${padNum(date.getMinutes())}:${padNum(date.getSeconds())}`
+  return `${DateString} ${TimeString}`
 }
 
 /**
