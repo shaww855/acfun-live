@@ -1,4 +1,4 @@
-const handleProxy = async (page, action, url, method = 'POST', retry = 0) => {
+const handleProxy = async ({ page, action, url, method = 'POST', retry = 0 }) => {
   const msg = '获取 ' + action
   console.log('Fetch', url);
   const handle = await page.evaluateHandle(({ url, method }) =>
@@ -7,11 +7,14 @@ const handleProxy = async (page, action, url, method = 'POST', retry = 0) => {
       { method }
     ).then(
       res => res.json()
-    ).catch(err => ({
-      handleError: true,
-      name: err.name,
-      message: err.message,
-    })
+    ).catch(err => {
+      return {
+        handleError: true,
+        name: err.name,
+        message: err.message,
+        err
+      }
+    }
     ),
     { url, method }
   ).finally(() => {
@@ -21,7 +24,7 @@ const handleProxy = async (page, action, url, method = 'POST', retry = 0) => {
     if (res.handleError) {
       if (retry < 3) {
         console.log(`${msg} 第${retry}次失败`);
-        return handleProxy(page, action, url, method, retry + 1)
+        return handleProxy({ page, action, url, method, retry: retry + 1 })
       } else {
         throw {
           ...res,
@@ -39,15 +42,39 @@ const handleProxy = async (page, action, url, method = 'POST', retry = 0) => {
   })
 }
 
+const OpenLivePage = async page => {
+  const newPage = await page.browser().newPage()
+  await newPage.goto('https://live.acfun.cn/settings/help', {timeout: 1000 * 60 * 5}).catch(err => {
+    console.log('打开live.acfun.cn相关页面失败');
+    console.error(err);
+  })
+  return newPage
+  // return page.browser().newPage().then(page =>
+  //   page.goto('https://live.acfun.cn/settings/help').catch(err => {
+  //     console.log('打开live.acfun.cn相关页面失败');
+  //     console.error(err);
+  //   })
+  // )
+}
+
 
 module.exports = (action, page, data) => {
   switch (action) {
     case '个人信息':
-      return handleProxy(page, action, 'https://www.acfun.cn/rest/pc-direct/user/personalInfo').then(res =>
-        res.info
-      )
+      return handleProxy({
+        page,
+        action,
+        url: 'https://www.acfun.cn/rest/pc-direct/user/personalInfo'
+      })
+        .then(res =>
+          res.info
+        )
     case '粉丝牌列表':
-      return handleProxy(page, action, 'https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/list')
+      return handleProxy({
+        page,
+        action,
+        url: 'https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/list'
+      })
         .then(res =>
           res.medalList.map(e =>
           ({
@@ -64,7 +91,11 @@ module.exports = (action, page, data) => {
           )
         )
     case '关注并开播列表':
-      return handleProxy(page, action, 'https://www.acfun.cn/rest/pc-direct/live/followLiveUsers')
+      return handleProxy({
+        page,
+        action,
+        url: 'https://www.acfun.cn/rest/pc-direct/live/followLiveUsers',
+      })
         .then(res =>
           res.liveUsers.map(e =>
           ({
@@ -76,31 +107,59 @@ module.exports = (action, page, data) => {
           })
           )
         )
+    case '关注并开播列表2':
+      return OpenLivePage(page).then(page =>
+        handleProxy({
+          page,
+          action,
+          url: 'https://live.acfun.cn/api/channel/list?count=100&pcursor=&filters=[%7B%22filterType%22:3,+%22filterId%22:0%7D]',
+          method: 'GET'
+        })
+          .then(res =>
+            res.liveList.map(e =>
+            ({
+              authorId: e.authorId,
+              uperName: e.user.name,
+              title: e.title,
+              createTime: e.createTime,
+              headUrl: e.user.headUrl
+            })
+            )
+          ).finally(() =>
+            page.close()
+          )
+      )
     case '当日时长':
-      return handleProxy(page, `${data} ${action}`, `https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/degreeLimit?uperId=${data}`)
+      return handleProxy({
+        page,
+        action: `${data} ${action}`,
+        url: `https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/degreeLimit?uperId=${data}`
+      })
         .then(res =>
           res.medalDegreeLimit
         )
     case '所有正在直播列表':
-      return page.browser().newPage().then(async page => {
-        await page.goto('https://live.acfun.cn/settings/help').catch(err => {
-          console.log('打开live.acfun.cn相关页面失败');
-          console.error(err);
+      return OpenLivePage(page).then(page =>
+        handleProxy({
+          page,
+          action,
+          url: `https://live.acfun.cn/api/channel/list?count=1000&pcursor=0`,
+          method: 'GET'
         })
-        return handleProxy(page, action, `https://live.acfun.cn/api/channel/list?count=1000&pcursor=0`, 'GET').then(res => {
-          // console.log(res.liveList.length)
-          // return []
-          return res.liveList.map(e =>
-          ({
-            authorId: e.authorId,
-            title: e.title,
-            createTime: e.createTime
-          })
+          .then(res => {
+            // console.log(res.liveList.length)
+            // return []
+            return res.liveList.map(e =>
+            ({
+              authorId: e.authorId,
+              title: e.title,
+              createTime: e.createTime
+            })
+            )
+          }).finally(() =>
+            page.close()
           )
-        }).finally(() =>
-          page.close()
-        )
-      })
+      )
 
     default:
       return Promise.reject({
