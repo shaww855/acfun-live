@@ -16,7 +16,7 @@ const errorTimes = {
  * @param {Object} page 页面
  */
 function userLogin (page) {
-  return page.goto('https://www.acfun.cn/login').then(async () => {
+  return page.goto('https://www.acfun.cn/login', {timeout: 1000 * 60 * 5}).then(async () => {
     const loginSwitch = '#login-switch'
     await page.waitForSelector(loginSwitch)
     await page.click(loginSwitch)
@@ -104,7 +104,7 @@ async function startMonitor (browser, times = 0, timeId = null) {
     getInfo('粉丝牌列表', page)
   ]
 
-  promiseList.push(config.checkAllRoom ? getInfo('所有正在直播列表', page) : getInfo('关注并开播列表', page))
+  promiseList.push(config.checkAllRoom ? getInfo('所有正在直播列表', page) : getInfo('关注并开播列表2', page))
 
   const allLiveRoom = await Promise.all(promiseList).then(responseList => {
     return responseList[1].map(e => {
@@ -286,7 +286,7 @@ function roomOpen (browser, info, num = 0) {
     })
 
     const url = config.useObsDanmaku ? `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false` : `https://live.acfun.cn/live/${info.uperId}`
-    return page.goto(url).then(async () => {
+    return page.goto(url, {timeout: 1000 * 60 * 5}).then(async () => {
       console.log('进入直播', info.uperName);
 
       errorTimes[info.uperName] = 0
@@ -410,6 +410,27 @@ async function DDVup (browser, liveUperInfo) {
       promiseList.push(roomExit(null, info.uperId, browser))
     } else if (info.opened) {
       msg = '继续监控'
+      promiseList.push(
+        browser.pages().then(pages => {
+          const page = pages.find(p => {
+            const url = p.url()
+            if (!isLiveTab(url)) {
+              // 不是直播间则跳过
+              return false
+            }
+            const pageUid = getUidByUrl(url)
+            if (info.uperId === pageUid) {
+              return true
+            }
+            return false
+          })
+          if (page === null) {
+            return Promise.resolve()
+          } else {
+            return page.title().then(uperName => page.reload().then(() => page.evaluate(uperName => document.title = uperName, uperName)))
+          }
+        })
+      )
     } else {
       msg = '进入直播'
       // roomOpen(browser, info)
