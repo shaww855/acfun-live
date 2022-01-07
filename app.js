@@ -21,7 +21,7 @@ const handleError = err => {
     Start()
   }
   console.log(err)
-  process.exit(1)
+  // process.exit(1)
 }
 process.title = 'acfun直播监控'
 
@@ -53,7 +53,7 @@ console.log('获取粉丝牌方式', config.mux);
 
 const Start = () => {
   puppeteer.launch({
-    // devtools: true, // 开发者工具
+    // devtools: true, // 开+发者工具
     // headless: false, // 无头模式
     product: 'chrome',
     // defaultViewport: {
@@ -87,7 +87,7 @@ const Start = () => {
     if (config.cookies !== '') {
       console.log('登录方式 Cookie');
       await userLoginByCookies(page)
-      await page.goto('https://www.acfun.cn').catch(err => {
+      await page.goto('https://www.acfun.cn', {timeout: 1000 * 60 * 5}).catch(err => {
         console.log('跳转主页失败');
         console.log(err);
         page.browser().close()
