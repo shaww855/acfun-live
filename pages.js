@@ -484,24 +484,33 @@ const handlePageError = async (page, uperName, err) => {
   console.error(`第${errorTimes[uperName]}次 handlePageError`, uperName, errorTimes[uperName] > 5)
   if (typeof err === 'object') {
     if (err.error) {
-      console.log(6, err);
+      console.log('[错误为object]', err);
     } else if (typeof err.message === 'string') {
-      console.log(3, err.message);
+      console.log('[错误为object并且有message]', err.message);
     } else {
-      JSON.stringify(4, err.message)
+      JSON.stringify('[未知错误]', err.message)
       if (err.message.error) {
-        console.log(5, err.message.error);
+        console.log('[未知错误的object]', err.message.error);
       }
     }
   } else {
-    console.log(2, err);
+    console.log('[错误为文本]', err);
   }
 
+  if (errorTimes[uperName] === 'loading') {
+    console.log(uperName, `handlePageError 已超过5次，刷新页面中...`);
+    return
+  }
   if (errorTimes[uperName] > 5) {
     console.log(uperName, `handlePageError 超过5次，刷新页面`);
+    errorTimes[uperName] = 'loading'
     page.reload().then(() => {
       console.log(uperName, `handlePageError 刷新完毕`);
       page.evaluate(uperName => document.title = uperName, uperName)
+    }).catch(err => {
+      console.log(uperName, `handlePageError 刷新失败`);
+      console.log(err);
+    }).finally(() => {
       errorTimes[uperName] = 0
     })
   }
