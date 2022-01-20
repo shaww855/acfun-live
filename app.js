@@ -73,6 +73,7 @@ const Start = () => {
       '--suppress-message-center-popups',
     ]
   }).then(async browser => {
+    console.log('puppeteer launched，Cookie状态：', config.cookies !== '');
     const pageList = await browser.pages()
     const page = pageList[0]
     await requestFliter(page)
@@ -101,6 +102,11 @@ const Start = () => {
   
     // 起飞
     startMonitor(browser)
+  }).catch(err => {
+    console.log('puppeteer启动失败，1秒稍后重试', err);
+    setTimeout(() => {
+      Start()
+    }, 1000)
   })
 }
 
