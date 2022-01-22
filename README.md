@@ -13,7 +13,7 @@
 - [安装时可能出现的问题](#安装时可能出现的问题)  
 
 # 懒人包
-懒人包试运行中，仅支持 Win10 及以上，请前往 发布页面 下载使用~  
+懒人包试运行中，支持 Windows10 及以上，请前往 发布页面 下载，运行前请阅读使用说明
 - [国内](https://gitee.com/cn_shaw/acfun-live/releases)  
 - [海外](https://github.com/shilx/acfun-live/releases)  
 
