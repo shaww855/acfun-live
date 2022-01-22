@@ -4,7 +4,7 @@
     "checkLiveTimeout": 10,
     "likeBtnTimeout": 0,
     "defaultTimeout": 5,
-    "executablePath": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+    "executablePath": "",
     "uidUnwatchList": [],
     "showLiveInfo": true,
     "checkWearMedal": false,
