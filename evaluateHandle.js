@@ -133,7 +133,9 @@ module.exports = (action, page, data) => {
       return handleProxy({
         page,
         action: `${data} ${action}`,
-        url: `https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/degreeLimit?uperId=${data}`
+        // url: `https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/degreeLimit?uperId=${data}`,
+        // 2022年1月13日16点56分 猴子改接口
+        url: `https://www.acfun.cn/rest/pc-direct/fansClub/fans/medal/extraInfo?uperId=${data}`
       })
         .then(res =>
           res.medalDegreeLimit
