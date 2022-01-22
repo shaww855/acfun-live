@@ -13,14 +13,14 @@
 - [安装时可能出现的问题](#安装时可能出现的问题)  
 
 # 懒人包
-懒人包试运行中，请前往 发布页面 下载使用~  
+懒人包试运行中，仅支持 Win10 及以上，请前往 发布页面 下载使用~  
 - [国内](https://gitee.com/cn_shaw/acfun-live/releases)  
 - [海外](https://github.com/shilx/acfun-live/releases)  
 
 # AcFun-Live  
 使用 Puppeteer 开启 AcFun 直播监控室，挂牌子，还有开播通知！😏  
 定时检查已开播并且拥有粉丝牌的直播间，根据设置进行操作。  
-Windows、WSL、Linux的 x86 和 ARM 架构均可运行~  
+Windows、WSL、Linux均可运行~  
 支持多台机子，请保持每台机子配置相同。  
 （序列形式的负载，并不是真正的均衡负载，因为实现起来比较容易😆）  
 - dev 分支  
