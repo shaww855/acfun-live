@@ -359,6 +359,7 @@ async function DDVup (browser, liveUperInfo) {
   if (liveUperInfo.length === 0) {
     console.log('---')
     console.log('拥有牌子的主播均未开播。')
+    console.log('如果你确定有主播开播，请尝试重新配置config.json文件，并重启本工具🤖')
     // console.log('---')
   }
   // console.log('>>>>before', liveUperInfo);
