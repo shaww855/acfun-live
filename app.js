@@ -28,7 +28,7 @@ process.title = 'acfun直播监控'
 process.on('uncaughtException', handleError)
 process.on("unhandledRejection", handleError);
 
-
+console.log('调试模式', config.debug);
 console.log(`每(分钟)检查直播`, config.checkLiveTimeout);
 if (config.likeBtnTimeout > 0) {
   console.log(`每(分钟)点赞一次`, config.likeBtnTimeout);
@@ -53,7 +53,7 @@ console.log('获取粉丝牌方式', config.mux);
 
 const Start = () => {
   puppeteer.launch({
-    // devtools: true, // 开发发者工具
+    devtools: config.debug, // 开发发者工具
     // headless: false, // 无头模式
     product: 'chrome',
     // defaultViewport: {

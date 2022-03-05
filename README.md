@@ -42,6 +42,7 @@ config.json
 cookies | String | 自行抓包，复制请求头的 cookie （饼干保质期一个月）
 ~~account~~ | ~~String~~ | ~~账号~~  
 ~~password~~ | ~~String~~ | ~~密码~~  
+debug | Boolean | 是否开启调试，默认不开启<br>是则会在前台展示浏览器<br>否则静默运行
 checkLiveTimeout | Number | 每（分钟）检查直播  
 likeBtnTimeout | Number | 每（分钟）自动点赞 <br> 0为关闭自动点赞
 defaultTimeout | Number | 异步操作最多等待（分钟）
