@@ -481,6 +481,11 @@ const requestFliter = async page => {
 }
 
 const handlePageError = async (page, uperName, err) => {
+  if (errorTimes[uperName] === 'loading') {
+    console.log(uperName, `handlePageError 已超过5次，刷新页面中...`);
+    return
+  }
+
   errorTimes[uperName] += 1
   console.error(`第${errorTimes[uperName]}次 handlePageError`, uperName, errorTimes[uperName] > 5)
   if (typeof err === 'object') {
@@ -498,10 +503,6 @@ const handlePageError = async (page, uperName, err) => {
     console.log('[错误为文本]', err);
   }
 
-  if (errorTimes[uperName] === 'loading') {
-    console.log(uperName, `handlePageError 已超过5次，刷新页面中...`);
-    return
-  }
   if (errorTimes[uperName] > 5) {
     console.log(uperName, `handlePageError 超过5次，刷新页面`);
     errorTimes[uperName] = 'loading'
