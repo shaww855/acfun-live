@@ -1,4 +1,6 @@
 {
+    "account": "",
+    "password": "",
     "debug": false,
     "checkLiveTimeout": 10,
     "likeBtnTimeout": 0,
