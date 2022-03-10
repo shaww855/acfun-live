@@ -129,33 +129,17 @@ async function startMonitor (browser, times = 0, timeId = null) {
     throw err
   })
 
-  let checkLiveWatch = []
   let liveAndClub = allLiveRoom.filter(e => e.fansClub)
 
   notification(liveAndClub)
 
   let liveUperInfo = []
-  if (config.mux === true || (config.mux === 'auto' && liveAndClub.length < 10)) {
-    // 并发
-    // auto 开播主播超过小于10个并发
-    console.log('并发获取粉丝牌信息');
-    liveAndClub.forEach(item => {
-      checkLiveWatch.push(getInfo('当日时长', page, item.uperId))
+  // 顺序获取
+  console.log('顺序获取粉丝牌信息');
+  for (const iterator of liveAndClub) {
+    await getInfo('当日时长', page, iterator.uperId).then(res => {
+      liveUperInfo.push(res)
     })
-    liveUperInfo = await Promise.all(checkLiveWatch).then(list => {
-      return list
-    }).catch(err => {
-      console.log('获取所有牌子的当日信息失败');
-      throw err
-    })
-  } else {
-    // 顺序获取
-    console.log('顺序获取粉丝牌信息');
-    for (const iterator of liveAndClub) {
-      await getInfo('当日时长', page, iterator.uperId).then(res => {
-        liveUperInfo.push(res)
-      })
-    }
   }
 
   console.log('拥有牌子并且开播的直播间数', liveUperInfo.length);
