@@ -16,7 +16,7 @@ const errorTimes = {
  * @param {Object} page 页面
  */
 function userLogin (page) {
-  return page.goto('https://www.acfun.cn/login', {timeout: 1000 * 60 * 5}).then(async () => {
+  return page.goto('https://www.acfun.cn/login', {waitUntil: 'domcontentloaded'}).then(async () => {
     const loginSwitch = '#login-switch'
     await page.waitForSelector(loginSwitch)
     await page.click(loginSwitch)
@@ -270,7 +270,7 @@ function roomOpen (browser, info, num = 0) {
     })
 
     const url = config.useObsDanmaku ? `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false` : `https://live.acfun.cn/live/${info.uperId}`
-    return page.goto(url, {timeout: 1000 * 60 * 5}).then(async () => {
+    return page.goto(url, {waitUntil: 'domcontentloaded'}).then(async () => {
       console.log('进入直播', info.uperName);
 
       errorTimes[info.uperName] = 0
