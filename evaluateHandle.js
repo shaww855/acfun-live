@@ -44,7 +44,7 @@ const handleProxy = async ({ page, action, url, method = 'POST', retry = 0 }) =>
 
 const OpenLivePage = async page => {
   const newPage = await page.browser().newPage()
-  await newPage.goto('https://live.acfun.cn/settings/help', {timeout: 1000 * 60 * 5}).catch(err => {
+  await newPage.goto('https://live.acfun.cn/settings/help', {waitUntil: 'domcontentloaded'}).catch(err => {
     console.log('打开live.acfun.cn相关页面失败');
     console.error(err);
   })
