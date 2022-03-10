@@ -48,8 +48,6 @@ if (config.notification) {
   console.log('IFTTT', config.iftttKey ? '已启用' : '未启用')
   console.log('BARK', config.barkKey ? '已启用' : '未启用')
 }
-console.log('获取粉丝牌方式', config.mux);
-
 
 const Start = () => {
   puppeteer.launch({
