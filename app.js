@@ -7,6 +7,7 @@ const {
   userLogin,
   userLoginByCookies,
   startMonitor,
+  endMonitor,
   requestFliter,
   handlePageError
 } = require('./pages.js')
@@ -29,6 +30,7 @@ process.on('uncaughtException', handleError)
 process.on("unhandledRejection", handleError);
 
 console.log('调试模式', config.debug);
+console.log('每天0~1点自动重启', config.autoRestart);
 console.log(`每(分钟)检查直播`, config.checkLiveTimeout);
 if (config.likeBtnTimeout > 0) {
   console.log(`每(分钟)点赞一次`, config.likeBtnTimeout);
@@ -86,11 +88,6 @@ const Start = () => {
     if (config.cookies !== '') {
       console.log('登录方式 Cookie');
       await userLoginByCookies(page)
-      await page.goto('https://www.acfun.cn', {timeout: 1000 * 60 * 5}).catch(err => {
-        console.log('跳转主页失败');
-        console.log(err);
-        page.browser().close()
-      })
     } else if (config.account !== '' && config.password !== '') {
       console.log('登录方式 账号密码');
       await userLogin(page)
@@ -100,6 +97,22 @@ const Start = () => {
   
     // 起飞
     startMonitor(browser)
+
+    if (config.autoRestart) {
+      // 定时重启
+      const timeoutId = setInterval(() => {
+        const hours = new Date().getHours()
+        console.log(`[定时重启工具运行中，每天0点自动重启：当前${hours}点]`);
+        if (hours === 0) {
+          clearInterval(timeoutId)
+          endMonitor(browser)
+          setTimeout(() => {
+            Start()
+          }, 1000)
+        }
+      }, 1000 * 60 * 60 * 24)
+    }
+
   }).catch(err => {
     console.log('puppeteer启动失败，1秒稍后重试', err);
     setTimeout(() => {

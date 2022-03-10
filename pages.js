@@ -10,6 +10,7 @@ const notification = require('./notification')
 const errorTimes = {
   主页: 0
 }
+let monitorTimeoutId = null
 
 /**
  * 用户登录
@@ -41,7 +42,7 @@ function userLogin (page) {
  * 用Cookies登录
  * @param {Object} page 页面
  */
-function userLoginByCookies (page) {
+async function userLoginByCookies (page) {
   let list = []
   if (config.cookies instanceof Object) {
     config.cookies.forEach(e => {
@@ -61,16 +62,20 @@ function userLoginByCookies (page) {
       }))
     })
   }
-  return Promise.all(list)
+  await Promise.all(list)
+  await page.goto('https://www.acfun.cn', {waitUntil: 'domcontentloaded'}).catch(err => {
+    console.log('跳转主页失败');
+    console.log(err);
+    page.browser().close()
+  })
 }
 
 /**
  * 开始监控室
  * @param {Object} browser 浏览器连接断点
  * @param {Number} times 检查次数
- * @param {Number} timeId 定时器ID
  */
-async function startMonitor (browser, times = 0, timeId = null) {
+async function startMonitor (browser, times = 0) {
   console.log('===');
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
 
@@ -83,7 +88,7 @@ async function startMonitor (browser, times = 0, timeId = null) {
     page = target
   }).catch(err => {
     console.log('获取页面对象失败');
-    clearTimeout(timeId)
+    clearTimeout(monitorTimeoutId)
     throw err
   })
 
@@ -152,9 +157,18 @@ async function startMonitor (browser, times = 0, timeId = null) {
 
   DDVup(browser, liveUperInfo)
 
-  setTimeout(id => {
-    startMonitor(browser, times + 1, id)
+  monitorTimeoutId = setTimeout(() => {
+    startMonitor(browser, times + 1)
   }, 1000 * 60 * config.checkLiveTimeout)
+}
+
+/**
+ * 关闭浏览器及清除定时器
+ * @param {Object} browser 浏览器对象
+ */
+async function endMonitor(browser) {
+  clearTimeout(monitorTimeoutId)
+  await browser.close()
 }
 
 /**
@@ -515,6 +529,7 @@ module.exports = {
   userLogin,
   userLoginByCookies,
   startMonitor,
+  endMonitor,
   requestFliter,
   handlePageError
 }
