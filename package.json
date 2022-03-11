@@ -15,6 +15,11 @@
   "author": "shaw",
   "license": "ISC",
   "dependencies": {
+    "inquirer": "^8.2.1",
+    "node-schedule": "^2.1.0",
     "puppeteer": "^5.3.1"
+  },
+  "devDependencies": {
+    "pkg": "^5.5.2"
   }
 }
