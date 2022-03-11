@@ -3,8 +3,6 @@ const { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig } = r
 // 配置文件
 const config = getConfig()
 // const puppeteer = require('puppeteer');
-const getInfo = require('./evaluateHandle')
-const notification = require('./notification')
 
 // 报错计数
 const errorTimes = {
@@ -29,7 +27,7 @@ function userLogin (page) {
     await page.click(loginBtnSelector)
     await page.waitForNavigation()
     page.cookies().then(cookieList => {
-      setConfig(cookieList, 'cookies')
+      setConfig({ prop: 'cookies', value: cookieList})
     })
   }).catch(err => {
     console.log('使用账号密码登录失败');
@@ -76,6 +74,7 @@ async function userLoginByCookies (page) {
  * @param {Number} times 检查次数
  */
 async function startMonitor (browser, times = 0) {
+  const getInfo = require('./evaluateHandle')
   console.log('===');
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
 
@@ -136,6 +135,7 @@ async function startMonitor (browser, times = 0) {
 
   let liveAndClub = allLiveRoom.filter(e => e.fansClub)
 
+  const notification = require('./notification')
   notification(liveAndClub)
 
   let liveUperInfo = []
