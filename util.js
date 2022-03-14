@@ -110,7 +110,7 @@ const setConfig = ({
       ...userConfig
     }
   } else if (prop === 'cookies') {
-    config.cookies = val.map(e => ({
+    config.cookies = value.map(e => ({
       name: e.name,
       value: e.value,
       domain: e.domain
@@ -122,78 +122,6 @@ const setConfig = ({
   console.log(`= config.json cookies 已保存 =`);
 }
 
-const defaultConfig = {
-  "account": "",
-  "password": "",
-  "debug": false,
-  "checkLiveTimeout": 10,
-  "likeBtnTimeout": 0,
-  "defaultTimeout": 5,
-  "executablePath": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-  "uidUnwatchList": [],
-  "showLiveInfo": true,
-  "checkWearMedal": false,
-  "serverRoomLimit": [
-    0
-  ],
-  "serverIndex": 0,
-  "checkAllRoom": false,
-  "useObsDanmaku": true,
-  "notification": false,
-  "iftttKey": "",
-  "barkKey": "",
-  "cookies": ""
-}
-
-/**
- * 询问并建立配置文件
- */
-function configQuestion () {
-  return inquirer.prompt([{
-    type: 'input',
-    name: 'account',
-    message: "请输入账号：",
-  }, {
-    type: 'password',
-    message: '请输入密码：',
-    mask: '*',
-    name: 'password',
-  }, {
-    type: 'confirm',
-    message: '是否开启调试？',
-    default: false,
-    name: 'debug',
-  }, {
-    type: 'confirm',
-    message: '是否于每日0点自动重启？',
-    default: false,
-    name: 'autoRestart'
-  }, {
-    type: 'confirm',
-    message: '使用OBS弹幕工具监控？',
-    default: true,
-    name: 'useObsDanmaku',
-  }, {
-    type: 'confirm',
-    message: '佩戴牌子的主播不观看？ （戴着牌子说明你正在D TA，不需要服务器挂牌子）',
-    default: false,
-    name: 'checkWearMedal'
-  }, {
-    type: 'confirm',
-    message: '只要有粉丝牌，未关注的主播也需要监控？',
-    default: false,
-    name: 'checkAllRoom'
-  }]).then((answers) => {
-    delete answers.notificationApp
-    const userConfig = {
-      ...defaultConfig,
-      ...answers
-    }
-    setConfig({userConfig})
-    return userConfig
-  })
-}
-
 module.exports = {
   padNum,
   formartDate,
@@ -201,6 +129,5 @@ module.exports = {
   getUidByUrl,
   isLiveTab,
   getConfig,
-  setConfig,
-  configQuestion
+  setConfig
 }

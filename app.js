@@ -104,7 +104,7 @@ module.exports = {
         startMonitor(browser)
 
         if (config.autoRestart) {
-          console.log(`[定时重启工具运行中，每天0点自动重启`);
+          console.log(`[定时重启工具运行中，每天0点自动重启]`);
           schedule.scheduleJob({ rule: '01 00 * * *' }, function () {
             clearInterval(timeoutId)
             endMonitor(browser)
