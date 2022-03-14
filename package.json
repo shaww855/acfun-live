@@ -9,8 +9,8 @@
     "url": "https://github.com/shilx/acfun-live"
   },
   "scripts": {
-    "start": "node app.js",
-    "build:win": "pkg app.js -o acfunlive -t win --public"
+    "start": "node entry.js",
+    "build:win": "pkg entry.js -o acfunlive -t win --public"
   },
   "author": "shaw",
   "license": "ISC",
