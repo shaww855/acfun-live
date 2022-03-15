@@ -2,6 +2,7 @@
     "account": "",
     "password": "",
     "debug": false,
+    "autoRestart": false,
     "checkLiveTimeout": 10,
     "likeBtnTimeout": 0,
     "defaultTimeout": 5,
