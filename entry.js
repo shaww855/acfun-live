@@ -34,11 +34,27 @@ function configQuestion () {
     type: 'input',
     name: 'account',
     message: "请输入账号：",
+    validate: function(input) {
+      const done = this.async()
+      if(input === ''){
+        done('账号不能为空')
+      }else{
+        done(null, true)
+      }
+    }
   }, {
     type: 'password',
     message: '请输入密码：',
     mask: '*',
     name: 'password',
+    validate: function(input) {
+      const done = this.async()
+      if(input === ''){
+        done('密码不能为空')
+      }else{
+        done(null, true)
+      }
+    }
   }, {
     type: 'confirm',
     message: '是否开启调试？',
@@ -54,6 +70,9 @@ function configQuestion () {
     message: '请输入 Chromium 为内核的浏览器路径：',
     default: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
     name: 'executablePath',
+    when: function () {
+      return process.platform === 'win32'
+    }
   }, {
     type: 'confirm',
     message: '使用OBS弹幕工具监控？',
@@ -66,7 +85,7 @@ function configQuestion () {
     name: 'checkWearMedal'
   }, {
     type: 'confirm',
-    message: '只要有粉丝牌，未关注的主播也需要监控？',
+    message: '只要有粉丝牌，即使未关注主播也需要监控？',
     default: false,
     name: 'checkAllRoom'
   }]).then((answers) => {
@@ -80,26 +99,24 @@ function configQuestion () {
   })
 }
 
-async function check () {
-  if (getConfig() === null) {
-    await inquirer.prompt([{
-      type: 'confirm',
-      name: 'create',
-      message: "未找到config.json，或文件已损坏！是否重新建立？",
-    }]).then(answers => {
-      if (answers.create) {
-        configQuestion().then(() => {
-          runApp()
-        })
-      } else {
-        console.log('程序即将关闭...');
-        setTimeout(() => {
-          process.exit(0)
-        }, 3000)
-      }
-    })
-  } else {
-    runApp()
-  }
+// 检查配置文件
+if (getConfig() === null) {
+  inquirer.prompt([{
+    type: 'confirm',
+    name: 'create',
+    message: "未找到config.json，或文件已损坏！是否重新建立？",
+  }]).then(answers => {
+    if (answers.create) {
+      configQuestion().then(() => {
+        runApp()
+      })
+    } else {
+      console.log('程序即将关闭...');
+      setTimeout(() => {
+        process.exit(0)
+      }, 3000)
+    }
+  })
+} else {
+  runApp()
 }
-check()
