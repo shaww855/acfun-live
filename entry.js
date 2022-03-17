@@ -1,7 +1,8 @@
 const { getConfig, setConfig } = require('./util.js')
 const inquirer = require('inquirer');
-const { runApp } = require('./app.js')
-
+// 检查更新
+const checkUpdate = require('./checkUpdate')
+const runApp = require('./app.js')
 const defaultConfig = {
   "account": "",
   "password": "",
@@ -10,7 +11,7 @@ const defaultConfig = {
   "checkLiveTimeout": 10,
   "likeBtnTimeout": 0,
   "defaultTimeout": 5,
-  "executablePath": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+  "executablePath": "",
   "uidUnwatchList": [],
   "showLiveInfo": true,
   "checkWearMedal": false,
@@ -26,14 +27,42 @@ const defaultConfig = {
   "cookies": ""
 }
 
+const isWindows = process.platform === 'win32'
+
 /**
  * 询问并建立配置文件
  */
-function configQuestion () {
+async function configQuestion () {
   return inquirer.prompt([{
+    type: 'list',
+    name: 'loginByUsername',
+    message: "请选择登录方式",
+    choices: [{
+      name: '账号密码',
+      value: true,
+      checked: true
+    },{
+      name: 'cookies',
+      value: false,
+    }]
+  }, {
+    type: 'editor',
+    name: 'cookies',
+    message: "请粘贴cookies：",
+    when: answers => !answers.loginByUsername,
+    validate: function(input) {
+      const done = this.async()
+      if(input === ''){
+        done('cookies不能为空')
+      }else{
+        done(null, true)
+      }
+    }
+  }, {
     type: 'input',
     name: 'account',
     message: "请输入账号：",
+    when: answers => answers.loginByUsername,
     validate: function(input) {
       const done = this.async()
       if(input === ''){
@@ -47,6 +76,7 @@ function configQuestion () {
     message: '请输入密码：',
     mask: '*',
     name: 'password',
+    when: answers => answers.loginByUsername,
     validate: function(input) {
       const done = this.async()
       if(input === ''){
@@ -60,6 +90,7 @@ function configQuestion () {
     message: '是否开启调试？',
     default: false,
     name: 'debug',
+    when: () => isWindows
   }, {
     type: 'confirm',
     message: '是否于每日0点自动重启？',
@@ -70,9 +101,7 @@ function configQuestion () {
     message: '请输入 Chromium 为内核的浏览器路径：',
     default: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
     name: 'executablePath',
-    when: function () {
-      return process.platform === 'win32'
-    }
+    when: isWindows
   }, {
     type: 'confirm',
     message: '使用OBS弹幕工具监控？',
@@ -99,24 +128,26 @@ function configQuestion () {
   })
 }
 
-// 检查配置文件
-if (getConfig() === null) {
-  inquirer.prompt([{
-    type: 'confirm',
-    name: 'create',
-    message: "未找到config.json，或文件已损坏！是否重新建立？",
-  }]).then(answers => {
-    if (answers.create) {
-      configQuestion().then(() => {
-        runApp()
-      })
-    } else {
-      console.log('程序即将关闭...');
-      setTimeout(() => {
-        process.exit(0)
-      }, 3000)
-    }
-  })
-} else {
-  runApp()
-}
+checkUpdate().then(() => {
+  // 检查配置文件
+  if (getConfig() === null) {
+    inquirer.prompt([{
+      type: 'confirm',
+      name: 'create',
+      message: "未找到config.json，或文件已损坏！是否重新建立？",
+    }]).then(answers => {
+      if (answers.create) {
+        configQuestion().then(() => {
+          runApp()
+        })
+      } else {
+        console.log('程序即将关闭...');
+        setTimeout(() => {
+          process.exit(0)
+        }, 1000)
+      }
+    })
+  } else {
+    runApp()
+  }
+})
