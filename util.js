@@ -79,8 +79,6 @@ const getConfig = () => {
     return config
   } else {
     // throw '未找到config.json';
-    console.log('未找到config.json，或文件已损坏！');
-    console.log('utils');
     return null
     // await inquirer.prompt([{
     //   type: 'confirm',
