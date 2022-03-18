@@ -1,6 +1,7 @@
 module.exports = ({ title, message, url }) => {
   const https = require('https')
-  const { iftttKey } = require('../config.json')
+  const { getConfig } = require('../util.js')
+  const iftttKey = getConfig().iftttKey
   return new Promise((resolve, reject) => {
 
     let path = encodeURI(`/trigger/acfun_live/with/key/${iftttKey}?value1=${title}&value2=${message}&value3=${url}`)
