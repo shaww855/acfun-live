@@ -3,20 +3,19 @@ const { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig } = r
 // 配置文件
 const config = getConfig()
 // const puppeteer = require('puppeteer');
-const getInfo = require('./evaluateHandle')
-const notification = require('./notification')
 
 // 报错计数
 const errorTimes = {
   主页: 0
 }
+let monitorTimeoutId = null
 
 /**
  * 用户登录
  * @param {Object} page 页面
  */
 function userLogin (page) {
-  return page.goto('https://www.acfun.cn/login', {timeout: 1000 * 60 * 5}).then(async () => {
+  return page.goto('https://www.acfun.cn/login', {waitUntil: 'domcontentloaded'}).then(async () => {
     const loginSwitch = '#login-switch'
     await page.waitForSelector(loginSwitch)
     await page.click(loginSwitch)
@@ -28,7 +27,7 @@ function userLogin (page) {
     await page.click(loginBtnSelector)
     await page.waitForNavigation()
     page.cookies().then(cookieList => {
-      setConfig(cookieList, 'cookies')
+      setConfig({ prop: 'cookies', value: cookieList})
     })
   }).catch(err => {
     console.log('使用账号密码登录失败');
@@ -41,7 +40,7 @@ function userLogin (page) {
  * 用Cookies登录
  * @param {Object} page 页面
  */
-function userLoginByCookies (page) {
+async function userLoginByCookies (page) {
   let list = []
   if (config.cookies instanceof Object) {
     config.cookies.forEach(e => {
@@ -61,16 +60,21 @@ function userLoginByCookies (page) {
       }))
     })
   }
-  return Promise.all(list)
+  await Promise.all(list)
+  await page.goto('https://www.acfun.cn', {waitUntil: 'domcontentloaded'}).catch(err => {
+    console.log('跳转主页失败');
+    console.log(err);
+    page.browser().close()
+  })
 }
 
 /**
  * 开始监控室
  * @param {Object} browser 浏览器连接断点
  * @param {Number} times 检查次数
- * @param {Number} timeId 定时器ID
  */
-async function startMonitor (browser, times = 0, timeId = null) {
+async function startMonitor (browser, times = 0) {
+  const getInfo = require('./evaluateHandle')
   console.log('===');
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
 
@@ -83,7 +87,7 @@ async function startMonitor (browser, times = 0, timeId = null) {
     page = target
   }).catch(err => {
     console.log('获取页面对象失败');
-    clearTimeout(timeId)
+    clearTimeout(monitorTimeoutId)
     throw err
   })
 
@@ -129,33 +133,18 @@ async function startMonitor (browser, times = 0, timeId = null) {
     throw err
   })
 
-  let checkLiveWatch = []
   let liveAndClub = allLiveRoom.filter(e => e.fansClub)
 
+  const notification = require('./notification')
   notification(liveAndClub)
 
   let liveUperInfo = []
-  if (config.mux === true || (config.mux === 'auto' && liveAndClub.length < 10)) {
-    // 并发
-    // auto 开播主播超过小于10个并发
-    console.log('并发获取粉丝牌信息');
-    liveAndClub.forEach(item => {
-      checkLiveWatch.push(getInfo('当日时长', page, item.uperId))
+  // 顺序获取
+  console.log('顺序获取粉丝牌信息');
+  for (const iterator of liveAndClub) {
+    await getInfo('当日时长', page, iterator.uperId).then(res => {
+      liveUperInfo.push(res)
     })
-    liveUperInfo = await Promise.all(checkLiveWatch).then(list => {
-      return list
-    }).catch(err => {
-      console.log('获取所有牌子的当日信息失败');
-      throw err
-    })
-  } else {
-    // 顺序获取
-    console.log('顺序获取粉丝牌信息');
-    for (const iterator of liveAndClub) {
-      await getInfo('当日时长', page, iterator.uperId).then(res => {
-        liveUperInfo.push(res)
-      })
-    }
   }
 
   console.log('拥有牌子并且开播的直播间数', liveUperInfo.length);
@@ -168,9 +157,18 @@ async function startMonitor (browser, times = 0, timeId = null) {
 
   DDVup(browser, liveUperInfo)
 
-  setTimeout(id => {
-    startMonitor(browser, times + 1, id)
+  monitorTimeoutId = setTimeout(() => {
+    startMonitor(browser, times + 1)
   }, 1000 * 60 * config.checkLiveTimeout)
+}
+
+/**
+ * 关闭浏览器及清除定时器
+ * @param {Object} browser 浏览器对象
+ */
+async function endMonitor(browser) {
+  clearTimeout(monitorTimeoutId)
+  await browser.close()
 }
 
 /**
@@ -286,7 +284,7 @@ function roomOpen (browser, info, num = 0) {
     })
 
     const url = config.useObsDanmaku ? `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false` : `https://live.acfun.cn/live/${info.uperId}`
-    return page.goto(url, {timeout: 1000 * 60 * 5}).then(async () => {
+    return page.goto(url, {waitUntil: 'domcontentloaded'}).then(async () => {
       console.log('进入直播', info.uperName);
 
       errorTimes[info.uperName] = 0
@@ -359,6 +357,7 @@ async function DDVup (browser, liveUperInfo) {
   if (liveUperInfo.length === 0) {
     console.log('---')
     console.log('拥有牌子的主播均未开播。')
+    console.log('🤖如果你确定有主播开播，请删除config.json文件，并重启本工具')
     // console.log('---')
   }
   // console.log('>>>>before', liveUperInfo);
@@ -480,6 +479,11 @@ const requestFliter = async page => {
 }
 
 const handlePageError = async (page, uperName, err) => {
+  if (errorTimes[uperName] === 'loading') {
+    console.log(uperName, `handlePageError 已超过5次，刷新页面中...`);
+    return
+  }
+
   errorTimes[uperName] += 1
   console.error(`第${errorTimes[uperName]}次 handlePageError`, uperName, errorTimes[uperName] > 5)
   if (typeof err === 'object') {
@@ -497,10 +501,6 @@ const handlePageError = async (page, uperName, err) => {
     console.log('[错误为文本]', err);
   }
 
-  if (errorTimes[uperName] === 'loading') {
-    console.log(uperName, `handlePageError 已超过5次，刷新页面中...`);
-    return
-  }
   if (errorTimes[uperName] > 5) {
     console.log(uperName, `handlePageError 超过5次，刷新页面`);
     errorTimes[uperName] = 'loading'
@@ -529,6 +529,7 @@ module.exports = {
   userLogin,
   userLoginByCookies,
   startMonitor,
+  endMonitor,
   requestFliter,
   handlePageError
 }

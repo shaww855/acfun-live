@@ -1,6 +1,7 @@
 "use strict";
 
 const fs = require("fs");
+const inquirer = require('inquirer');
 
 /**
 * 补零
@@ -77,23 +78,43 @@ const getConfig = () => {
     console.log(`= config.json config 已读取 =`);
     return config
   } else {
-    throw '未找到config.json';
+    // throw '未找到config.json';
+    return null
+    // await inquirer.prompt([{
+    //   type: 'confirm',
+    //   name: 'create',
+    //   message: "未找到config.json，或文件已损坏！是否重新建立？",
+    // }]).then(answers => {
+    //   if (answers.create) {
+    //     return configQuestion()
+    //   } else {
+    //     console.log('程序即将关闭...');
+    //     setTimeout(() => {
+    //       process.exit(0)
+    //     }, 1000)
+    //   }
+    // })
   }
 }
 
-const setConfig = (val = '', prop) => {
-  if (prop === 'cookies') {
-    if (val === '') {
-      config.cookies = ''
-    } else {
-      config.cookies = val.map(e => ({
-        name: e.name,
-        value: e.value,
-        domain: e.domain
-      }))
+const setConfig = ({
+  prop = null,
+  value = '',
+  userConfig = {}
+}) => {
+  if (prop === null) {
+    config = {
+      ...config,
+      ...userConfig
     }
+  } else if (prop === 'cookies') {
+    config.cookies = value.map(e => ({
+      name: e.name,
+      value: e.value,
+      domain: e.domain
+    }))
   } else {
-    config[prop] = val
+    config[prop] = value
   }
   fs.writeFileSync(configPath, JSON.stringify(config, null, 4));
   console.log(`= config.json cookies 已保存 =`);

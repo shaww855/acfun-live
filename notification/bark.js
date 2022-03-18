@@ -1,9 +1,10 @@
 const https = require('https')
-const { barkKey } = require('../config.json')
+const { getConfig } = require('../util.js')
+const barkKey = getConfig().barkKey
 module.exports = ({ title, message, url, headUrl }) => {
   return new Promise((resolve, reject) => {
 
-    let path = encodeURI(`/${barkKey}/${title}/${message}?url=${url}&group=acfun&icon=${headUrl}`)
+    let path = encodeURI(`/${barkKey}/${title.replace('/', '')}/${message.replace('/', '')}?url=${url}&group=acfun&icon=${headUrl}`)
 
     const options = {
       hostname: 'api.day.app',
@@ -17,7 +18,7 @@ module.exports = ({ title, message, url, headUrl }) => {
 
     const req = https.request(options, res => {
       if (res.statusCode === 200) {
-        // console.log('IFTTT发送开播通知成功',);
+        // console.log('Bark发送开播通知成功',);
         resolve('ok')
       }
 
@@ -28,7 +29,7 @@ module.exports = ({ title, message, url, headUrl }) => {
 
     req.on('error', error => {
       reject(error)
-      // console.error('IFTTT发送开播通知失败', error)
+      // console.error('Bark发送开播通知失败', error)
     })
 
     req.end()
