@@ -41,18 +41,19 @@ async function configQuestion () {
       name: '账号密码',
       value: true,
       checked: true
-    },{
+    }, {
       name: 'cookies',
       value: false,
-    }]
+    }],
+    when: !isWindows
   }, {
     type: 'editor',
     name: 'cookies',
-    message: "请粘贴cookies：",
-    when: answers => !answers.loginByUsername,
-    validate: function(input) {
+    message: "从已登录过账号密码的config.json文件中复制cookies项并粘贴：",
+    when: answers => answers.loginByUsername === false && !isWindows,
+    validate: function (input) {
       const done = this.async()
-      if(input === ''){
+      if (input === '') {
         done('cookies不能为空')
         return
       }
@@ -60,19 +61,19 @@ async function configQuestion () {
         JSON.parse(input)
         done(null, true)
       } catch (error) {
-        done(error.message)
+        done(`请输入正确的格式，${error.message}`)
       }
     }
   }, {
     type: 'input',
     name: 'account',
     message: "请输入账号：",
-    when: answers => answers.loginByUsername,
-    validate: function(input) {
+    when: answers => answers.loginByUsername !== false,
+    validate: function (input) {
       const done = this.async()
-      if(input === ''){
+      if (input === '') {
         done('账号不能为空')
-      }else{
+      } else {
         done(null, true)
       }
     }
@@ -81,12 +82,12 @@ async function configQuestion () {
     message: '请输入密码：',
     mask: '*',
     name: 'password',
-    when: answers => answers.loginByUsername,
-    validate: function(input) {
+    when: answers => answers.loginByUsername !== false,
+    validate: function (input) {
       const done = this.async()
-      if(input === ''){
+      if (input === '') {
         done('密码不能为空')
-      }else{
+      } else {
         done(null, true)
       }
     }
@@ -123,6 +124,7 @@ async function configQuestion () {
     default: false,
     name: 'checkAllRoom'
   }]).then((answers) => {
+    delete answers.loginByUsername
     delete answers.notificationApp
     const userConfig = {
       ...defaultConfig,
@@ -132,7 +134,7 @@ async function configQuestion () {
       userConfig.cookies = JSON.parse(answers.cookies)
     }
 
-    setConfig({userConfig})
+    setConfig({ userConfig })
     return userConfig
   })
 }
