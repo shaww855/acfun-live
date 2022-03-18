@@ -3,8 +3,8 @@ const { version } = require('./package.json')
 
 module.exports = () => {
   return new Promise((resolve, reject) => {
-    // return https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', { timeout:3000 }, (res) => {
-    return https.get('https://raw.githubusercontent.com/shilx/acfun-live/main/package.json', { timeout:3000 }, (res) => {
+    return https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', { timeout:3000 }, (res) => {
+    // return https.get('https://raw.githubusercontent.com/shilx/acfun-live/main/package.json', { timeout:3000 }, (res) => {
       const { statusCode } = res;
       // const contentType = res.headers['content-type'];
   
@@ -40,7 +40,7 @@ module.exports = () => {
       reject(e.message)
     });
   }).then(res => {
-    let msg = `当前版本：${version},`
+    let msg = `当前版本：${version}，`
     if (res.version) {
       if (res.version === version) {
         msg += '已是最新'
