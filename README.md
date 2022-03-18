@@ -42,6 +42,8 @@ config.json
 cookies | String | 自行抓包，复制请求头的 cookie （饼干保质期一个月）
 ~~account~~ | ~~String~~ | ~~账号~~  
 ~~password~~ | ~~String~~ | ~~密码~~  
+debug | Boolean | 是否开启调试，默认不开启<br>是则会在前台展示浏览器<br>否则静默运行
+autoRestart | Boolean | 是否开启每天0~1点自动重启
 checkLiveTimeout | Number | 每（分钟）检查直播  
 likeBtnTimeout | Number | 每（分钟）自动点赞 <br> 0为关闭自动点赞
 defaultTimeout | Number | 异步操作最多等待（分钟）
@@ -49,14 +51,13 @@ executablePath | String | Chromium 路径 <br> 例 `C:/Program Files (x86)/Googl
 uidUnwatchList | Array | 这些 UID 的直播间不看
 showLiveInfo | Boolean | 检查直播状态时是否展示主播详细信息
 checkWearMedal | Boolean | 佩戴牌子的主播不观看 <br> （戴着牌子说明你正在D TA，不需要服务器挂牌子）
-serverRoomLimit | Array | 支持多台服务器 <br> 假如你有三台服务器，并填入了 [3, 2, 0]  <br>  第一台服务器负责挂第0、1、2个直播间 <br> 第二台服务器挂第3、4个直播间  <br>  第三台服务器挂剩余的所有直播   <br>  直播间按开播时间从早到晚 <br> 自己测试自己的机子能挂多少直播间 
+serverRoomLimit | Array | 支持多台服务器 <br> 假如你有三台服务器，并填入了 [3, 2, 0]  <br>  第一台服务器负责挂第0、1、2个直播间 <br> 第二台服务器挂第3、4个直播间  <br>  第三台服务器挂剩余的所有直播   <br>  直播间按开播时间从早到晚 <br> 自己测试自己的机子能挂多少直播间<br>（估计1G内存可以挂2个直播间） 
 serverIndex | Array | 当前是第几台，从0开始
 checkAllRoom | Boolean | 只要有牌子，不管是否关注都监控
 useObsDanmaku | Boolean | 使用官方OBS弹幕工具监控<br>开启此项时 自动点赞功能 会失效
 notification | Boolean<br>Array  | 借助第三方APP推送开播通知<br>true: 所有粉丝牌主播的通知<br>false: 不推送开播通知<br> [ Number ]: 指定uid开播推送，前提是已关注并有粉丝牌<br>此配置项会受 `checkAllRoom` 影响<br>服务器时间的 0~6 点不推送
 iftttKey | String | [IFTTT](https://ifttt.com/) 密钥<br>[配置方法](#IFTTT)
 barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  IOS用户专享<br>[配置方法](#BARK)
-mux | Boolean<br>String | 获取粉丝牌详情时是否并发<br>true：开启（D太多有可能被服务器拒绝请求）<br>false：关闭<br>"auto"：超过 10 个就不并发获取
 # 运行  
 1. 安装  
     - NodeJs 和 NPM
@@ -75,9 +76,9 @@ mux | Boolean<br>String | 获取粉丝牌详情时是否并发<br>true：开启�
   正常运行 😎  
 - ## Linux  
   以Oracle为例
-  - ARM 单核6G 😎  
+  - ARM 四核24G 😎  
     安装 npm 包时照着提示来就行  
-    6G内存机子没有限制直播间数量，挂了5天没发生异常
+    限制直播间数量40个，挂了半个月没发生异常
   - x86 单核1G 😶
   不知道为啥会报这个错误，出错了牌子经验就不会涨  
   目前解决方案就是报错就关闭页面，等下次检查直播时在打开  
