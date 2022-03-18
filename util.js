@@ -63,7 +63,7 @@ const isLiveTab = url => {
   return url.includes(getConfig().useObsDanmaku ? "live.acfun.cn/room/" : "live.acfun.cn/live/")
 }
 
-const configPath = "config.json"
+const configPath = "./config.json"
 let config = null
 
 /**
