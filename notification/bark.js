@@ -1,5 +1,6 @@
 const https = require('https')
-const { barkKey } = require('../config.json')
+const { getConfig } = require('../util.js')
+const barkKey = getConfig().barkKey
 module.exports = ({ title, message, url, headUrl }) => {
   return new Promise((resolve, reject) => {
 
