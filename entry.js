@@ -54,8 +54,13 @@ async function configQuestion () {
       const done = this.async()
       if(input === ''){
         done('cookies不能为空')
-      }else{
+        return
+      }
+      try {
+        JSON.parse(input)
         done(null, true)
+      } catch (error) {
+        done(error.message)
       }
     }
   }, {
@@ -123,6 +128,10 @@ async function configQuestion () {
       ...defaultConfig,
       ...answers
     }
+    if (!answers.loginByUsername) {
+      userConfig.cookies = JSON.parse(answers.cookies)
+    }
+
     setConfig({userConfig})
     return userConfig
   })
