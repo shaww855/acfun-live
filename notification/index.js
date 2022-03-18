@@ -1,12 +1,11 @@
-const { getConfig } = require('../util.js')
-const { checkLiveTimeout, notification, iftttKey, barkKey } = getConfig()
-
-const IFTTT = require('./ifttt')
-const BARK = require('./bark')
-const { formartDate } = require('../util')
 let data = {}
-
 module.exports = (liveUperInfo) => {
+  const { getConfig } = require('../util.js')
+  
+  const IFTTT = require('./ifttt')
+  const BARK = require('./bark')
+  const { formartDate } = require('../util')
+  const { checkLiveTimeout, notification, iftttKey, barkKey } = getConfig()
   if (notification === false || notification.length === 0) return
   const hours = new Date().getHours()
   if (hours === 0 && new Date().getMinutes() < 10) {

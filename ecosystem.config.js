@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
     name: "acfun",
-    script: "./app.js",
+    script: "./entry.js",
     watch: [
       'app.js',
       'config.js',
