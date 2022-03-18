@@ -130,7 +130,7 @@ async function configQuestion () {
       ...defaultConfig,
       ...answers
     }
-    if (!answers.loginByUsername) {
+    if (answers.loginByUsername === false) {
       userConfig.cookies = JSON.parse(answers.cookies)
     }
 
