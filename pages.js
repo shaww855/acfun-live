@@ -455,6 +455,9 @@ async function DDVup (browser, liveUperInfo) {
  * @param {Object} page 页面
  */
 const requestFliter = async page => {
+  if (config.debug) {
+    return
+  }
   await page.setRequestInterception(true);
   page.on('request', request => {
     if (request.resourceType() === 'image') {
