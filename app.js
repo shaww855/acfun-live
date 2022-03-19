@@ -21,12 +21,16 @@ module.exports = function () {
 
   const handleError = err => {
     if (err.result === -401) {
-      console.error('**登录过期，尝试账号密码重新登录**');
+      console.error('🐛登录过期，尝试使用账号密码重新登录🐛');
       setConfig({ prop: 'cookies' })
       Start()
+      return
     }
     console.log(err)
-    // process.exit(1)
+    console.log('🐛出现错误，5秒后自动关闭🐛');
+    setTimeout(() => {
+      process.exit(1)
+    }, 5000)
   }
   process.title = 'acfun直播监控'
 
@@ -112,7 +116,11 @@ module.exports = function () {
       }
 
     }).catch(err => {
-      console.log('puppeteer启动失败，1秒稍后重试', err);
+      console.error(err)
+      console.log('🐛puppeteer启动失败，5秒后自动关闭🐛');
+      setTimeout(() => {
+        process.exit(1)
+      }, 5000)
     })
   }
 
