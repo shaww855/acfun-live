@@ -50,7 +50,7 @@ async function configQuestion () {
     type: 'editor',
     name: 'cookies',
     message: "从已登录过账号密码的config.json文件中复制cookies项并粘贴：",
-    when: answers => answers.loginByUsername === false && !isWindows,
+    when: answers => isWindows === false && answers.loginByUsername === false,
     validate: function (input) {
       const done = this.async()
       if (input === '') {
@@ -68,7 +68,7 @@ async function configQuestion () {
     type: 'input',
     name: 'account',
     message: "请输入账号：",
-    when: answers => answers.loginByUsername !== false,
+    when: answers => isWindows || answers.loginByUsername,
     validate: function (input) {
       const done = this.async()
       if (input === '') {
@@ -82,7 +82,7 @@ async function configQuestion () {
     message: '请输入密码：',
     mask: '*',
     name: 'password',
-    when: answers => answers.loginByUsername !== false,
+    when: answers => isWindows || answers.loginByUsername,
     validate: function (input) {
       const done = this.async()
       if (input === '') {
@@ -104,7 +104,7 @@ async function configQuestion () {
     name: 'autoRestart'
   }, {
     type: 'input',
-    message: '请输入 Chromium 为内核的浏览器路径：',
+    message: '请输入 Chromium 为内核的浏览器执行路径：',
     default: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
     name: 'executablePath',
     when: isWindows
@@ -115,7 +115,7 @@ async function configQuestion () {
     name: 'useObsDanmaku',
   }, {
     type: 'confirm',
-    message: '佩戴牌子的主播不观看？ （戴着牌子说明你正在D TA，不需要服务器挂牌子）',
+    message: '佩戴牌子的主播不观看？ （戴着牌子说明你正在D TA，不需要工具挂牌子）',
     default: false,
     name: 'checkWearMedal'
   }, {
@@ -124,8 +124,6 @@ async function configQuestion () {
     default: false,
     name: 'checkAllRoom'
   }]).then((answers) => {
-    delete answers.loginByUsername
-    delete answers.notificationApp
     const userConfig = {
       ...defaultConfig,
       ...answers
@@ -133,7 +131,12 @@ async function configQuestion () {
     if (answers.loginByUsername === false) {
       userConfig.cookies = JSON.parse(answers.cookies)
     }
+    if (isWindows === false) {
+      userConfig.executablePath = ''
+    }
 
+    delete userConfig.loginByUsername
+    delete userConfig.notificationApp
     setConfig({ userConfig })
     return userConfig
   })
