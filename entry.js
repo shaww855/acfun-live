@@ -107,7 +107,7 @@ async function configQuestion () {
     message: '请输入 Chromium 为内核的浏览器执行路径：',
     default: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
     name: 'executablePath',
-    // when: isWindows
+    when: isWindows
   }, {
     type: 'confirm',
     message: '使用OBS弹幕工具监控？',
@@ -115,7 +115,7 @@ async function configQuestion () {
     name: 'useObsDanmaku',
   }, {
     type: 'confirm',
-    message: '佩戴牌子的主播不观看？ （戴着牌子说明你正在D TA，不需要服务器挂牌子）',
+    message: '佩戴牌子的主播不观看？ （戴着牌子说明你正在D TA，不需要工具挂牌子）',
     default: false,
     name: 'checkWearMedal'
   }, {
@@ -129,16 +129,14 @@ async function configQuestion () {
       ...answers
     }
     if (answers.loginByUsername === false) {
-      console.log('answers.cookies', answers.cookies);
       userConfig.cookies = JSON.parse(answers.cookies)
-      console.log('userConfig.cookies', userConfig.cookies);
     }
     if (isWindows === false) {
       userConfig.executablePath = ''
     }
 
-    delete answers.loginByUsername
-    delete answers.notificationApp
+    delete userConfig.loginByUsername
+    delete userConfig.notificationApp
     setConfig({ userConfig })
     return userConfig
   })
