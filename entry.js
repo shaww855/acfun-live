@@ -98,9 +98,19 @@ async function configQuestion () {
     name: 'debug',
     when: () => isWindows
   }, {
-    type: 'confirm',
-    message: '是否于每日0点自动重启？',
-    default: false,
+    type: 'list',
+    message: '是否开启自动重启？',
+    choices: [{
+      name: '关闭',
+      value: false,
+      checked: true
+    }, {
+      name: '每天0点重启',
+      value: '30 00 00 * * *',
+    }, {
+      name: '每个整点重启',
+      value: '30 00 * * * *',
+    }],
     name: 'autoRestart'
   }, {
     type: 'input',
