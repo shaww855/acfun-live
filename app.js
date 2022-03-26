@@ -38,6 +38,8 @@ module.exports = function () {
     console.log('BARK', config.barkKey ? '已启用' : '未启用')
   }
 
+  let globalBrowser = null
+
   const Start = () => {
     puppeteer.launch({
       devtools: config.debug, // 开发发者工具
@@ -60,6 +62,7 @@ module.exports = function () {
         '--suppress-message-center-popups',
       ]
     }).then(async browser => {
+      globalBrowser = browser
       console.log('puppeteer launched，Cookie状态：', config.cookies !== '');
       const pageList = await browser.pages()
       const page = pageList[0]
@@ -85,15 +88,6 @@ module.exports = function () {
       // 起飞
       startMonitor(browser)
 
-      if (config.autoRestart) {
-        console.log(`[定时重启工具运行中，每天0点自动重启]`);
-        schedule.scheduleJob({ rule: '01 00 * * *' }, function () {
-          clearInterval(timeoutId)
-          endMonitor(browser)
-          Start()
-        })
-      }
-
     }).catch(err => {
       console.error(err)
       console.log('🐛puppeteer启动失败，5秒后自动关闭🐛');
@@ -104,4 +98,16 @@ module.exports = function () {
   }
 
   Start()
+
+  if (config.autoRestart === false) {
+    return
+  }
+
+  const rule = config.autoRestart === true ? '01 00 * * *' : config.autoRestart
+  console.log(`🤖 定时重启工具运行中，规则：${rule}`);
+  schedule.scheduleJob({ rule }, function () {
+    console.log(`🤖 定时重启已触发，规则：${rule}`);
+    endMonitor(globalBrowser)
+    Start()
+  })
 }
