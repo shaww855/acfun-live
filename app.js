@@ -16,27 +16,6 @@ module.exports = function () {
     handlePageError
   } = require('./pages.js')
 
-  // // 检查更新
-  // require('./checkUpdate')
-
-  const handleError = err => {
-    if (err.result === -401) {
-      console.error('🐛登录过期，尝试使用账号密码重新登录🐛');
-      setConfig({ prop: 'cookies' })
-      Start()
-      return
-    }
-    console.log(err)
-    console.log('🐛出现错误，5秒后自动关闭🐛');
-    setTimeout(() => {
-      process.exit(1)
-    }, 5000)
-  }
-  process.title = 'acfun直播监控'
-
-  process.on('uncaughtException', handleError)
-  process.on("unhandledRejection", handleError);
-
   console.log('调试模式', config.debug);
   console.log('每天0~1点自动重启', config.autoRestart);
   console.log(`每(分钟)检查直播`, config.checkLiveTimeout);
