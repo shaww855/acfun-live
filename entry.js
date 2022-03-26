@@ -98,9 +98,19 @@ async function configQuestion () {
     name: 'debug',
     when: () => isWindows
   }, {
-    type: 'confirm',
-    message: '是否于每日0点自动重启？',
-    default: false,
+    type: 'list',
+    message: '是否开启自动重启？',
+    choices: [{
+      name: '关闭',
+      value: false,
+      checked: true
+    }, {
+      name: '每天0点重启',
+      value: '30 00 00 * * *',
+    }, {
+      name: '每个整点重启',
+      value: '30 00 * * * *',
+    }],
     name: 'autoRestart'
   }, {
     type: 'input',
@@ -141,6 +151,29 @@ async function configQuestion () {
     return userConfig
   })
 }
+
+const handleError = err => {
+  if (err.result === -401) {
+    console.error('🐛 登录过期，尝试使用账号密码重新登录');
+    setConfig({ prop: 'cookies' })
+    Start()
+    return
+  }
+  console.log(err)
+  console.log('🐛 出现错误，10秒后自动关闭...');
+  console.log('🐛 如频繁报错，请删除config.json文件后，重新开打工具');
+  console.log('🐛 或截图反馈给开发者');
+
+  setTimeout(() => {
+    console.log('🐛 祝您身体健康，再见');
+  }, 7000)
+  setTimeout(() => {
+    process.exit(1)
+  }, 10000)
+}
+
+process.on('uncaughtException', handleError)
+process.on("unhandledRejection", handleError);
 
 checkUpdate().then(() => {
   // 检查配置文件
