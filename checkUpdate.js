@@ -3,8 +3,10 @@ const { version } = require('./package.json')
 
 module.exports = () => {
   return new Promise((resolve, reject) => {
-    return https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', { timeout:3000 }, (res) => {
+    // return https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', { timeout:3000 }, (res) => {
     // return https.get('https://raw.githubusercontent.com/shilx/acfun-live/main/package.json', { timeout:3000 }, (res) => {
+    return https.get('https://github.91chi.fun/https://raw.githubusercontent.com/shilx/acfun-live/main/package.json', { timeout:3000 }, (res) => {
+
       const { statusCode } = res;
       // const contentType = res.headers['content-type'];
   
@@ -34,6 +36,7 @@ module.exports = () => {
           resolve(parsedData)
         } catch (e) {
           console.error(e.message);
+          reject(e.message)
         }
       });
     }).on('error', (e) => {
