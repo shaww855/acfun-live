@@ -142,6 +142,29 @@ async function configQuestion () {
   })
 }
 
+const handleError = err => {
+  if (err.result === -401) {
+    console.error('🐛 登录过期，尝试使用账号密码重新登录');
+    setConfig({ prop: 'cookies' })
+    Start()
+    return
+  }
+  console.log(err)
+  console.log('🐛 出现错误，10秒后自动关闭...');
+  console.log('🐛 如频繁报错，请删除config.json文件后，重新开打工具');
+  console.log('🐛 或截图反馈给开发者');
+
+  setTimeout(() => {
+    console.log('🐛 祝您身体健康，再见');
+  }, 7000)
+  setTimeout(() => {
+    process.exit(1)
+  }, 10000)
+}
+
+process.on('uncaughtException', handleError)
+process.on("unhandledRejection", handleError);
+
 checkUpdate().then(() => {
   // 检查配置文件
   if (getConfig() === null) {
