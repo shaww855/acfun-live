@@ -1,19 +1,18 @@
 - [说明](#AcFun-Live)  
 - [注意事项](#注意事项)  
-- [配置](#配置)  
-- [运行](#运行)  
-- [当前状态](#当前状态) 
-  - [Win10](#Win10)
-  - [WSL](#WSL)
-  - [Linux](#Linux)
-- [推送配置](#推送配置)  
-  - [IFTTT](#IFTTT)  
-  - [BARK](#BARK)  
-- [推送说明及示例](#推送说明及示例)  
-- [安装时可能出现的问题](#安装时可能出现的问题)  
+- [配置文件说明(config.json)](#配置文件说明(config.json))  
+- [在Windows中运行](#在Windows中运行)
+- [在Linux中运行](#在Linux中运行)
+  - [运行](#运行)  
+  - [当前状态](#当前状态) 
+  - [推送配置](#推送配置)  
+    - [IFTTT](#IFTTT)  
+    - [BARK](#BARK)  
+  - [推送说明及示例](#推送说明及示例)  
+  - [安装时可能出现的问题](#安装时可能出现的问题)  
 
-# 懒人包
-懒人包试运行中，支持 Windows10 及以上，请前往 发布页面 下载，运行前请阅读使用说明
+# 懒人包（限Windows)
+懒人包试运行中，支持 Windows10 及以上，请前往 发布页面 下载，解压后直接运行
 - [国内](https://gitee.com/cn_shaw/acfun-live/releases)  
 - [海外](https://github.com/shilx/acfun-live/releases)  
 
@@ -24,7 +23,7 @@ Windows、WSL、Linux均可运行~
 支持多台机子，请保持每台机子配置相同。  
 （序列形式的负载，并不是真正的均衡负载，因为实现起来比较容易😆）  
 - dev 分支  
-主要用于功能测试、问题修复  
+主要用于功能开发、测试、问题修复  
 - main 分支  
 自测通过后会发布到此分支  
   
@@ -34,14 +33,12 @@ Windows、WSL、Linux均可运行~
 - 2021-6-8 活动猴 [ac29442323](https://www.acfun.cn/a/ac29442323)  
   > 用户不得以任何不正当手段及其他破坏活动规则、违背活动公平原则的方式参与本活动。一经发现，本平台有权撤消活动资格，亦有权收回用户已领取的现金奖励、实物奖品或者虚拟奖品，并保留追究该用户责任的权利。如因前述不正当手段被本平台追究责任造成的损失，本平台不进行任何赔偿或补偿。不正当手段及舞弊行为包括但不限于：下载非官方客户端；使用模拟器、插件、外挂等非法工具扫码、下载、安装、注册、登录、赠与、领取奖励；恶意购买；虚假分享；倒买倒卖；注册多个账号；篡改设备数据；恶意牟利等扰乱平台秩序；<b>使用插件、外挂、系统或第三方工具</b>对本平台及本次活动进行干扰、破坏、修改或施加其他影响及本平台认为的其他不正当手段
   
-# 配置  
-config.json  
+# 配置文件说明(config.json)
   
 键名 | 类型 | 说明  
   --- | --- | ---  
-cookies | String | 自行抓包，复制请求头的 cookie （饼干保质期一个月）
-~~account~~ | ~~String~~ | ~~账号~~  
-~~password~~ | ~~String~~ | ~~密码~~  
+account | String | 账号  
+password | String | 密码  
 debug | Boolean | 是否开启调试，默认不开启<br>是则会在前台展示浏览器<br>否则静默运行
 autoRestart | Boolean<br>String | 是否开启点自动重启<br>true 为每天0点<br>文本需符合 cron [规则](https://github.com/node-schedule/node-schedule#cron-style-scheduling)的文本
 checkLiveTimeout | Number | 每（分钟）检查直播  
@@ -58,23 +55,24 @@ useObsDanmaku | Boolean | 使用官方OBS弹幕工具监控<br>开启此项时 �
 notification | Boolean<br>Array  | 借助第三方APP推送开播通知<br>true: 所有粉丝牌主播的通知<br>false: 不推送开播通知<br> [ Number ]: 指定uid开播推送，前提是已关注并有粉丝牌<br>此配置项会受 `checkAllRoom` 影响<br>服务器时间的 0~6 点不推送
 iftttKey | String | [IFTTT](https://ifttt.com/) 密钥<br>[配置方法](#IFTTT)
 barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  IOS用户专享<br>[配置方法](#BARK)
-# 运行  
+
+# 在Windows中运行
+  下载压缩包解压后直接运行
+# 在Linux中运行  
+## 运行  
 1. 安装  
-    - NodeJs 和 NPM
+    - NodeJs 和 NPM （尽量保持为最新版）
     - 下载源码  
     - 安装依赖包（建议 `npm ci`）  
+    - 按照 [配置文件说明](#配置文件说明(config.json)) 创建名为 config.json 的配置文件
 2. 运行  
-  `npm run start` 或 `node app`  
+  `npm run start` 或 `node entry.js`  
 3. 进阶  
-  使用进程守护挂载   
-  [PM2](https://pm2.keymetrics.io/) ，配置文件在 ecosystem.config.js ，日志记录也靠它
+  使用进程守护挂载  
+  **如果你在进程守护中配置了重启，请关闭 config.autoRestart 选项**   
+  例如 [PM2](https://pm2.keymetrics.io/) ，配置文件在 ecosystem.config.js ，用它也可以记录日志。
 
-# 当前状态  
-- ## Win10  
-  正常运行 😎  
-- ## WSL  
-  正常运行 😎  
-- ## Linux  
+## 当前状态  
   以Oracle为例
   - ARM 四核24G 😎  
     安装 npm 包时照着提示来就行  
@@ -92,8 +90,8 @@ barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  IOS用户专享<
       at Object.next (https://ali-imgs.acfun.cn/kos/nlav10360/static/js/0.2b0f2cd0.js:2:256477)
       at a (https://ali-imgs.acfun.cn/kos/nlav10360/static/js/0.2b0f2cd0.js:2:255215)
     ```  
-# 推送配置
-## IFTTT
+## 推送配置
+### IFTTT
 
 - 创建Applets  
   1. My Applets - Create
@@ -115,12 +113,12 @@ barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  IOS用户专享<
     3. 此页面会显示你的 key  
       （可以在这个页面测试你的 Webhook  ）
 
-## BARK 
+### BARK 
 
 1. App Store 搜索并下载安装  
 2. 打开 app 就可以看到链接  https://api.day.app/你的key/
 
-# 推送说明及示例 
+## 推送说明及示例 
 推送文本中的时间是检测时间  
 点击推送会打开对应主播主页  
 开播通知 0 ~ 6 点默认不发送  
@@ -133,7 +131,7 @@ barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  IOS用户专享<
   > xxx 等 n 位主播已经开播  
   > xxxx-xx-xx xx:xx:xx  
 
-# 安装时可能出现的问题
+## 安装时可能出现的问题
   * ERROR: Failed to set up Chromium r782078! Set  "PUPPETEER_SKIP_DOWNLOAD" env variable to skip download.  
   一般是网络慢导致下载浏览器失败，解决方法有二  
      -  设置淘宝预源后再次尝试安装    
