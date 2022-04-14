@@ -323,21 +323,17 @@ async function afterOpenRoom (page) {
       })
     })
   }
-  const videoHandle = await page.waitForSelector('video')
-  videoHandle.dispose()
-  await page.evaluate(() => {
-    // 这里不能用video.pause，因为video.play是个Promise
-    const video = document.querySelector('video')
-    video.src = ''
-    // video.addEventListener('play', () => {
-    //   video.pause()
-    // })
-    // 干掉弹幕池
-    document.querySelector('.container-live-feed-messages').remove()
-  })
-  // videoHandle.evaluate(node => node.pause()).finally(() => {
-  //   console.log('videoHandle evaluate');
-  //   videoHandle.dispose()
+  // const videoHandle = await page.waitForSelector('video')
+  // videoHandle.dispose()
+  // await page.evaluate(() => {
+  //   // 这里不能用video.pause，因为video.play是个Promise
+  //   const video = document.querySelector('video')
+  //   video.src = ''
+  //   // video.addEventListener('play', () => {
+  //   //   video.pause()
+  //   // })
+  //   // 干掉弹幕池
+  //   document.querySelector('.container-live-feed-messages').remove()
   // })
 }
 
