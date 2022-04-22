@@ -1,11 +1,8 @@
-module.exports = ({ title, message, url }) => {
-  const https = require('https')
-  const { getConfig } = require('../util.js')
-  const iftttKey = getConfig().iftttKey
+const https = require('https')
+module.exports = (path) => {
   return new Promise((resolve, reject) => {
-
-    let path = encodeURI(`/trigger/acfun_live/with/key/${iftttKey}?value1=${title}&value2=${message}&value3=${url}`)
-
+    path = encodeURI(path)
+    
     const options = {
       hostname: 'maker.ifttt.com',
       port: 443,
@@ -13,7 +10,7 @@ module.exports = ({ title, message, url }) => {
       method: 'GET'
     }
 
-    console.log('开播通知 IFTTT Webhook');
+    console.log('通知 IFTTT Webhook');
     console.log('https://' + options.hostname + options.path);
 
     const req = https.request(options, res => {

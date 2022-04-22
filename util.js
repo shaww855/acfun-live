@@ -1,7 +1,7 @@
 "use strict";
 
 const fs = require("fs");
-const inquirer = require('inquirer');
+const { version } = require('./package.json')
 
 /**
 * 补零
@@ -105,7 +105,8 @@ const setConfig = ({
   if (prop === null) {
     config = {
       ...config,
-      ...userConfig
+      ...userConfig,
+      version
     }
   } else if (prop === 'cookies') {
     config.cookies = value.map(e => ({
