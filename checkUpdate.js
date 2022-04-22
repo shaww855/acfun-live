@@ -54,8 +54,11 @@ module.exports = () => {
   }).then(res => {
     let msg = `当前版本：${version}，`
     if (res.version) {
-      const remote = res.version.split('.')
-      const local = version.split('.')
+      const remote = res.version.split('.').map(e => Number(e))
+      const local = version.split('.').map(e => Number(e))
+      if (remote.some(e => isNaN(e)) || local.some(e => isNaN(e))) {
+        throw new Error('读取版本号失败')
+      }
       const hasNewVersion = remote.some((e, i) => e > local[i])
       if (hasNewVersion) {
         msg += `GitHub版本 ${res.version}，请关注` 
