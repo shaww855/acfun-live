@@ -119,11 +119,11 @@ async function configQuestion () {
     name: 'executablePath',
     when: isWindows
   }, {
-    type: 'confirm',
-    message: '使用OBS弹幕工具监控？',
-    default: true,
-    name: 'useObsDanmaku',
-  }, {
+  //   type: 'confirm',
+  //   message: '使用OBS弹幕工具监控？',
+  //   default: true,
+  //   name: 'useObsDanmaku',
+  // }, {
     type: 'confirm',
     message: '佩戴牌子的主播不观看？ （戴着牌子说明你正在D TA，不需要工具挂牌子）',
     default: false,
