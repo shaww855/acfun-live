@@ -54,14 +54,17 @@ module.exports = () => {
   }).then(res => {
     let msg = `当前版本：${version}，`
     if (res.version) {
-      if (res.version === version) {
-        msg += '已是最新'
-      } else {
+      const remote = res.version.split('.')
+      const local = version.split('.')
+      const hasNewVersion = remote.some((e, i) => e > local[i])
+      if (hasNewVersion) {
         msg += `GitHub版本 ${res.version}，请关注` 
+        showDownloadLink()
         notify(msg, 'https://github.com/shilx/acfun-live/releases')
+      } else {
+        msg += '已是最新'
       }
       console.log(msg);
-      showDownloadLink()
     } else {
       throw new Error('读取版本号失败')
     }
