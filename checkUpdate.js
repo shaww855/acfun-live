@@ -1,5 +1,14 @@
 const https = require('https');
 const { version } = require('./package.json')
+const { notify } = require('./notification')
+
+/**
+ * 打印发布网页链接
+ */
+function showDownloadLink () {
+  console.log('中国大陆（GFW内） https://gitee.com/cn_shaw/acfun-live/releases');
+  console.log('其他地区及海外 https://github.com/shilx/acfun-live/releases');
+}
 
 module.exports = () => {
   return new Promise((resolve, reject) => {
@@ -48,14 +57,17 @@ module.exports = () => {
       if (res.version === version) {
         msg += '已是最新'
       } else {
-        msg += `GitHub版本 ${res.version}，请前往查看 https://github.com/shilx/acfun-live/releases` 
+        msg += `GitHub版本 ${res.version}，请关注` 
+        notify(msg, 'https://github.com/shilx/acfun-live/releases')
       }
       console.log(msg);
+      showDownloadLink()
     } else {
       throw new Error('读取版本号失败')
     }
   }).catch(err => {
-    console.error('检查更新失败，请前往查看 https://github.com/shilx/acfun-live/releases');
+    console.error('检查更新失败，请关注');
+    showDownloadLink()
     console.error(err)
   })
 }

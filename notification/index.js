@@ -71,22 +71,23 @@ function liveStart (liveUperInfo) {
     path = `/${barkKey}/${title}/${message.replace('/', '')}?url=${url}&group=acfun&icon=${headUrl}&badge=${badge}`
   }
   fn(path).then(res => {
-    console.log(`开播通知 ${fn.name}发送成功`);
+    console.log(`开播通知 发送成功`);
   }).catch(err => {
-    console.log(`开播通知 ${fn.name}发送失败`);
+    console.log(`开播通知 发送失败`);
     console.error(err)
   })
 }
 
 /**
- * 发送提醒
- * @param {String} message 提醒内容
+ * 发送通知
+ * @param {String} message 通知内容
+ * @param {String} url 点击通知跳转的链接
  * @returns 
  */
-function notify(message) {
-  if (notification === false || notification.length === 0) return
+function notify(message, url = '') {
+  // if (notification === false || notification.length === 0) return
   if (iftttKey + barkKey === '') {
-    console.log('提醒 发送失败，未配置相关key。');
+    console.log('通知 发送失败，未配置相关key。');
     return
   }
 
@@ -98,15 +99,17 @@ function notify(message) {
   if (iftttKey !== '') {
     fn = IFTTT
     path = `/trigger/acfun_live/with/key/${iftttKey}?value1=${title}&value2=${message}`
+    if(url !== '') path += `&value3=${url}`
   }
   if (barkKey !== '') {
     fn = BARK
     path = `/${barkKey}/${title}/${message.replace('/', '')}?group=acfun&icon=${headUrl}`
+    if(url !== '') path += `&url=${url}`
   }
   fn(path).then(res => {
-    console.log(`提醒 ${fn.name}发送成功`);
+    console.log(`通知 发送成功`);
   }).catch(err => {
-    console.log(`提醒 ${fn.name}发送失败`);
+    console.log(`通知 发送失败`);
     console.error(err)
   })
 }
