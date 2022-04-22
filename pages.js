@@ -9,7 +9,9 @@ const errorTimes = {
   主页: 0
 }
 let monitorTimeoutId = null
+let 检测到所有主播均未开播的次数 = 0
 
+const { liveStart, notify } = require('./notification')
 /**
  * 用户登录
  * @param {Object} page 页面
@@ -135,8 +137,7 @@ async function startMonitor (browser, times = 0) {
 
   let liveAndClub = allLiveRoom.filter(e => e.fansClub)
 
-  const notification = require('./notification')
-  notification(liveAndClub)
+  liveStart(liveAndClub)
 
   let liveUperInfo = []
   // 顺序获取
@@ -351,16 +352,20 @@ async function DDVup (browser, liveUperInfo) {
   // console.log(liveUperInfo);
 
   if (liveUperInfo.length === 0) {
+    检测到所有主播均未开播的次数 ++
     console.log('---')
     console.log('拥有牌子的主播均未开播。')
     console.log('🤖如果你确定有主播开播，请删除config.json文件，并重启本工具')
-    // console.log('---')
+    if (检测到所有主播均未开播的次数 > 24) {
+      // 每十分钟检测一次，则24为：连续四小时都没有主播开播
+      // 连续长时间无主播开播，可能为cookie过期，发送通知提醒
+      检测到所有主播均未开播的次数 = 0
+      notify('连续四小时未检测到主播开播，可能为cookie过期，请及时检查。')
+    }
+  } else {
+    检测到所有主播均未开播的次数 = 0
   }
-  // console.log('>>>>before', liveUperInfo);
   await checkOpenedPages(browser, liveUperInfo)
-  //   .then(list => {
-  //   console.log('>>>>afert list', list);
-  // })
 
   // liveUperInfo = await checkOpenedPages(browser, liveUperInfo)
   // console.log('afert',liveUperInfo);

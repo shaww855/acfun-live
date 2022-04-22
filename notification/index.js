@@ -12,6 +12,10 @@ const BARK = require('./bark')
  */
 function liveStart (liveUperInfo) {
   if (notification === false || notification.length === 0) return
+  if (iftttKey + barkKey === '') {
+    console.log('开播通知 发送失败，未配置相关key。');
+    return
+  }
   const hours = new Date().getHours()
   if (hours === 0 && new Date().getMinutes() < 10) {
     // 每天0点10分触发 清空
@@ -72,13 +76,42 @@ function liveStart (liveUperInfo) {
     console.log(`开播通知 ${fn.name}发送失败`);
     console.error(err)
   })
+}
 
+/**
+ * 发送提醒
+ * @param {String} message 提醒内容
+ * @returns 
+ */
+function notify(message) {
+  if (notification === false || notification.length === 0) return
   if (iftttKey + barkKey === '') {
-    console.log('开播通知 发送失败，未配置相关key。');
+    console.log('提醒 发送失败，未配置相关key。');
     return
   }
+
+  let fn = null
+  let path = ''
+  const title = '挂牌子工具通知'
+  const headUrl = 'https://tvax4.sinaimg.cn/crop.0.2.1020.1020.180/8faf3cccly8gditbjc4o1j20sf0sfae7.jpg'
+
+  if (iftttKey !== '') {
+    fn = IFTTT
+    path = `/trigger/acfun_live/with/key/${iftttKey}?value1=${title}&value2=${message}`
+  }
+  if (barkKey !== '') {
+    fn = BARK
+    path = `/${barkKey}/${title}/${message.replace('/', '')}?group=acfun&icon=${headUrl}`
+  }
+  fn(path).then(res => {
+    console.log(`提醒 ${fn.name}发送成功`);
+  }).catch(err => {
+    console.log(`提醒 ${fn.name}发送失败`);
+    console.error(err)
+  })
 }
 
 module.exports = {
-  liveStart
+  liveStart,
+  notify
 }
