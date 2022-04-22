@@ -1,10 +1,7 @@
 const https = require('https')
-const { getConfig } = require('../util.js')
-const barkKey = getConfig().barkKey
-module.exports = ({ title, message, url, headUrl }) => {
+module.exports = (path) => {
   return new Promise((resolve, reject) => {
-
-    let path = encodeURI(`/${barkKey}/${title.replace('/', '')}/${message.replace('/', '')}?url=${url}&group=acfun&icon=${headUrl}`)
+    path = encodeURI(path)
 
     const options = {
       hostname: 'api.day.app',
@@ -13,7 +10,7 @@ module.exports = ({ title, message, url, headUrl }) => {
       method: 'GET'
     }
 
-    console.log('开播通知 Bark Webhook');
+    console.log('通知 Bark Webhook');
     console.log('https://' + options.hostname + options.path);
 
     const req = https.request(options, res => {
