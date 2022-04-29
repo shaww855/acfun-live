@@ -471,7 +471,7 @@ const requestFliter = async page => {
     } else if (request.url().includes('/perfLog')) {
       // 拦截疑似日志
       request.abort()
-    } else if (request.url().includes('hm.baidu.com')) {
+    } else if (request.url().includes('/hm.baidu.com')) {
       // 拦截疑似日志
       request.abort()
     } else if (request.url().includes('/collect')) {
