@@ -134,7 +134,7 @@ barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  IOS用户专享<
 ## 安装时可能出现的问题
   * ERROR: Failed to set up Chromium r782078! Set  "PUPPETEER_SKIP_DOWNLOAD" env variable to skip download.  
   一般是网络慢导致下载浏览器失败，解决方法有二  
-     -  设置淘宝预源后再次尝试安装    
+     -  设置淘宝源后再次尝试安装    
      `npm config set puppeteer_download_host=https://npm.taobao.org/mirrors`  
      -  如果你本机已经安装 Chromium，可以设置跳过下载后，再次尝试安装  
      `npm config set puppeteer_skip_chromium_download=true`  
