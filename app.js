@@ -90,7 +90,7 @@ module.exports = function () {
 
     }).catch(err => {
       console.error(err)
-      console.log('🐛puppeteer启动失败，5秒后自动关闭🐛');
+      console.log('puppeteer启动失败，5秒后自动关闭');
       setTimeout(() => {
         process.exit(1)
       }, 5000)
@@ -104,9 +104,9 @@ module.exports = function () {
   }
 
   const rule = config.autoRestart === true ? '01 00 * * *' : config.autoRestart
-  console.log(`🤖 定时重启工具运行中，规则：${rule}`);
+  console.log(`定时重启工具运行中，规则：${rule}`);
   schedule.scheduleJob({ rule }, function () {
-    console.log(`🤖 定时重启已触发，规则：${rule}`);
+    console.log(`定时重启已触发，规则：${rule}`);
     endMonitor(globalBrowser)
     Start()
   })
