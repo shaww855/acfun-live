@@ -17,24 +17,37 @@ const { liveStart, notify } = require('./notification')
  * @param {Object} page 页面
  */
 function userLogin (page) {
-  return page.goto('https://www.acfun.cn/login', {waitUntil: 'domcontentloaded'}).then(async () => {
-    const loginSwitch = '#login-switch'
-    await page.waitForSelector(loginSwitch)
-    await page.click(loginSwitch)
-    // console.log('sign in...');
-    await page.type('#ipt-account-login', config.account);
-    await page.type('#ipt-pwd-login', config.password);
-    const loginBtnSelector = '.btn-login'
-    await page.waitForSelector(loginBtnSelector);
-    await page.click(loginBtnSelector)
-    await page.waitForNavigation()
-    page.cookies().then(cookieList => {
-      setConfig({ prop: 'cookies', value: cookieList})
+  return new Promise(async (resolve, reject) => {
+    page.goto('https://www.acfun.cn/login', { waitUntil: 'domcontentloaded' }).then(async () => {
+      const loginSwitch = '#login-switch'
+      await page.waitForSelector(loginSwitch)
+      await page.click(loginSwitch)
+      // console.log('sign in...');
+      await page.type('#ipt-account-login', config.account);
+      await page.type('#ipt-pwd-login', config.password);
+      const loginBtnSelector = '.btn-login'
+      await page.waitForSelector(loginBtnSelector);
+      await page.click(loginBtnSelector)
+      await page.waitForNavigation()
+      await page.cookies().then(cookieList => {
+        setConfig({ prop: 'cookies', value: cookieList})
+      })
+    }).catch(err => {
+      console.error(err);
+      page.browser().close()
+      reject('使用账号密码登录失败');
     })
-  }).catch(err => {
-    console.log('使用账号密码登录失败');
-    console.error(err);
-    return page.browser().close()
+
+    page.on('response', async response => {
+      if (response.url().includes('/login/signin')) {
+        const res = await response.json()
+        if (res.result === 0) {
+          resolve()
+        } else {
+          reject(`** ${res.error_msg} ** `)
+        }
+      }
+    })
   })
 }
 
@@ -63,7 +76,7 @@ async function userLoginByCookies (page) {
     })
   }
   await Promise.all(list)
-  await page.goto('https://www.acfun.cn', {waitUntil: 'domcontentloaded'}).catch(err => {
+  return page.goto('https://www.acfun.cn', {waitUntil: 'domcontentloaded'}).catch(err => {
     console.log('跳转主页失败');
     console.log(err);
     page.browser().close()
