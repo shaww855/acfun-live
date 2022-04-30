@@ -355,7 +355,7 @@ async function DDVup (browser, liveUperInfo) {
     检测到所有主播均未开播的次数 ++
     console.log('---')
     console.log('拥有牌子的主播均未开播。')
-    console.log('🤖如果你确定有主播开播，请删除config.json文件，并重启本工具')
+    console.log('如果你确定有主播开播，请删除config.json文件，并重启本工具')
     if (检测到所有主播均未开播的次数 > 24) {
       // 每十分钟检测一次，则24为：连续四小时都没有主播开播
       // 连续长时间无主播开播，可能为cookie过期，发送通知提醒
