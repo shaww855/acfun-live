@@ -63,7 +63,7 @@ module.exports = function () {
       ]
     }).then(async browser => {
       globalBrowser = browser
-      console.log('puppeteer launched，Cookie状态：', config.cookies !== '');
+      console.log('puppeteer launched');
       const pageList = await browser.pages()
       const page = pageList[0]
       await requestFliter(page)
@@ -74,23 +74,27 @@ module.exports = function () {
         handlePageError(page, '主页', error)
       })
 
+      let loginFn = userLoginByCookies
+
       // 开始登录
       if (config.cookies !== '') {
         console.log('登录方式 Cookie');
-        await userLoginByCookies(page)
       } else if (config.account !== '' && config.password !== '') {
         console.log('登录方式 账号密码');
-        await userLogin(page)
+        loginFn = userLogin
       } else {
         console.error('请填写 Cookie 或者 账号密码 以便登录')
       }
 
       // 起飞
-      startMonitor(browser)
+      loginFn(page).then(() => {
+        console.log('loginFn then');
+        startMonitor(browser)
+      })
 
     }).catch(err => {
       console.error(err)
-      console.log('🐛puppeteer启动失败，5秒后自动关闭🐛');
+      console.log('puppeteer启动失败，5秒后自动关闭');
       setTimeout(() => {
         process.exit(1)
       }, 5000)
@@ -104,9 +108,9 @@ module.exports = function () {
   }
 
   const rule = config.autoRestart === true ? '01 00 * * *' : config.autoRestart
-  console.log(`🤖 定时重启工具运行中，规则：${rule}`);
+  console.log(`定时重启工具运行中，规则：${rule}`);
   schedule.scheduleJob({ rule }, function () {
-    console.log(`🤖 定时重启已触发，规则：${rule}`);
+    console.log(`定时重启已触发，规则：${rule}`);
     endMonitor(globalBrowser)
     Start()
   })
