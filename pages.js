@@ -17,24 +17,37 @@ const { liveStart, notify } = require('./notification')
  * @param {Object} page 页面
  */
 function userLogin (page) {
-  return page.goto('https://www.acfun.cn/login', {waitUntil: 'domcontentloaded'}).then(async () => {
-    const loginSwitch = '#login-switch'
-    await page.waitForSelector(loginSwitch)
-    await page.click(loginSwitch)
-    // console.log('sign in...');
-    await page.type('#ipt-account-login', config.account);
-    await page.type('#ipt-pwd-login', config.password);
-    const loginBtnSelector = '.btn-login'
-    await page.waitForSelector(loginBtnSelector);
-    await page.click(loginBtnSelector)
-    await page.waitForNavigation()
-    page.cookies().then(cookieList => {
-      setConfig({ prop: 'cookies', value: cookieList})
+  return new Promise(async (resolve, reject) => {
+    page.goto('https://www.acfun.cn/login', { waitUntil: 'domcontentloaded' }).then(async () => {
+      const loginSwitch = '#login-switch'
+      await page.waitForSelector(loginSwitch)
+      await page.click(loginSwitch)
+      // console.log('sign in...');
+      await page.type('#ipt-account-login', config.account);
+      await page.type('#ipt-pwd-login', config.password);
+      const loginBtnSelector = '.btn-login'
+      await page.waitForSelector(loginBtnSelector);
+      await page.click(loginBtnSelector)
+      await page.waitForNavigation()
+      await page.cookies().then(cookieList => {
+        setConfig({ prop: 'cookies', value: cookieList})
+      })
+    }).catch(err => {
+      console.error(err);
+      page.browser().close()
+      reject('使用账号密码登录失败');
     })
-  }).catch(err => {
-    console.log('使用账号密码登录失败');
-    console.error(err);
-    return page.browser().close()
+
+    page.on('response', async response => {
+      if (response.url().includes('/login/signin')) {
+        const res = await response.json()
+        if (res.result === 0) {
+          resolve()
+        } else {
+          reject(`** ${res.error_msg} ** `)
+        }
+      }
+    })
   })
 }
 
@@ -63,7 +76,7 @@ async function userLoginByCookies (page) {
     })
   }
   await Promise.all(list)
-  await page.goto('https://www.acfun.cn', {waitUntil: 'domcontentloaded'}).catch(err => {
+  return page.goto('https://www.acfun.cn', {waitUntil: 'domcontentloaded'}).catch(err => {
     console.log('跳转主页失败');
     console.log(err);
     page.browser().close()
@@ -355,7 +368,7 @@ async function DDVup (browser, liveUperInfo) {
     检测到所有主播均未开播的次数 ++
     console.log('---')
     console.log('拥有牌子的主播均未开播。')
-    console.log('🤖如果你确定有主播开播，请删除config.json文件，并重启本工具')
+    console.log('如果你确定有主播开播，请删除config.json文件，并重启本工具')
     if (检测到所有主播均未开播的次数 > 24) {
       // 每十分钟检测一次，则24为：连续四小时都没有主播开播
       // 连续长时间无主播开播，可能为cookie过期，发送通知提醒
@@ -471,7 +484,7 @@ const requestFliter = async page => {
     } else if (request.url().includes('/perfLog')) {
       // 拦截疑似日志
       request.abort()
-    } else if (request.url().includes('hm.baidu.com')) {
+    } else if (request.url().includes('/hm.baidu.com')) {
       // 拦截疑似日志
       request.abort()
     } else if (request.url().includes('/collect')) {

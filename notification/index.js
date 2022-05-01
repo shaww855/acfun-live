@@ -1,7 +1,6 @@
 let data = {}
 
 const { getConfig, formartDate } = require('../util.js')
-const { checkLiveTimeout, notification, iftttKey, barkKey } = getConfig()
 const IFTTT = require('./ifttt')
 const BARK = require('./bark')
 
@@ -11,6 +10,7 @@ const BARK = require('./bark')
  * @returns 
  */
 function liveStart (liveUperInfo) {
+  const { checkLiveTimeout, notification, iftttKey, barkKey } = getConfig()
   if (notification === false || notification.length === 0) return
   if (iftttKey + barkKey === '') {
     console.log('开播通知 发送失败，未配置相关key。');
