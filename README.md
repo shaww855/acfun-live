@@ -134,7 +134,7 @@ barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  IOS用户专享<
 ## 安装时可能出现的问题
   * ERROR: Failed to set up Chromium r782078! Set  "PUPPETEER_SKIP_DOWNLOAD" env variable to skip download.  
   一般是网络慢导致下载浏览器失败，解决方法有二  
-     -  设置淘宝预源后再次尝试安装    
+     -  设置淘宝源后再次尝试安装    
      `npm config set puppeteer_download_host=https://npm.taobao.org/mirrors`  
      -  如果你本机已经安装 Chromium，可以设置跳过下载后，再次尝试安装  
      `npm config set puppeteer_skip_chromium_download=true`  
@@ -146,4 +146,10 @@ barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  IOS用户专享<
   path/node_modules/puppeteer/.local-chromium/linux-782078/chrome-linux/chrome: error while loading shared libraries: libXss.so.1: cannot open shared object file: No such file or directory
      - 查找缺少的依赖并安装  
   https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md
+  * 打包懒人包时进度慢  
+    可能是需要下载node包缓慢导致的  
+    1. 去 https://github.com/vercel/pkg-fetch/releases 下载提示中的node包  
+    2. 放到 `C:\Users\{用户名}\.pkg-cache\{当前pkg版本号}` 目录下  
+    3. 改名为 `fetched-{node版本号}-win-x64`  
+    4. 再次运行打包命令即可
 ---
