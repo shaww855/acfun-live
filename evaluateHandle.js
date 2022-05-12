@@ -42,19 +42,29 @@ const handleProxy = async ({ page, action, url, method = 'POST', retry = 0 }) =>
   })
 }
 
-const OpenLivePage = async page => {
-  const newPage = await page.browser().newPage()
-  await newPage.goto('https://live.acfun.cn/settings/help', {waitUntil: 'domcontentloaded'}).catch(err => {
-    console.log('打开live.acfun.cn相关页面失败');
-    console.error(err);
+const OpenLivePage = (page, retry = 0) => {
+  if (retry > 0) {
+    console.log(`打开子域名 live.acfun.cn 第${retry}次失败`);
+  }
+  return new Promise(async (resolve, reject) => {
+    const newPage = await page.browser().newPage().catch(err => {
+      console.error(err);
+      if (retry < 6) {
+        return OpenLivePage(page, retry + 1)
+      } else {
+        reject('打开新标签页失败')
+      }
+    })
+    await newPage.goto('https://live.acfun.cn/settings/help', { waitUntil: 'domcontentloaded' }).catch(err => {
+      console.error(err);
+      if (retry < 6) {
+        return OpenLivePage(page, retry + 1)
+      } else {
+        reject('打开live.acfun.cn相关页面失败')
+      }
+    })
+    resolve(newPage)
   })
-  return newPage
-  // return page.browser().newPage().then(page =>
-  //   page.goto('https://live.acfun.cn/settings/help').catch(err => {
-  //     console.log('打开live.acfun.cn相关页面失败');
-  //     console.error(err);
-  //   })
-  // )
 }
 
 
