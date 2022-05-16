@@ -20,9 +20,13 @@ const handleProxy = async ({ page, action, url, method = 'POST', retry = 0 }) =>
   ).finally(() => {
     console.log(msg, 'done');
   })
+
+  // https://blog.csdn.net/qq_33850304/article/details/103042138
+  await page.waitForNavigation()
+
   return handle.jsonValue().then(res => {
     if (res.handleError) {
-      if (retry < 3) {
+      if (retry < 6) {
         console.log(`${msg} 第${retry}次失败`);
         return handleProxy({ page, action, url, method, retry: retry + 1 })
       } else {
@@ -37,6 +41,14 @@ const handleProxy = async ({ page, action, url, method = 'POST', retry = 0 }) =>
       throw res
     }
     return res
+  }).catch(err => {
+    console.log(`解析${action}数据 第${retry}次失败`);
+    console.error(err);
+    if (retry < 6) {
+      return handleProxy({ page, action, url, method, retry: retry + 1 })
+    } else {
+      throw err
+    }
   }).finally(() => {
     handle.dispose()
   })
