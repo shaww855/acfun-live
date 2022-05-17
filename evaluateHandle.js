@@ -22,7 +22,7 @@ const handleProxy = async ({ page, action, url, method = 'POST', retry = 0 }) =>
   })
 
   // https://blog.csdn.net/qq_33850304/article/details/103042138
-  await page.waitForNavigation()
+  // await page.waitForNavigation()
 
   return handle.jsonValue().then(res => {
     if (res.handleError) {
@@ -58,24 +58,31 @@ const OpenLivePage = (page, retry = 0) => {
   if (retry > 0) {
     console.log(`打开子域名 live.acfun.cn 第${retry}次失败`);
   }
-  return new Promise(async (resolve, reject) => {
-    const newPage = await page.browser().newPage().catch(err => {
-      console.error(err);
-      if (retry < 6) {
-        return OpenLivePage(page, retry + 1)
-      } else {
-        reject('打开新标签页失败')
+  return new Promise((resolve, reject) => {
+    page.browser().pages().then(async pages => {
+      const target = pages.find(page => page.url() === 'https://live.acfun.cn/settings/help')
+      if (target !== undefined) {
+        resolve(target)
+        return
       }
+      const newPage = await page.browser().newPage().catch(err => {
+        console.error(err);
+        if (retry < 6) {
+          return OpenLivePage(page, retry + 1)
+        } else {
+          reject('打开新标签页失败')
+        }
+      })
+      await newPage.goto('https://live.acfun.cn/settings/help', { waitUntil: 'domcontentloaded' }).catch(err => {
+        console.error(err);
+        if (retry < 6) {
+          return OpenLivePage(page, retry + 1)
+        } else {
+          reject('打开live.acfun.cn相关页面失败')
+        }
+      })
+      resolve(newPage)
     })
-    await newPage.goto('https://live.acfun.cn/settings/help', { waitUntil: 'domcontentloaded' }).catch(err => {
-      console.error(err);
-      if (retry < 6) {
-        return OpenLivePage(page, retry + 1)
-      } else {
-        reject('打开live.acfun.cn相关页面失败')
-      }
-    })
-    resolve(newPage)
   })
 }
 
@@ -147,8 +154,8 @@ module.exports = (action, page, data) => {
               headUrl: e.user.headUrl
             })
             )
-          ).finally(() =>
-            page.close()
+          // ).finally(() =>
+          //   page.close()
           )
       )
     case '当日时长':
@@ -170,18 +177,15 @@ module.exports = (action, page, data) => {
           url: `https://live.acfun.cn/api/channel/list?count=1000&pcursor=0`,
           method: 'GET'
         })
-          .then(res => {
-            // console.log(res.liveList.length)
-            // return []
-            return res.liveList.map(e =>
+          .then(res => res.liveList.map(e =>
             ({
               authorId: e.authorId,
               title: e.title,
               createTime: e.createTime
             })
             )
-          }).finally(() =>
-            page.close()
+          // }).finally(() =>
+          //   page.close()
           )
       )
 
