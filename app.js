@@ -79,7 +79,7 @@ module.exports = function () {
       // 开始登录
       if (config.cookies !== '') {
         console.log('登录方式 Cookie');
-      } else if (config.account !== '' && config.password !== '') {
+      } else if ((config.account !== '' && config.password !== '') || (global.account !== '' && global.password !== '')) {
         console.log('登录方式 账号密码');
         loginFn = userLogin
       } else {
@@ -102,6 +102,10 @@ module.exports = function () {
   }
 
   Start()
+  // console.log('global.account', global.account);
+  // setTimeout(() => {
+  // console.log('global.account', global.account);
+  // }, 1000)
 
   if (config.autoRestart === false) {
     return

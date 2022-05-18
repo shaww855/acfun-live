@@ -119,11 +119,11 @@ async function configQuestion () {
     name: 'executablePath',
     when: isWindows
   }, {
-  //   type: 'confirm',
-  //   message: '使用OBS弹幕工具监控？',
-  //   default: true,
-  //   name: 'useObsDanmaku',
-  // }, {
+    //   type: 'confirm',
+    //   message: '使用OBS弹幕工具监控？',
+    //   default: true,
+    //   name: 'useObsDanmaku',
+    // }, {
     type: 'confirm',
     message: '佩戴牌子的主播不观看？ （戴着牌子说明你正在D TA，不需要工具挂牌子）',
     default: false,
@@ -141,7 +141,12 @@ async function configQuestion () {
     if (answers.loginByUsername === false) {
       userConfig.cookies = JSON.parse(answers.cookies)
     }
-    if (isWindows === false) {
+    if (isWindows) {
+      global.account = answers.account
+      global.password = answers.password
+      delete userConfig.account
+      delete userConfig.password
+    } else {
       userConfig.executablePath = ''
     }
 
@@ -176,8 +181,9 @@ process.on('uncaughtException', handleError)
 process.on("unhandledRejection", handleError);
 
 checkUpdate().then(() => {
+  const config = getConfig()
   // 检查配置文件
-  if (getConfig() === null) {
+  if (config === null) {
     inquirer.prompt([{
       type: 'confirm',
       name: 'create',
@@ -193,6 +199,37 @@ checkUpdate().then(() => {
           process.exit(0)
         }, 1000)
       }
+    })
+  } else if (isWindows) {
+    inquirer.prompt([{
+      type: 'input',
+      name: 'account',
+      message: "请输入账号：",
+      validate: function (input) {
+        const done = this.async()
+        if (input === '') {
+          done('账号不能为空')
+        } else {
+          done(null, true)
+        }
+      }
+    }, {
+      type: 'password',
+      message: '请输入密码：',
+      mask: '*',
+      name: 'password',
+      validate: function (input) {
+        const done = this.async()
+        if (input === '') {
+          done('密码不能为空')
+        } else {
+          done(null, true)
+        }
+      }
+    }]).then(answers => {
+      global.account = answers.account
+      global.password = answers.password
+      runApp()
     })
   } else {
     runApp()
