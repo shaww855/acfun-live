@@ -23,15 +23,23 @@ function userLogin (page) {
       await page.waitForSelector(loginSwitch)
       await page.click(loginSwitch)
       // console.log('sign in...');
-      await page.type('#ipt-account-login', config.account);
-      await page.type('#ipt-pwd-login', config.password);
+      if (process.platform === 'win32') {
+        await page.type('#ipt-account-login', global.account);
+        await page.type('#ipt-pwd-login', global.password);
+      } else {
+        await page.type('#ipt-account-login', config.account);
+        await page.type('#ipt-pwd-login', config.password);
+      }
       const loginBtnSelector = '.btn-login'
       await page.waitForSelector(loginBtnSelector);
       await page.click(loginBtnSelector)
       await page.waitForNavigation()
-      await page.cookies().then(cookieList => {
-        setConfig({ prop: 'cookies', value: cookieList})
-      })
+
+      if (process.platform !== 'win32') {
+        await page.cookies().then(cookieList => {
+          setConfig({ prop: 'cookies', value: cookieList })
+        })
+      }
     }).catch(err => {
       console.error(err);
       page.browser().close()
