@@ -10,6 +10,7 @@ module.exports = function () {
   const {
     userLogin,
     userLoginByCookies,
+    userLoginByQrcode,
     startMonitor,
     endMonitor,
     requestFliter,
@@ -77,8 +78,12 @@ module.exports = function () {
       let loginFn = userLoginByCookies
 
       // 开始登录
-      if (config.cookies !== '') {
+      if (process.platform === 'win32') {
+        console.log('登录方式 扫码');
+        loginFn = userLoginByQrcode
+      } else if (config.cookies !== '') {
         console.log('登录方式 Cookie');
+        loginFn = userLoginByCookies
       } else if ((config.account !== '' && config.password !== '') || (global.account !== '' && global.password !== '')) {
         console.log('登录方式 账号密码');
         loginFn = userLogin

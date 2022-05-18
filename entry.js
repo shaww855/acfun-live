@@ -200,37 +200,37 @@ checkUpdate().then(() => {
         }, 1000)
       }
     })
-  } else if (isWindows) {
-    inquirer.prompt([{
-      type: 'input',
-      name: 'account',
-      message: "请输入账号：",
-      validate: function (input) {
-        const done = this.async()
-        if (input === '') {
-          done('账号不能为空')
-        } else {
-          done(null, true)
-        }
-      }
-    }, {
-      type: 'password',
-      message: '请输入密码：',
-      mask: '*',
-      name: 'password',
-      validate: function (input) {
-        const done = this.async()
-        if (input === '') {
-          done('密码不能为空')
-        } else {
-          done(null, true)
-        }
-      }
-    }]).then(answers => {
-      global.account = answers.account
-      global.password = answers.password
-      runApp()
-    })
+  // } else if (isWindows) {
+  //   inquirer.prompt([{
+  //     type: 'input',
+  //     name: 'account',
+  //     message: "请输入账号：",
+  //     validate: function (input) {
+  //       const done = this.async()
+  //       if (input === '') {
+  //         done('账号不能为空')
+  //       } else {
+  //         done(null, true)
+  //       }
+  //     }
+  //   }, {
+  //     type: 'password',
+  //     message: '请输入密码：',
+  //     mask: '*',
+  //     name: 'password',
+  //     validate: function (input) {
+  //       const done = this.async()
+  //       if (input === '') {
+  //         done('密码不能为空')
+  //       } else {
+  //         done(null, true)
+  //       }
+  //     }
+  //   }]).then(answers => {
+  //     global.account = answers.account
+  //     global.password = answers.password
+  //     runApp()
+  //   })
   } else {
     runApp()
   }
