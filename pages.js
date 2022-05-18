@@ -92,6 +92,47 @@ async function userLoginByCookies (page) {
 }
 
 /**
+ * 用户登录
+ * @param {Object} page 页面
+ */
+function userLoginByQrcode (page) {
+  return new Promise(async (resolve, reject) => {
+    console.log('↓↓↓ 请使用 AcFun APP 扫码并确认登录，二维码两分钟内有效 ↓↓↓');
+    page.goto('https://www.acfun.cn/login', { waitUntil: 'domcontentloaded' }).then(async () => {
+
+    }).catch(err => {
+      console.error(err);
+      page.browser().close()
+      reject('打开登录页失败');
+    })
+
+    page.on('response', async response => {
+      if (response.url().includes('/rest/pc-direct/qr/start')) {
+        const res = await response.json()
+        if (res.result === 0) {
+          console.log();
+          const QRCode = require('qrcode')
+          QRCode.toString(`http://scan.acfun.cn/l/${res.qrLoginToken}`, { type: 'terminal', small: true }, function (err, url) {
+            if (err) throw err
+            console.log(url)
+          })
+        } else {
+          reject(`** ${res.error_msg} ** `)
+        }
+      }
+      // https://scan.acfun.cn/rest/pc-direct/qr/acceptResult
+      if (response.url().includes('/rest/pc-direct/qr/acceptResult')) {
+        console.log('扫码成功，请确认登录');
+      }
+      if (response.url() === 'https://www.acfun.cn/') {
+        await page.waitForNavigation()
+        resolve()
+      }
+    })
+  })
+}
+
+/**
  * 开始监控室
  * @param {Object} browser 浏览器连接断点
  * @param {Number} times 检查次数
@@ -553,6 +594,7 @@ const handlePageError = async (page, uperName, err) => {
 module.exports = {
   userLogin,
   userLoginByCookies,
+  userLoginByQrcode,
   startMonitor,
   endMonitor,
   requestFliter,
