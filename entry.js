@@ -200,18 +200,25 @@ checkUpdate().then(() => {
   if (config !== null) {
     const { version } = require('./package.json')
     const { hasNewVersion } = require('./util.js')
-    if (config.version === version) {
+    if (config.version === undefined) {
+      // 没有版本信息
+      配置文件过期 = false
+    } else if (config.version === version) {
+      // 当前版本
       配置文件过期 = false
     } else if (hasNewVersion(config.version, version)) {
+      // 旧版本
       配置文件过期 = true
     } else {
+      // 新版本
       配置文件过期 = false
     }
   }
 
   if (global.platformIsWin === false) {
     if (config === null) {
-      console.log('Linux请用户按照文档手动创建配置文件');
+      setConfig(defaultConfig)
+      console.log('Linux请用户按照文档修改配置文件');
       console.log('https://github.com/shilx/acfun-live#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8Econfigjson');
     } else if (配置文件过期) {
       console.log('版本已更新，请按照文档重新创建配置文件');
@@ -222,7 +229,7 @@ checkUpdate().then(() => {
     return
   }
   confirmLoginType().then(async (loginInfo) => {
-    console.log('loginInfo', loginInfo);
+    // console.log('loginInfo', loginInfo);
     const config = getConfig()
     if (config === null) {
       // 未配置

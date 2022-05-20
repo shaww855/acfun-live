@@ -2,7 +2,6 @@
 const { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig } = require('./util.js')
 // 配置文件
 const config = getConfig()
-console.log('pages.js getConfig()', config);
 const inquirer = require('inquirer');
 // 报错计数
 const errorTimes = {
