@@ -4,7 +4,6 @@ const inquirer = require('inquirer');
 const checkUpdate = require('./checkUpdate')
 const runApp = require('./app.js')
 const defaultConfig = {
-  "loginType": null,
   "account": "",
   "password": "",
   "debug": false,
@@ -86,7 +85,6 @@ const confirmLoginType = () =>
       }
     }
   }, ]).then(answers => {
-    // global.loginType = answers.loginType
     global.loginInfo = answers
 
     const userConfig = {
@@ -103,6 +101,7 @@ const confirmLoginType = () =>
         delete userConfig.password
       }
     }
+    delete userConfig.loginType
     return userConfig
   })
 
@@ -161,7 +160,6 @@ const createConfiguration = () => {
     }
 
     delete userConfig.notificationApp
-    console.log('entry createConfiguration() allConfig', userConfig);
     setConfig({
       userConfig: {
         ...defaultConfig,
@@ -216,8 +214,9 @@ checkUpdate().then(() => {
   }
 
   if (global.platformIsWin === false) {
+    // Linux平台
     if (config === null) {
-      setConfig(defaultConfig)
+      setConfig({ userConfig: defaultConfig })
       console.log('Linux请用户按照文档修改配置文件');
       console.log('https://github.com/shilx/acfun-live#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8Econfigjson');
     } else if (配置文件过期) {
@@ -228,9 +227,8 @@ checkUpdate().then(() => {
     }
     return
   }
-  confirmLoginType().then(async (loginInfo) => {
-    // console.log('loginInfo', loginInfo);
-    const config = getConfig()
+  // Win平台
+  confirmLoginType().then(async () => {
     if (config === null) {
       // 未配置
       await createConfiguration()
@@ -238,10 +236,6 @@ checkUpdate().then(() => {
       console.log('版本已更新，需要重新配置');
       await createConfiguration()
     }
-
-    // console.log('config', userConfig);
-    // console.log('loginInfo', loginInfo);
-    // console.log(process.platform);
     runApp()
   })
 })
