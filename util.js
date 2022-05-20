@@ -76,6 +76,7 @@ const getConfig = () => {
   if (fs.existsSync(configPath)) {
     config = JSON.parse(fs.readFileSync(configPath, "utf8"));
     console.log(`= config.json config 已读取 =`);
+    console.log(config);
     return config
   } else {
     // throw '未找到config.json';
@@ -102,7 +103,9 @@ const setConfig = ({
   value = '',
   userConfig = {}
 }) => {
+  console.log('---');
   if (prop === null) {
+    console.log(userConfig);
     config = {
       ...config,
       ...userConfig,
@@ -119,6 +122,23 @@ const setConfig = ({
   }
   fs.writeFileSync(configPath, JSON.stringify(config, null, 4));
   console.log(`= config.json cookies 已保存 =`);
+  console.log(config);
+  console.log('---');
+}
+
+/**
+ * 对比版本号是否有更新
+ * @param {String} older 旧版本
+ * @param {String} newer 新版本
+ * @returns Boolean
+ */
+const hasNewVersion = (older, newer) => {
+  newer = newer.split('.').map(e => Number(e))
+  older = older.split('.').map(e => Number(e))
+  if (newer.some(e => isNaN(e)) || older.some(e => isNaN(e))) {
+    throw new Error('读取版本号失败')
+  }
+  return newer.some((e, i) => e > older[i])
 }
 
 module.exports = {
@@ -128,5 +148,6 @@ module.exports = {
   getUidByUrl,
   isLiveTab,
   getConfig,
-  setConfig
+  setConfig,
+  hasNewVersion
 }
