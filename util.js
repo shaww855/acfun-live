@@ -76,7 +76,6 @@ const getConfig = () => {
   if (fs.existsSync(configPath)) {
     config = JSON.parse(fs.readFileSync(configPath, "utf8"));
     console.log(`= config.json config 已读取 =`);
-    console.log(config);
     return config
   } else {
     // throw '未找到config.json';
@@ -103,9 +102,7 @@ const setConfig = ({
   value = '',
   userConfig = {}
 }) => {
-  console.log('---');
   if (prop === null) {
-    console.log(userConfig);
     config = {
       ...config,
       ...userConfig,
@@ -122,8 +119,6 @@ const setConfig = ({
   }
   fs.writeFileSync(configPath, JSON.stringify(config, null, 4));
   console.log(`= config.json cookies 已保存 =`);
-  console.log(config);
-  console.log('---');
 }
 
 /**

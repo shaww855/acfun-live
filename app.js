@@ -78,8 +78,6 @@ module.exports = function () {
       let loginFn = userLoginByCookies
       
       // 开始登录
-      console.log(global.platformIsWin);
-      console.log(config.loginType, global.loginInfo);
       if (global.platformIsWin) {
         if (global.loginInfo.loginType === '扫码登录') {
           console.log('登录方式 扫码');
@@ -94,7 +92,7 @@ module.exports = function () {
           throw (new Error('请确认登录方式'))
         }
       } else {
-        if (config.loginType === 'cookies') {
+        if (config.cookies !== '') {
           console.log('登录方式 Cookie');
           loginFn = userLoginByCookies
         } else if (config.account !== '' && config.password !== '') {
