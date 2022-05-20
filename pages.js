@@ -26,7 +26,6 @@ function userLogin (page) {
         await page.type('#ipt-account-login', global.loginInfo.account);
         await page.type('#ipt-pwd-login', global.loginInfo.password);
       } else {
-        console.log('config.account', config.account);
         await page.type('#ipt-account-login', config.account);
         await page.type('#ipt-pwd-login', config.password);
       }

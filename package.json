@@ -1,6 +1,6 @@
 {
   "name": "acfun-live",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "description": "使用 Puppeteer 开启 acfun 直播监控室，挂牌子！😏",
   "main": "index.js",
   "bin": "app.js",
@@ -17,10 +17,10 @@
   "dependencies": {
     "inquirer": "^8.2.4",
     "node-schedule": "^2.1.0",
-    "puppeteer": "^14.0.0",
+    "puppeteer": "^14.1.1",
     "qrcode": "^1.5.0"
   },
   "devDependencies": {
-    "pkg": "^5.6.0"
+    "pkg": "^5.7.0"
   }
 }
