@@ -2,13 +2,13 @@ const https = require('https');
 const { version } = require('./package.json')
 const { notify } = require('./notification')
 
-/**
- * 打印发布网页链接
- */
-function showDownloadLink () {
-  console.log('中国大陆（GFW内） https://gitee.com/cn_shaw/acfun-live/releases');
-  console.log('其他地区及海外 https://github.com/shilx/acfun-live/releases');
-}
+const downloadInfo = `
+---
+唯二指定下载地址：
+中国大陆（GFW内） https://gitee.com/cn_shaw/acfun-live/releases
+其他地区及海外 https://github.com/shilx/acfun-live/releases
+---
+`
 
 module.exports = () => {
   return new Promise((resolve, reject) => {
@@ -57,7 +57,7 @@ module.exports = () => {
       const { hasNewVersion } = require('./util.js')
       if (hasNewVersion(res.version, version)) {
         msg += `GitHub版本 ${res.version}，请关注` 
-        showDownloadLink()
+        msg = `${msg}${downloadInfo}`
         notify(msg, 'https://github.com/shilx/acfun-live/releases')
       } else {
         msg += '已是最新'
@@ -69,7 +69,7 @@ module.exports = () => {
     }
   }).catch(err => {
     console.error('检查更新失败，请关注');
-    showDownloadLink()
+    console.log(downloadInfo);
     console.error(err)
   })
 }
