@@ -76,20 +76,35 @@ module.exports = function () {
       })
 
       let loginFn = userLoginByCookies
-
+      
       // 开始登录
-      if (process.platform === 'win32') {
-        console.log('登录方式 扫码');
-        loginFn = userLoginByQrcode
-      } else if (config.cookies !== '') {
-        console.log('登录方式 Cookie');
-        loginFn = userLoginByCookies
-      } else if ((config.account !== '' && config.password !== '') || (global.account !== '' && global.password !== '')) {
-        console.log('登录方式 账号密码');
-        loginFn = userLogin
+      console.log(global.platformIsWin);
+      console.log(config.loginType, global.loginInfo);
+      if (global.platformIsWin) {
+        if (global.loginInfo.loginType === '扫码登录') {
+          console.log('登录方式 扫码');
+          loginFn = userLoginByQrcode
+        } else if (global.loginInfo.loginType === 'cookies') {
+          console.log('登录方式 Cookie');
+          loginFn = userLoginByCookies
+        } else if (global.loginInfo.account !== '' && global.loginInfo.password !== '') {
+          console.log('登录方式 账号密码');
+          loginFn = userLogin
+        } else {
+          throw (new Error('请确认登录方式'))
+        }
       } else {
-        console.error('请填写 Cookie 或者 账号密码 以便登录')
+        if (config.loginType === 'cookies') {
+          console.log('登录方式 Cookie');
+          loginFn = userLoginByCookies
+        } else if (config.account !== '' && config.password !== '') {
+          console.log('登录方式 账号密码');
+          loginFn = userLogin
+        } else {
+          throw (new Error('请确认登录方式'))
+        }
       }
+
 
       // 起飞
       loginFn(page).then(() => {
@@ -107,10 +122,6 @@ module.exports = function () {
   }
 
   Start()
-  // console.log('global.account', global.account);
-  // setTimeout(() => {
-  // console.log('global.account', global.account);
-  // }, 1000)
 
   if (config.autoRestart === false) {
     return

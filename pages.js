@@ -2,8 +2,8 @@
 const { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig } = require('./util.js')
 // 配置文件
 const config = getConfig()
-// const puppeteer = require('puppeteer');
-
+console.log('pages.js getConfig()', config);
+const inquirer = require('inquirer');
 // 报错计数
 const errorTimes = {
   主页: 0
@@ -23,10 +23,11 @@ function userLogin (page) {
       await page.waitForSelector(loginSwitch)
       await page.click(loginSwitch)
       // console.log('sign in...');
-      if (process.platform === 'win32') {
-        await page.type('#ipt-account-login', global.account);
-        await page.type('#ipt-pwd-login', global.password);
+      if (global.platformIsWin) {
+        await page.type('#ipt-account-login', global.loginInfo.account);
+        await page.type('#ipt-pwd-login', global.loginInfo.password);
       } else {
+        console.log('config.account', config.account);
         await page.type('#ipt-account-login', config.account);
         await page.type('#ipt-pwd-login', config.password);
       }
@@ -97,34 +98,49 @@ async function userLoginByCookies (page) {
  */
 function userLoginByQrcode (page) {
   return new Promise(async (resolve, reject) => {
-    console.log('↓↓↓ 请使用 AcFun APP 扫码并确认登录，二维码两分钟内有效 ↓↓↓');
-    page.goto('https://www.acfun.cn/login', { waitUntil: 'domcontentloaded' }).then(async () => {
-
-    }).catch(err => {
+    console.log('↓↓↓ 请使用 AcFun APP 扫码并确认登录 ↓↓↓');
+    page.goto('https://www.acfun.cn/login', { waitUntil: 'domcontentloaded' }).catch(err => {
       console.error(err);
       page.browser().close()
       reject('打开登录页失败');
     })
-
+    const ui = new inquirer.ui.BottomBar();
+    let timeId = null
     page.on('response', async response => {
       if (response.url().includes('/rest/pc-direct/qr/start')) {
         const res = await response.json()
         if (res.result === 0) {
-          console.log();
           const QRCode = require('qrcode')
           QRCode.toString(`http://scan.acfun.cn/l/${res.qrLoginToken}`, { type: 'terminal', small: true }, function (err, url) {
             if (err) throw err
             console.log(url)
+            let second = res.expireTime / 1000
+            // let second = 20
+            timeId = setInterval(() => {
+              second--
+              ui.updateBottomBar(`二维码将在 ${second}秒 后失效`);
+              if (second < 1) {
+                clearInterval(timeId)
+                ui.updateBottomBar(`二维码已失效`);
+                console.log('');
+                ui.close()
+                reject(`** 等待扫码登录超时 **`)
+              }
+            }, 1000)
           })
         } else {
           reject(`** ${res.error_msg} ** `)
         }
       }
-      // https://scan.acfun.cn/rest/pc-direct/qr/acceptResult
-      if (response.url().includes('/rest/pc-direct/qr/acceptResult')) {
-        console.log('扫码成功，请确认登录');
-      }
+      // // https://scan.acfun.cn/rest/pc-direct/qr/acceptResult
+      // if (response.url().includes('/rest/pc-direct/qr/acceptResult')) {
+      //   console.log('扫码成功，请确认登录');
+      // }
       if (response.url() === 'https://www.acfun.cn/') {
+        clearInterval(timeId)
+        console.log('');
+        ui.close()
+        console.log('扫码登录成功');
         await page.waitForNavigation()
         resolve()
       }
@@ -546,7 +562,7 @@ const requestFliter = async page => {
 
 const handlePageError = async (page, uperName, err) => {
   if (errorTimes[uperName] === 'loading') {
-    console.log(uperName, `handlePageError 已超过5次，刷新页面中...`);
+    console.error(uperName, `handlePageError 已超过5次，刷新页面中...`);
     return
   }
 
@@ -554,28 +570,28 @@ const handlePageError = async (page, uperName, err) => {
   console.error(`第${errorTimes[uperName]}次 handlePageError`, uperName, errorTimes[uperName] > 5)
   if (typeof err === 'object') {
     if (err.error) {
-      console.log('[错误为object]', err);
+      console.error('[错误为object]', err);
     } else if (typeof err.message === 'string') {
-      console.log('[错误为object并且有message]', err.message);
+      console.error('[错误为object并且有message]', err.message);
     } else {
       JSON.stringify('[未知错误]', err.message)
       if (err.message.error) {
-        console.log('[未知错误的object]', err.message.error);
+        console.error('[未知错误的object]', err.message.error);
       }
     }
   } else {
-    console.log('[错误为文本]', err);
+    console.error('[错误为文本]', err);
   }
 
   if (errorTimes[uperName] > 5) {
-    console.log(uperName, `handlePageError 超过5次，刷新页面`);
+    console.error(uperName, `handlePageError 超过5次，刷新页面`);
     errorTimes[uperName] = 'loading'
     page.reload().then(() => {
-      console.log(uperName, `handlePageError 刷新完毕`);
+      console.error(uperName, `handlePageError 刷新完毕`);
       page.evaluate(uperName => document.title = uperName, uperName)
     }).catch(err => {
-      console.log(uperName, `handlePageError 刷新失败`);
-      console.log(err);
+      console.error(uperName, `handlePageError 刷新失败`);
+      console.error(err);
     }).finally(() => {
       errorTimes[uperName] = 0
     })
