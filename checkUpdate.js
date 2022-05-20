@@ -64,6 +64,7 @@ module.exports = () => {
       }
       console.log(msg);
     } else {
+      console.error(res);
       throw new Error('读取版本号失败')
     }
   }).catch(err => {
