@@ -84,8 +84,13 @@ function liveStart (liveUperInfo) {
  * @param {String} url 点击通知跳转的链接
  * @returns 
  */
-function notify(message, url = '') {
-  // if (notification === false || notification.length === 0) return
+function notify (message, url = '') {
+  const config = getConfig()
+  if (config === null) {
+    return
+  }
+  const { notification, iftttKey, barkKey } = config
+  if (notification === false || notification.length === 0) return
   if (iftttKey + barkKey === '') {
     console.log('通知 发送失败，未配置相关key。');
     return
