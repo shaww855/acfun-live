@@ -96,6 +96,8 @@ async function userLoginByCookies (page) {
  */
 function userLoginByQrcode (page) {
   return new Promise(async (resolve, reject) => {
+    const qrcodePath = "./qrcode.png"
+
     console.log('↓↓↓ 请使用 AcFun APP 扫码并确认登录 ↓↓↓');
     page.goto('https://www.acfun.cn/login', { waitUntil: 'domcontentloaded' }).catch(err => {
       console.error(err);
@@ -108,6 +110,19 @@ function userLoginByQrcode (page) {
       if (response.url().includes('/rest/pc-direct/qr/start')) {
         const res = await response.json()
         if (res.result === 0) {
+          // 保存二维码图片至本地
+          const base64Data = res.imageData
+          const dataBuffer = Buffer.from(base64Data, 'base64')
+          const fs = require("fs"); 
+          fs.writeFile(qrcodePath, dataBuffer, err => {
+            if (err) {
+              console.error(err);
+            } else {
+              console.log('如二维码图片无法扫描，请手动打开本工具同级目录下的图片进行扫码');
+            }
+          })
+
+          // 在终端中展示二维码图片
           const QRCode = require('qrcode')
           QRCode.toString(`http://scan.acfun.cn/l/${res.qrLoginToken}`, { type: 'terminal', small: true }, function (err, url) {
             if (err) throw err
@@ -139,6 +154,13 @@ function userLoginByQrcode (page) {
         console.log('');
         ui.close()
         console.log('扫码登录成功');
+        try {
+          const fs = require("fs"); 
+          fs.unlinkSync(qrcodePath);
+        } catch (err) {
+          console.log('二维码图片清理失败，可手动删除。');
+          console.error(err)
+        }
         await page.waitForNavigation()
         resolve()
       }
