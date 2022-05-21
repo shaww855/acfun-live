@@ -10,6 +10,7 @@ module.exports = function () {
   const {
     userLogin,
     userLoginByCookies,
+    userLoginByQrcode,
     startMonitor,
     endMonitor,
     requestFliter,
@@ -75,16 +76,33 @@ module.exports = function () {
       })
 
       let loginFn = userLoginByCookies
-
+      
       // 开始登录
-      if (config.cookies !== '') {
-        console.log('登录方式 Cookie');
-      } else if (config.account !== '' && config.password !== '') {
-        console.log('登录方式 账号密码');
-        loginFn = userLogin
+      if (global.platformIsWin) {
+        if (global.loginInfo.loginType === '扫码登录') {
+          console.log('登录方式 扫码');
+          loginFn = userLoginByQrcode
+        } else if (global.loginInfo.loginType === 'cookies') {
+          console.log('登录方式 Cookie');
+          loginFn = userLoginByCookies
+        } else if (global.loginInfo.account !== '' && global.loginInfo.password !== '') {
+          console.log('登录方式 账号密码');
+          loginFn = userLogin
+        } else {
+          throw (new Error('请确认登录方式'))
+        }
       } else {
-        console.error('请填写 Cookie 或者 账号密码 以便登录')
+        if (config.cookies !== '') {
+          console.log('登录方式 Cookie');
+          loginFn = userLoginByCookies
+        } else if (config.account !== '' && config.password !== '') {
+          console.log('登录方式 账号密码');
+          loginFn = userLogin
+        } else {
+          throw (new Error('请确认登录方式'))
+        }
       }
+
 
       // 起飞
       loginFn(page).then(() => {

@@ -121,6 +121,21 @@ const setConfig = ({
   console.log(`= config.json cookies 已保存 =`);
 }
 
+/**
+ * 对比版本号是否有更新
+ * @param {String} older 旧版本
+ * @param {String} newer 新版本
+ * @returns Boolean
+ */
+const hasNewVersion = (older, newer) => {
+  newer = newer.split('.').map(e => Number(e))
+  older = older.split('.').map(e => Number(e))
+  if (newer.some(e => isNaN(e)) || older.some(e => isNaN(e))) {
+    throw new Error('读取版本号失败')
+  }
+  return newer.some((e, i) => e > older[i])
+}
+
 module.exports = {
   padNum,
   formartDate,
@@ -128,5 +143,6 @@ module.exports = {
   getUidByUrl,
   isLiveTab,
   getConfig,
-  setConfig
+  setConfig,
+  hasNewVersion
 }
