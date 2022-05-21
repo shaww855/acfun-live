@@ -200,7 +200,7 @@ checkUpdate().then(() => {
     const { hasNewVersion } = require('./util.js')
     if (config.version === undefined) {
       // 没有版本信息
-      配置文件过期 = false
+      配置文件过期 = true
     } else if (config.version === version) {
       // 当前版本
       配置文件过期 = false
