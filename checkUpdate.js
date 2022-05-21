@@ -2,19 +2,19 @@ const https = require('https');
 const { version } = require('./package.json')
 const { notify } = require('./notification')
 
-/**
- * 打印发布网页链接
- */
-function showDownloadLink () {
-  console.log('中国大陆（GFW内） https://gitee.com/cn_shaw/acfun-live/releases');
-  console.log('其他地区及海外 https://github.com/shilx/acfun-live/releases');
-}
+const downloadInfo = `
+---
+唯二指定下载地址：
+中国大陆（GFW内） https://gitee.com/cn_shaw/acfun-live/releases
+其他地区及海外 https://github.com/shilx/acfun-live/releases
+---
+`
 
 module.exports = () => {
   return new Promise((resolve, reject) => {
-    // return https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', { timeout:3000 }, (res) => {
+    return https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', { timeout:3000 }, (res) => {
     // return https.get('https://raw.githubusercontent.com/shilx/acfun-live/main/package.json', { timeout:3000 }, (res) => {
-    return https.get('https://github.91chi.fun/https://raw.githubusercontent.com/shilx/acfun-live/main/package.json', { timeout:3000 }, (res) => {
+    // return https.get('https://github.91chi.fun/https://raw.githubusercontent.com/shilx/acfun-live/main/package.json', { timeout:3000 }, (res) => {
 
       const { statusCode } = res;
       // const contentType = res.headers['content-type'];
@@ -54,26 +54,22 @@ module.exports = () => {
   }).then(res => {
     let msg = `当前版本：${version}，`
     if (res.version) {
-      const remote = res.version.split('.').map(e => Number(e))
-      const local = version.split('.').map(e => Number(e))
-      if (remote.some(e => isNaN(e)) || local.some(e => isNaN(e))) {
-        throw new Error('读取版本号失败')
-      }
-      const hasNewVersion = remote.some((e, i) => e > local[i])
-      if (hasNewVersion) {
+      const { hasNewVersion } = require('./util.js')
+      if (hasNewVersion(res.version, version)) {
         msg += `GitHub版本 ${res.version}，请关注` 
-        showDownloadLink()
         notify(msg, 'https://github.com/shilx/acfun-live/releases')
+        msg = `${msg}${downloadInfo}`
       } else {
         msg += '已是最新'
       }
       console.log(msg);
     } else {
+      console.error(res);
       throw new Error('读取版本号失败')
     }
   }).catch(err => {
     console.error('检查更新失败，请关注');
-    showDownloadLink()
+    console.log(downloadInfo);
     console.error(err)
   })
 }
