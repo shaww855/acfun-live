@@ -57,8 +57,8 @@ module.exports = () => {
       const { hasNewVersion } = require('./util.js')
       if (hasNewVersion(res.version, version)) {
         msg += `GitHub版本 ${res.version}，请关注` 
-        msg = `${msg}${downloadInfo}`
         notify(msg, 'https://github.com/shilx/acfun-live/releases')
+        msg = `${msg}${downloadInfo}`
       } else {
         msg += '已是最新'
       }
