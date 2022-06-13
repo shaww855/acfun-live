@@ -1,8 +1,12 @@
-# AcFun-Live  
+## AcFun-Live  
+[![CodeQL](https://github.com/shilx/acfun-live/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/shilx/acfun-live/actions/workflows/codeql-analysis.yml)
+[![release](https://img.shields.io/github/v/release/shilx/acfun-live)](https://github.com/shilx/acfun-live/releases)
+[![downloads](https://img.shields.io/github/downloads/shilx/acfun-live/total)](https://github.com/shilx/acfun-live/releases)
+[![downloads](https://img.shields.io/github/license/shilx/acfun-live)](https://github.com/shilx/acfun-live/blob/main/LICENSE)  
 使用 Puppeteer 开启 AcFun 直播监控室，挂牌子，还有开播通知！😏  
 请认准唯二指定下载仓库 Gitee、Github。  
 本工具完全免费、开源，有更好的点子欢迎PR。
-# 隐私提示 
+## 隐私提示 
 本工具不会向A站以外的任何服务器发送、储存你的任何信息，也不会分享任何信息给任意第三方，所有操作均通过A站Api实现。  
  - Win 用户扫码登录不储存任何信息；账号密码登录则储存于运行环境中，关闭即销毁。  
  - Linux 用户账号密码明文存储于本地，请自行保证本地环境安全。  
@@ -12,14 +16,14 @@
   1. 查询你的粉丝牌列表及粉丝牌经验；  
   1. 使用你的账号信息查询主播开播信息；  
   1. 使用你的账号进入直播间。  
-# 运行环境  
+## 运行环境  
 本工具通过操控 Chromium 实现各种操作，请始终保持你的浏览器为最新版本。  
-- # Windows  
+- ## Windows  
   **可选扫码登录，无需输入账号密码**  
   支持 Windows10 及以上，请前往 发布页面 下载，解压后直接运行。   
   [国内下载地址](https://gitee.com/cn_shaw/acfun-live/releases)  
   [海外下载地址](https://github.com/shilx/acfun-live/releases)  
-- # Linux  
+- ## Linux  
   - 安装  
       - NodeJs 和 NPM （尽量保持为最新版）
       - 下载源码  
@@ -33,7 +37,7 @@
     例如 [PM2](https://pm2.keymetrics.io/) ，配置文件在 ecosystem.config.js ，用它也可以记录日志。
 
 
-# 官方对第三方插件的态度  
+## 官方对第三方插件的态度  
 - 2022-05-17 无常猴 [ac34895639](https://www.acfun.cn/a/ac34895639) [ac34899002](https://www.acfun.cn/a/ac34899002  
 )
   >- <b>及时修改密码，定期更新密码，增加密码复杂程度。</b>尤其是账号注册时间较长、密码较长时间未更改、多平台使用同一密码的用户。    
@@ -43,7 +47,7 @@
 - 2021-06-08 活动猴 [ac29442323](https://www.acfun.cn/a/ac29442323)  
   > 用户不得以任何不正当手段及其他破坏活动规则、违背活动公平原则的方式参与本活动。一经发现，本平台有权撤消活动资格，亦有权收回用户已领取的现金奖励、实物奖品或者虚拟奖品，并保留追究该用户责任的权利。如因前述不正当手段被本平台追究责任造成的损失，本平台不进行任何赔偿或补偿。不正当手段及舞弊行为包括但不限于：下载非官方客户端；使用模拟器、插件、外挂等非法工具扫码、下载、安装、注册、登录、赠与、领取奖励；恶意购买；虚假分享；倒买倒卖；注册多个账号；篡改设备数据；恶意牟利等扰乱平台秩序；<b>使用插件、外挂、系统或第三方工具</b>对本平台及本次活动进行干扰、破坏、修改或施加其他影响及本平台认为的其他不正当手段
   
-# 配置文件说明
+## 配置文件说明
   
 键名 | 类型 | 说明  
   --- | --- | ---  
@@ -66,8 +70,8 @@ notification | Boolean<br>Array  | 借助第三方APP推送开播通知<br>true:
 iftttKey | String | [IFTTT](https://ifttt.com/) 密钥<br>[配置方法](#IFTTT)
 barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  仅限IOS<br>[配置方法](#BARK)
 
-# 推送配置
-## IFTTT
+## 推送配置
+### IFTTT
 
 - 创建Applets  
   1. My Applets - Create
@@ -89,12 +93,12 @@ barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  仅限IOS<br>[�
     3. 此页面会显示你的 key  
       （可以在这个页面测试你的 Webhook  ）
 
-## BARK 
+### BARK 
 
 1. App Store 搜索并下载安装  
 2. 打开 app 就可以看到链接  https://api.day.app/你的key/
 
-# 可能会遇到的问题及解决方法
+## 可能会遇到的问题及解决方法
   * Q   
   ERROR: Failed to set up Chromium r782078! Set  "PUPPETEER_SKIP_DOWNLOAD" env variable to skip download.  
   * A   
@@ -132,3 +136,7 @@ barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  仅限IOS<br>[�
   * A  
   https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md
 
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/shilx/acfun-live.svg)](https://starchart.cc/shilx/acfun-live)
