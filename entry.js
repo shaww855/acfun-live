@@ -228,6 +228,14 @@ checkUpdate().then(() => {
     return
   }
   // Win平台
+  if (config.account && config.password) {
+    global.loginInfo = {
+      ...config,
+      loginType: '账号密码'
+    }
+    runApp()
+    return
+  }
   confirmLoginType().then(async () => {
     if (config === null) {
       // 未配置
