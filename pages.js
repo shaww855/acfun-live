@@ -33,8 +33,7 @@ function userLogin (page) {
       await page.waitForSelector(loginBtnSelector);
       await page.click(loginBtnSelector)
       await page.waitForNavigation()
-
-      if (process.platform !== 'win32') {
+      if (process.platform !== 'win32' || config.debug === true) {
         await page.cookies().then(cookieList => {
           setConfig({ prop: 'cookies', value: cookieList })
         })
