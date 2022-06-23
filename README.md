@@ -8,7 +8,7 @@
 请认准唯二指定下载仓库 Gitee、Github。  
 本工具完全免费、开源，有更好的点子欢迎PR。
 ## 隐私提示 
-本工具不会向A站以外的任何服务器发送、储存你的任何信息，也不会分享任何信息给任意第三方，所有操作均通过A站Api实现。  
+本工具不会向A站以外的任何服务器发送或储存你的任何信息，也不会分享任何信息给任意第三方，所有操作均通过A站Api实现。  
  - Win 用户扫码登录不储存任何信息；账号密码登录则储存于运行环境中，关闭即销毁。  
  - Linux 用户账号密码明文存储于本地，请自行保证本地环境安全。  
 
@@ -21,9 +21,9 @@
 本工具通过操控 Chromium 实现各种操作，请始终保持你的浏览器为最新版本。  
 - ## Windows  
   **可选扫码登录，无需输入账号密码**  
-  支持 Windows10 及以上，请前往 发布页面 下载，解压后直接运行。   
-  [国内下载地址](https://gitee.com/cn_shaw/acfun-live/releases)  
-  [海外下载地址](https://github.com/shaww855/acfun-live/releases)  
+  支持 Windows10 及以上，请前往 发布页面 下载：   
+  - [国内下载地址](https://gitee.com/cn_shaw/acfun-live/releases)  
+  - [海外下载地址](https://github.com/shaww855/acfun-live/releases)  
 - ## Linux  
   - 安装  
       - NodeJs 和 NPM （尽量保持为最新版）
