@@ -218,10 +218,10 @@ checkUpdate().then(() => {
     if (config === null) {
       setConfig({ userConfig: defaultConfig })
       console.log('Linux请用户按照文档修改配置文件');
-      console.log('https://github.com/shilx/acfun-live#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E');
+      console.log('https://github.com/shaww855/acfun-live#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E');
     } else if (配置文件过期) {
       console.log('版本已更新，请按照文档重新创建配置文件');
-      console.log('https://github.com/shilx/acfun-live#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E');
+      console.log('https://github.com/shaww855/acfun-live#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E');
     } else {
       runApp()
     }

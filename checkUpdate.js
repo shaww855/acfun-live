@@ -6,15 +6,15 @@ const downloadInfo = `
 ---
 唯二指定下载地址：
 中国大陆（GFW内） https://gitee.com/cn_shaw/acfun-live/releases
-其他地区及海外 https://github.com/shilx/acfun-live/releases
+其他地区及海外 https://github.com/shaww855/acfun-live/releases
 ---
 `
 
 module.exports = () => {
   return new Promise((resolve, reject) => {
     return https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', { timeout:3000 }, (res) => {
-    // return https.get('https://raw.githubusercontent.com/shilx/acfun-live/main/package.json', { timeout:3000 }, (res) => {
-    // return https.get('https://github.91chi.fun/https://raw.githubusercontent.com/shilx/acfun-live/main/package.json', { timeout:3000 }, (res) => {
+    // return https.get('https://raw.githubusercontent.com/shaww855/acfun-live/main/package.json', { timeout:3000 }, (res) => {
+    // return https.get('https://github.91chi.fun/https://raw.githubusercontent.com/shaww855/acfun-live/main/package.json', { timeout:3000 }, (res) => {
 
       const { statusCode } = res;
       // const contentType = res.headers['content-type'];
@@ -57,7 +57,7 @@ module.exports = () => {
       const { hasNewVersion } = require('./util.js')
       if (hasNewVersion(res.version, version)) {
         msg += `GitHub版本 ${res.version}，请关注` 
-        notify(msg, 'https://github.com/shilx/acfun-live/releases')
+        notify(msg, 'https://github.com/shaww855/acfun-live/releases')
         msg = `${msg}${downloadInfo}`
       } else {
         msg += '已是最新'

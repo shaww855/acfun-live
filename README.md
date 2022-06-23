@@ -1,8 +1,9 @@
 ## AcFun-Live  
-[![CodeQL](https://github.com/shilx/acfun-live/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/shilx/acfun-live/actions/workflows/codeql-analysis.yml)
-[![release](https://img.shields.io/github/v/release/shilx/acfun-live)](https://github.com/shilx/acfun-live/releases)
-[![downloads](https://img.shields.io/github/downloads/shilx/acfun-live/total)](https://github.com/shilx/acfun-live/releases)
-[![downloads](https://img.shields.io/github/license/shilx/acfun-live)](https://github.com/shilx/acfun-live/blob/main/LICENSE)  
+[![Actions Release](https://github.com/shaww855/acfun-live/actions/workflows/git-actions-release.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/git-actions-release.yml)
+[![CodeQL](https://github.com/shaww855/acfun-live/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/codeql-analysis.yml)  
+[![version](https://img.shields.io/github/package-json/v/shaww855/acfun-live)](https://github.com/shaww855/acfun-live/tags)
+[![downloads](https://img.shields.io/github/downloads/shaww855/acfun-live/total)](https://github.com/shaww855/acfun-live/releases)
+[![license](https://img.shields.io/github/license/shaww855/acfun-live)](https://github.com/shaww855/acfun-live/blob/main/LICENSE)  
 使用 Puppeteer 开启 AcFun 直播监控室，挂牌子，还有开播通知！😏  
 请认准唯二指定下载仓库 Gitee、Github。  
 本工具完全免费、开源，有更好的点子欢迎PR。
@@ -22,7 +23,7 @@
   **可选扫码登录，无需输入账号密码**  
   支持 Windows10 及以上，请前往 发布页面 下载，解压后直接运行。   
   [国内下载地址](https://gitee.com/cn_shaw/acfun-live/releases)  
-  [海外下载地址](https://github.com/shilx/acfun-live/releases)  
+  [海外下载地址](https://github.com/shaww855/acfun-live/releases)  
 - ## Linux  
   - 安装  
       - NodeJs 和 NPM （尽量保持为最新版）
@@ -139,4 +140,4 @@ barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  仅限IOS<br>[�
 
 ## Stargazers over time
 
-[![Stargazers over time](https://starchart.cc/shilx/acfun-live.svg)](https://starchart.cc/shilx/acfun-live)
+[![Stargazers over time](https://starchart.cc/shaww855/acfun-live.svg)](https://starchart.cc/shaww855/acfun-live)
