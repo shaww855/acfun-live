@@ -88,6 +88,11 @@ const confirmLoginType = () =>
         done(null, true)
       }
     }
+  }, {
+    type: 'confirm',
+    message: '记住登录状态',
+    default: false,
+    name: 'saveCookies'
   }, ]).then(answers => {
     global.loginInfo = answers
 
@@ -115,6 +120,11 @@ const confirmLoginType = () =>
  */
 const createConfiguration = () => {
   return inquirer.prompt([{
+    type: 'number',
+    message: '直播间数量限制（请根据本机运行内存大小酌情设置，0 为无限）',
+    default: 0,
+    name: 'serverRoomLimit',
+  }, {
     type: 'confirm',
     message: '是否开启调试',
     default: false,
@@ -162,6 +172,8 @@ const createConfiguration = () => {
     if (global.loginInfo.loginType === 'cookies') {
       userConfig.cookies = JSON.parse(answers.cookies)
     }
+
+    userConfig.serverRoomLimit = [ userConfig.serverRoomLimit ]
 
     delete userConfig.notificationApp
     setConfig({
@@ -230,10 +242,10 @@ checkUpdate().then(() => {
     return
   }
   // Win平台
-  if (config.account && config.password) {
+  if (config !== null && config.cookies !== '') {
     global.loginInfo = {
       ...config,
-      loginType: '账号密码'
+      loginType: 'cookies'
     }
     runApp()
     return
