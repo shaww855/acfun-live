@@ -1,4 +1,4 @@
-## AcFun-Live  
+# AcFun-Live  
 [![Actions Release](https://github.com/shaww855/acfun-live/actions/workflows/git-actions-release.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/git-actions-release.yml)
 [![CodeQL](https://github.com/shaww855/acfun-live/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/codeql-analysis.yml)  
 [![version](https://img.shields.io/github/package-json/v/shaww855/acfun-live)](https://github.com/shaww855/acfun-live/tags)
