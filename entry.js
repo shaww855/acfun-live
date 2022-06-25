@@ -1,8 +1,10 @@
-const { getConfig, setConfig } = require('./util.js')
-const inquirer = require('inquirer');
+import { getConfig, setConfig } from './util.js'
+import inquirer from 'inquirer';
 // 检查更新
-const checkUpdate = require('./checkUpdate')
-const runApp = require('./app.js')
+import checkUpdate from './checkUpdate.js'
+import { hasNewVersion } from './util.js'
+import fs from 'node:fs'
+import runApp from './app.js'
 const defaultConfig = {
   "account": "",
   "password": "",
@@ -26,6 +28,8 @@ const defaultConfig = {
   "barkKey": "",
   "cookies": ""
 }
+
+global.version = JSON.parse(fs.readFileSync('./package.json', "utf8")).version
 
 global.platformIsWin = process.platform === 'win32'
 
@@ -112,12 +116,12 @@ const confirmLoginType = () =>
 const createConfiguration = () => {
   return inquirer.prompt([{
     type: 'confirm',
-    message: '是否开启调试？',
+    message: '是否开启调试',
     default: false,
     name: 'debug',
   }, {
     type: 'list',
-    message: '是否开启自动重启？',
+    message: '是否开启自动重启',
     choices: [{
       name: '关闭',
       value: false,
@@ -137,7 +141,7 @@ const createConfiguration = () => {
     name: 'executablePath',
   }, {
     //   type: 'confirm',
-    //   message: '使用OBS弹幕工具监控？',
+    //   message: '使用OBS弹幕工具监控',
     //   default: true,
     //   name: 'useObsDanmaku',
     // }, {
@@ -147,7 +151,7 @@ const createConfiguration = () => {
     name: 'checkWearMedal'
   }, {
     type: 'confirm',
-    message: '只要有粉丝牌，即使未关注主播也需要监控？',
+    message: '只要有粉丝牌，即使未关注主播也需要监控',
     default: false,
     name: 'checkAllRoom'
   }]).then((answers) => {
@@ -196,15 +200,13 @@ checkUpdate().then(() => {
   const config = getConfig()
   let 配置文件过期 = false
   if (config !== null) {
-    const { version } = require('./package.json')
-    const { hasNewVersion } = require('./util.js')
     if (config.version === undefined) {
       // 没有版本信息
       配置文件过期 = true
-    } else if (config.version === version) {
+    } else if (config.version === global.version) {
       // 当前版本
       配置文件过期 = false
-    } else if (hasNewVersion(config.version, version)) {
+    } else if (hasNewVersion(config.version, global.version)) {
       // 旧版本
       配置文件过期 = true
     } else {

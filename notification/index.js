@@ -1,15 +1,15 @@
 let data = {}
 
-const { getConfig, formartDate } = require('../util.js')
-const IFTTT = require('./ifttt')
-const BARK = require('./bark')
+import { getConfig, formartDate } from '../util.js'
+import IFTTT from './ifttt.js'
+import BARK from './bark.js'
 
 /**
  * 发送开播通知
  * @param {Array} liveUperInfo 开播的主播信息
  * @returns 
  */
-function liveStart (liveUperInfo) {
+export function liveStart (liveUperInfo) {
   const { checkLiveTimeout, notification, iftttKey, barkKey } = getConfig()
   if (notification === false || notification.length === 0) return
   if (iftttKey + barkKey === '') {
@@ -84,7 +84,7 @@ function liveStart (liveUperInfo) {
  * @param {String} url 点击通知跳转的链接
  * @returns 
  */
-function notify (message, url = '') {
+export function notify (message, url = '') {
   const config = getConfig()
   if (config === null) {
     return
@@ -117,9 +117,4 @@ function notify (message, url = '') {
     console.log(`通知 发送失败`);
     console.error(err)
   })
-}
-
-module.exports = {
-  liveStart,
-  notify
 }

@@ -87,7 +87,7 @@ const OpenLivePage = (page, retry = 0) => {
 }
 
 
-module.exports = (action, page, data) => {
+export default function (action, page, data) {
   switch (action) {
     case '个人信息':
       return handleProxy({
