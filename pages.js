@@ -36,7 +36,7 @@ export function userLogin (page) {
       await page.waitForSelector(loginBtnSelector);
       await page.click(loginBtnSelector)
       await page.waitForNavigation()
-      if (process.platform !== 'win32' || config.debug === true) {
+      if (process.platform !== 'win32' || config.debug === true || global.loginInfo.saveCookies) {
         await page.cookies().then(cookieList => {
           setConfig({ prop: 'cookies', value: cookieList })
         })
@@ -163,6 +163,11 @@ export function userLoginByQrcode (page) {
           console.error(err)
         }
         await page.waitForNavigation()
+        if (config.debug === true || global.loginInfo.saveCookies) {
+          await page.cookies().then(cookieList => {
+            setConfig({ prop: 'cookies', value: cookieList })
+          })
+        }
         resolve()
       }
     })

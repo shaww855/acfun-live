@@ -63,37 +63,26 @@ export const isLiveTab = url => {
 }
 
 const configPath = "./config.json"
-let config = null
+let configCache = null
 
 /**
  * 获取配置文件
  */
 export const getConfig = () => {
-const getConfig = () => {
-  if (config !== null) {
-    return config
+  if (configCache !== null) {
+    // 存在缓存则直接返回
+    return configCache
   }
   if (fs.existsSync(configPath)) {
-    config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
     console.log(`= config.json config 已读取 =`);
+    if (global.configCache) {
+      // 需要设置缓存
+      configCache = config
+    }
     return config
   } else {
-    // throw '未找到config.json';
     return null
-    // await inquirer.prompt([{
-    //   type: 'confirm',
-    //   name: 'create',
-    //   message: "未找到config.json，或文件已损坏！是否重新建立？",
-    // }]).then(answers => {
-    //   if (answers.create) {
-    //     return configQuestion()
-    //   } else {
-    //     console.log('程序即将关闭...');
-    //     setTimeout(() => {
-    //       process.exit(0)
-    //     }, 1000)
-    //   }
-    // })
   }
 }
 
