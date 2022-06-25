@@ -1,8 +1,10 @@
 // 工具类函数
-const { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig } = require('./util.js')
-// 配置文件
-const config = getConfig()
-const inquirer = require('inquirer');
+import { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig } from './util.js'
+import fs from 'node:fs';
+import QRCode from 'qrcode'
+import getInfo from './evaluateHandle.js'
+
+import inquirer from 'inquirer';
 // 报错计数
 const errorTimes = {
   主页: 0
@@ -10,12 +12,13 @@ const errorTimes = {
 let monitorTimeoutId = null
 let 检测到所有主播均未开播的次数 = 0
 
-const { liveStart, notify } = require('./notification')
+import { liveStart, notify } from './notification/index.js';
 /**
  * 用户登录
  * @param {Object} page 页面
  */
-function userLogin (page) {
+export function userLogin (page) {
+  const config = getConfig()
   return new Promise(async (resolve, reject) => {
     page.goto('https://www.acfun.cn/login', { waitUntil: 'domcontentloaded' }).then(async () => {
       const loginSwitch = '#login-switch'
@@ -61,7 +64,8 @@ function userLogin (page) {
  * 用Cookies登录
  * @param {Object} page 页面
  */
-async function userLoginByCookies (page) {
+export async function userLoginByCookies (page) {
+  const config = getConfig()
   let list = []
   if (config.cookies instanceof Object) {
     config.cookies.forEach(e => {
@@ -93,7 +97,8 @@ async function userLoginByCookies (page) {
  * 用户登录
  * @param {Object} page 页面
  */
-function userLoginByQrcode (page) {
+export function userLoginByQrcode (page) {
+  const config = getConfig()
   return new Promise(async (resolve, reject) => {
     const qrcodePath = "./qrcode.png"
 
@@ -112,17 +117,15 @@ function userLoginByQrcode (page) {
           // 保存二维码图片至本地
           const base64Data = res.imageData
           const dataBuffer = Buffer.from(base64Data, 'base64')
-          const fs = require("fs"); 
           fs.writeFile(qrcodePath, dataBuffer, err => {
             if (err) {
               console.error(err);
             } else {
-              console.log('如二维码图片无法扫描，请手动打开本工具同级目录下的图片进行扫码');
+              console.log('如二维码图片无法扫描，请自行打开本工具目录下的二维码图片进行扫码');
             }
           })
 
           // 在终端中展示二维码图片
-          const QRCode = require('qrcode')
           QRCode.toString(`http://scan.acfun.cn/l/${res.qrLoginToken}`, { type: 'terminal', small: true }, function (err, url) {
             if (err) throw err
             console.log(url)
@@ -154,7 +157,6 @@ function userLoginByQrcode (page) {
         ui.close()
         console.log('扫码登录成功');
         try {
-          const fs = require("fs"); 
           fs.unlinkSync(qrcodePath);
         } catch (err) {
           console.log('二维码图片清理失败，可手动删除。');
@@ -172,8 +174,8 @@ function userLoginByQrcode (page) {
  * @param {Object} browser 浏览器连接断点
  * @param {Number} times 检查次数
  */
-async function startMonitor (browser, times = 0) {
-  const getInfo = require('./evaluateHandle')
+export async function startMonitor (browser, times = 0) {
+  const config = getConfig()
   console.log('===');
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
 
@@ -264,7 +266,7 @@ async function startMonitor (browser, times = 0) {
  * 关闭浏览器及清除定时器
  * @param {Object} browser 浏览器对象
  */
-async function endMonitor(browser) {
+export async function endMonitor(browser) {
   clearTimeout(monitorTimeoutId)
   await browser.close()
 }
@@ -275,6 +277,7 @@ async function endMonitor(browser) {
  * @param {Array} list 正在直播的信息
  */
 async function checkOpenedPages (browser, list) {
+  const config = getConfig()
   // console.log('checkOpenedPages', list);
   let pages = await browser.pages()
   // console.log('循环当前标签页');
@@ -372,6 +375,7 @@ async function roomExit (page, uid, browser = null) {
  * @param {Number} num 重试次数
  */
 function roomOpen (browser, info, num = 0) {
+  const config = getConfig()
   // console.log('roomOpen', info);
   return browser.newPage().then(async page => {
     page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
@@ -406,6 +410,7 @@ function roomOpen (browser, info, num = 0) {
  * @param {Object} page 页面对象
  */
 async function afterOpenRoom (page) {
+  const config = getConfig()
   if (config.likeBtnTimeout > 0) {
     // 点赞
     page.waitForSelector('.like-btn').then(() => {
@@ -441,6 +446,7 @@ async function afterOpenRoom (page) {
  * @param {Array} liveUperInfo 直播中的用户uid数组
  */
 async function DDVup (browser, liveUperInfo) {
+  const config = getConfig()
   liveUperInfo = orderBy(liveUperInfo.map(info => ({
     // 配置不观看
     ...info,
@@ -452,7 +458,7 @@ async function DDVup (browser, liveUperInfo) {
     检测到所有主播均未开播的次数 ++
     console.log('---')
     console.log('拥有牌子的主播均未开播。')
-    console.log('如果你确定有主播开播，请删除config.json文件，并重启本工具')
+    console.log('如果你确定有主播开播：请删除 config.json 文件，重启本工具，按照提示重新登录')
     if (检测到所有主播均未开播的次数 > 24) {
       // 每十分钟检测一次，则24为：连续四小时都没有主播开播
       // 连续长时间无主播开播，可能为cookie过期，发送通知提醒
@@ -552,7 +558,8 @@ async function DDVup (browser, liveUperInfo) {
  * 拦截页面请求
  * @param {Object} page 页面
  */
-const requestFliter = async page => {
+export const requestFliter = async page => {
+  const config = getConfig()
   if (config.debug) {
     return
   }
@@ -579,7 +586,7 @@ const requestFliter = async page => {
   });
 }
 
-const handlePageError = async (page, uperName, err) => {
+export const handlePageError = async (page, uperName, err) => {
   if (errorTimes[uperName] === 'loading') {
     console.error(uperName, `handlePageError 已超过5次，刷新页面中...`);
     return
@@ -624,14 +631,4 @@ const handlePageError = async (page, uperName, err) => {
   //   console.log('捕捉到WebSocket错误', uperName);
   //   await page.close()
   // }
-}
-
-module.exports = {
-  userLogin,
-  userLoginByCookies,
-  userLoginByQrcode,
-  startMonitor,
-  endMonitor,
-  requestFliter,
-  handlePageError
 }

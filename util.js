@@ -1,7 +1,6 @@
 "use strict";
 
-const fs = require("fs");
-const { version } = require('./package.json')
+import fs from "fs"
 
 /**
 * 补零
@@ -9,14 +8,14 @@ const { version } = require('./package.json')
 * @param {Number} digits 理想位数 默认2
 * @param {String} pad 填充的字符 默认0
 */
-const padNum = (value, digits = 2, pad = '0') => String(value).padStart(digits, pad)
+export const padNum = (value, digits = 2, pad = '0') => String(value).padStart(digits, pad)
 
 /**
  * 格式化时间
  * @param {Date} time 时间戳
  * @param {String} action 日期\时间\日期时间\
  */
-const formartDate = (time, action = '日期时间') => {
+export const formartDate = (time, action = '日期时间') => {
   let date = new Date(time)
   const DateString = `${date.getFullYear()}-${padNum(date.getMonth() + 1)}-${padNum(date.getDate())}`
   const TimeString = `${padNum(date.getHours())}:${padNum(date.getMinutes())}:${padNum(date.getSeconds())}`
@@ -35,7 +34,7 @@ const formartDate = (time, action = '日期时间') => {
  * @param {Array} props 需要排序的值数组
  * @param {Array} orders asc desc
  */
-const orderBy = (arr, props, orders) =>
+export const orderBy = (arr, props, orders) =>
   [...arr].sort((a, b) =>
     props.reduce((acc, prop, i) => {
       if (acc === 0) {
@@ -51,7 +50,7 @@ const orderBy = (arr, props, orders) =>
  * @param {String} url 网址
  * @returns {Number}
  */
-function getUidByUrl (url) {
+export function getUidByUrl (url) {
   return Number(getConfig().useObsDanmaku ? url.split('/')[4].split('?')[0] : url.split('/')[4])
 }
 
@@ -59,7 +58,7 @@ function getUidByUrl (url) {
  * 返回页面是否是直播间
  * @param {String} url 
  */
-const isLiveTab = url => {
+export const isLiveTab = url => {
   return url.includes(getConfig().useObsDanmaku ? "live.acfun.cn/room/" : "live.acfun.cn/live/")
 }
 
@@ -69,6 +68,7 @@ let config = null
 /**
  * 获取配置文件
  */
+export const getConfig = () => {
 const getConfig = () => {
   if (config !== null) {
     return config
@@ -97,16 +97,17 @@ const getConfig = () => {
   }
 }
 
-const setConfig = ({
+export const setConfig = ({
   prop = null,
   value = '',
   userConfig = {}
 }) => {
+  let config = getConfig()
   if (prop === null) {
     config = {
       ...config,
       ...userConfig,
-      version
+      version: global.version
     }
   } else if (prop === 'cookies') {
     config.cookies = value.map(e => ({
@@ -127,22 +128,11 @@ const setConfig = ({
  * @param {String} newer 新版本
  * @returns Boolean
  */
-const hasNewVersion = (older, newer) => {
+export const hasNewVersion = (older, newer) => {
   newer = newer.split('.').map(e => Number(e))
   older = older.split('.').map(e => Number(e))
   if (newer.some(e => isNaN(e)) || older.some(e => isNaN(e))) {
     throw new Error('读取版本号失败')
   }
   return newer.some((e, i) => e > older[i])
-}
-
-module.exports = {
-  padNum,
-  formartDate,
-  orderBy,
-  getUidByUrl,
-  isLiveTab,
-  getConfig,
-  setConfig,
-  hasNewVersion
 }

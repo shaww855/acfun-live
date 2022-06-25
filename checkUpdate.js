@@ -1,6 +1,6 @@
-const https = require('https');
-const { version } = require('./package.json')
-const { notify } = require('./notification')
+import https from 'https'
+import { notify } from './notification/index.js'
+import { hasNewVersion } from './util.js'
 
 const downloadInfo = `
 ---
@@ -10,7 +10,7 @@ const downloadInfo = `
 ---
 `
 
-module.exports = () => {
+export default function(){
   return new Promise((resolve, reject) => {
     return https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', { timeout:3000 }, (res) => {
     // return https.get('https://raw.githubusercontent.com/shaww855/acfun-live/main/package.json', { timeout:3000 }, (res) => {
@@ -52,10 +52,9 @@ module.exports = () => {
       reject(e.message)
     });
   }).then(res => {
-    let msg = `当前版本：${version}，`
+    let msg = `当前版本：${global.version}，`
     if (res.version) {
-      const { hasNewVersion } = require('./util.js')
-      if (hasNewVersion(res.version, version)) {
+      if (hasNewVersion(res.version, global.version)) {
         msg += `GitHub版本 ${res.version}，请关注` 
         notify(msg, 'https://github.com/shaww855/acfun-live/releases')
         msg = `${msg}${downloadInfo}`

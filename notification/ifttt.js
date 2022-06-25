@@ -1,8 +1,8 @@
-const https = require('https')
-module.exports = (path) => {
+import https from 'node:https'
+export default function (path) {
   return new Promise((resolve, reject) => {
     path = encodeURI(path)
-    
+
     const options = {
       hostname: 'maker.ifttt.com',
       port: 443,

@@ -12,6 +12,7 @@
     "start": "node entry.js",
     "build:win": "pkg entry.js -o acfunlive -t win --public"
   },
+  "type": "module",
   "author": "shaw",
   "license": "ISC",
   "dependencies": {
