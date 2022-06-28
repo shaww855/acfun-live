@@ -1,8 +1,8 @@
-import schedule from 'node-schedule'
-import puppeteer from 'puppeteer'
-import { getConfig, setConfig } from './util.js'
+const schedule = require('node-schedule')
+const puppeteer = require('puppeteer')
+const { getConfig, setConfig } = require ('./util.js')
 // 页面操作
-import {
+const {
   userLogin,
   userLoginByCookies,
   userLoginByQrcode,
@@ -10,12 +10,11 @@ import {
   endMonitor,
   requestFliter,
   handlePageError
-} from './pages.js'
+} = require ('./pages.js')
 
-export default function(){
+module.exports = function(){
   // 配置文件
   const config = getConfig()
-
 
   console.log('调试模式', config.debug);
   console.log('每天0~1点自动重启', config.autoRestart);

@@ -1,10 +1,10 @@
 // 工具类函数
-import { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig } from './util.js'
-import fs from 'node:fs';
-import QRCode from 'qrcode'
-import getInfo from './evaluateHandle.js'
+const { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig } = require('./util.js')
+const fs = require('node:fs')
+const QRCode = require('qrcode')
+const getInfo = require('./evaluateHandle.js')
 
-import inquirer from 'inquirer';
+const inquirer = require('inquirer')
 // 报错计数
 const errorTimes = {
   主页: 0
@@ -12,12 +12,13 @@ const errorTimes = {
 let monitorTimeoutId = null
 let 检测到所有主播均未开播的次数 = 0
 
-import { liveStart, notify } from './notification/index.js';
+const { liveStart, notify } = require('./notification/index.js')
 /**
  * 用户登录
  * @param {Object} page 页面
  */
-export function userLogin (page) {
+
+function userLogin (page) {
   const config = getConfig()
   return new Promise(async (resolve, reject) => {
     page.goto('https://www.acfun.cn/login', { waitUntil: 'domcontentloaded' }).then(async () => {
@@ -64,7 +65,7 @@ export function userLogin (page) {
  * 用Cookies登录
  * @param {Object} page 页面
  */
-export async function userLoginByCookies (page) {
+async function userLoginByCookies (page) {
   const config = getConfig()
   let list = []
   if (config.cookies instanceof Object) {
@@ -97,7 +98,7 @@ export async function userLoginByCookies (page) {
  * 用户登录
  * @param {Object} page 页面
  */
-export function userLoginByQrcode (page) {
+function userLoginByQrcode (page) {
   const config = getConfig()
   return new Promise(async (resolve, reject) => {
     const qrcodePath = "./qrcode.png"
@@ -179,7 +180,7 @@ export function userLoginByQrcode (page) {
  * @param {Object} browser 浏览器连接断点
  * @param {Number} times 检查次数
  */
-export async function startMonitor (browser, times = 0) {
+async function startMonitor (browser, times = 0) {
   const config = getConfig()
   console.log('===');
   console.log('第', times + 1, '次检查直播状态', formartDate(new Date()))
@@ -271,7 +272,7 @@ export async function startMonitor (browser, times = 0) {
  * 关闭浏览器及清除定时器
  * @param {Object} browser 浏览器对象
  */
-export async function endMonitor(browser) {
+async function endMonitor(browser) {
   clearTimeout(monitorTimeoutId)
   await browser.close()
 }
@@ -563,7 +564,7 @@ async function DDVup (browser, liveUperInfo) {
  * 拦截页面请求
  * @param {Object} page 页面
  */
-export const requestFliter = async page => {
+async function requestFliter (page){
   const config = getConfig()
   if (config.debug) {
     return
@@ -591,7 +592,7 @@ export const requestFliter = async page => {
   });
 }
 
-export const handlePageError = async (page, uperName, err) => {
+async function handlePageError (page, uperName, err){
   if (errorTimes[uperName] === 'loading') {
     console.error(uperName, `handlePageError 已超过5次，刷新页面中...`);
     return
@@ -636,4 +637,19 @@ export const handlePageError = async (page, uperName, err) => {
   //   console.log('捕捉到WebSocket错误', uperName);
   //   await page.close()
   // }
+}
+
+module.exports = {
+  userLogin,
+  userLoginByCookies,
+  userLoginByQrcode,
+  startMonitor,
+  endMonitor,
+  checkOpenedPages,
+  roomExit,
+  roomOpen,
+  afterOpenRoom,
+  DDVup,
+  requestFliter,
+  handlePageError,
 }

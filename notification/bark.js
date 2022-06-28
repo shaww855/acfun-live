@@ -1,5 +1,5 @@
-import https from 'node:https'
-export default function (path) {
+const https = require('node:https')
+module.exports = function (path) {
   return new Promise((resolve, reject) => {
     path = encodeURI(path)
 
