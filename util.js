@@ -1,7 +1,6 @@
 "use strict";
 
-const fs = require("fs");
-const { version } = require('./package.json')
+const fs = require("fs")
 
 /**
 * 补零
@@ -51,9 +50,7 @@ const orderBy = (arr, props, orders) =>
  * @param {String} url 网址
  * @returns {Number}
  */
-function getUidByUrl (url) {
-  return Number(getConfig().useObsDanmaku ? url.split('/')[4].split('?')[0] : url.split('/')[4])
-}
+const getUidByUrl = url => Number(getConfig().useObsDanmaku ? url.split('/')[4].split('?')[0] : url.split('/')[4])
 
 /**
  * 返回页面是否是直播间
@@ -64,36 +61,26 @@ const isLiveTab = url => {
 }
 
 const configPath = "./config.json"
-let config = null
+let configCache = null
 
 /**
  * 获取配置文件
  */
 const getConfig = () => {
-  if (config !== null) {
-    return config
+  if (configCache !== null) {
+    // 存在缓存则直接返回
+    return configCache
   }
   if (fs.existsSync(configPath)) {
-    config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
     console.log(`= config.json config 已读取 =`);
+    if (global.configCache) {
+      // 需要设置缓存
+      configCache = config
+    }
     return config
   } else {
-    // throw '未找到config.json';
     return null
-    // await inquirer.prompt([{
-    //   type: 'confirm',
-    //   name: 'create',
-    //   message: "未找到config.json，或文件已损坏！是否重新建立？",
-    // }]).then(answers => {
-    //   if (answers.create) {
-    //     return configQuestion()
-    //   } else {
-    //     console.log('程序即将关闭...');
-    //     setTimeout(() => {
-    //       process.exit(0)
-    //     }, 1000)
-    //   }
-    // })
   }
 }
 
@@ -102,11 +89,12 @@ const setConfig = ({
   value = '',
   userConfig = {}
 }) => {
+  let config = getConfig()
   if (prop === null) {
     config = {
       ...config,
       ...userConfig,
-      version
+      version: global.version
     }
   } else if (prop === 'cookies') {
     config.cookies = value.map(e => ({
@@ -144,5 +132,5 @@ module.exports = {
   isLiveTab,
   getConfig,
   setConfig,
-  hasNewVersion
+  hasNewVersion,
 }

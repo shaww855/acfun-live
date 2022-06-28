@@ -1,7 +1,9 @@
 const { getConfig, setConfig } = require('./util.js')
-const inquirer = require('inquirer');
+const inquirer = require('inquirer')
 // 检查更新
-const checkUpdate = require('./checkUpdate')
+const checkUpdate = require('./checkUpdate.js')
+const { hasNewVersion } = require('./util.js')
+const fs = require('node:fs')
 const runApp = require('./app.js')
 const defaultConfig = {
   "account": "",
@@ -26,6 +28,8 @@ const defaultConfig = {
   "barkKey": "",
   "cookies": ""
 }
+
+global.version = JSON.parse(fs.readFileSync('./package.json', "utf8")).version
 
 global.platformIsWin = process.platform === 'win32'
 
@@ -84,6 +88,11 @@ const confirmLoginType = () =>
         done(null, true)
       }
     }
+  }, {
+    type: 'confirm',
+    message: '记住登录状态',
+    default: false,
+    name: 'saveCookies'
   }, ]).then(answers => {
     global.loginInfo = answers
 
@@ -111,13 +120,18 @@ const confirmLoginType = () =>
  */
 const createConfiguration = () => {
   return inquirer.prompt([{
+    type: 'number',
+    message: '直播间数量限制（请根据本机运行内存大小酌情设置，0 为无限）',
+    default: 0,
+    name: 'serverRoomLimit',
+  }, {
     type: 'confirm',
-    message: '是否开启调试？',
+    message: '是否开启调试',
     default: false,
     name: 'debug',
   }, {
     type: 'list',
-    message: '是否开启自动重启？',
+    message: '是否开启自动重启',
     choices: [{
       name: '关闭',
       value: false,
@@ -137,7 +151,7 @@ const createConfiguration = () => {
     name: 'executablePath',
   }, {
     //   type: 'confirm',
-    //   message: '使用OBS弹幕工具监控？',
+    //   message: '使用OBS弹幕工具监控',
     //   default: true,
     //   name: 'useObsDanmaku',
     // }, {
@@ -147,7 +161,7 @@ const createConfiguration = () => {
     name: 'checkWearMedal'
   }, {
     type: 'confirm',
-    message: '只要有粉丝牌，即使未关注主播也需要监控？',
+    message: '只要有粉丝牌，即使未关注主播也需要监控',
     default: false,
     name: 'checkAllRoom'
   }]).then((answers) => {
@@ -158,6 +172,8 @@ const createConfiguration = () => {
     if (global.loginInfo.loginType === 'cookies') {
       userConfig.cookies = JSON.parse(answers.cookies)
     }
+
+    userConfig.serverRoomLimit = [ userConfig.serverRoomLimit ]
 
     delete userConfig.notificationApp
     setConfig({
@@ -196,15 +212,13 @@ checkUpdate().then(() => {
   const config = getConfig()
   let 配置文件过期 = false
   if (config !== null) {
-    const { version } = require('./package.json')
-    const { hasNewVersion } = require('./util.js')
     if (config.version === undefined) {
       // 没有版本信息
       配置文件过期 = true
-    } else if (config.version === version) {
+    } else if (config.version === global.version) {
       // 当前版本
       配置文件过期 = false
-    } else if (hasNewVersion(config.version, version)) {
+    } else if (hasNewVersion(config.version, global.version)) {
       // 旧版本
       配置文件过期 = true
     } else {
@@ -218,16 +232,24 @@ checkUpdate().then(() => {
     if (config === null) {
       setConfig({ userConfig: defaultConfig })
       console.log('Linux请用户按照文档修改配置文件');
-      console.log('https://github.com/shilx/acfun-live#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E');
+      console.log('https://github.com/shaww855/acfun-live#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E');
     } else if (配置文件过期) {
       console.log('版本已更新，请按照文档重新创建配置文件');
-      console.log('https://github.com/shilx/acfun-live#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E');
+      console.log('https://github.com/shaww855/acfun-live#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E');
     } else {
       runApp()
     }
     return
   }
   // Win平台
+  if (config !== null && config.cookies !== '') {
+    global.loginInfo = {
+      ...config,
+      loginType: 'cookies'
+    }
+    runApp()
+    return
+  }
   confirmLoginType().then(async () => {
     if (config === null) {
       // 未配置

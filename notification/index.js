@@ -1,8 +1,8 @@
 let data = {}
 
 const { getConfig, formartDate } = require('../util.js')
-const IFTTT = require('./ifttt')
-const BARK = require('./bark')
+const IFTTT = require('./ifttt.js')
+const BARK = require('./bark.js')
 
 /**
  * 发送开播通知

@@ -1,0 +1,34 @@
+name: "Actions Release"
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    name: Publish binaries
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: 'Get cache'
+      uses: actions/setup-node@v3
+      with:
+        node-version: '14'
+        cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
+    - name: Set env
+      run: npm config set puppeteer_skip_chromium_download=true
+    - name: Install
+      run: npm ci
+    - name: Build
+      run: npm run build:win
+    - name: Upload to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: acfunlive.exe
+        asset_name: acfunlive_win_$tag.exe
+        tag: ${{ github.ref }}
+        overwrite: true

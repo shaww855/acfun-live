@@ -1,21 +1,20 @@
-module.exports = function () {
-  const schedule = require('node-schedule');
-  const puppeteer = require('puppeteer');
+const schedule = require('node-schedule')
+const puppeteer = require('puppeteer')
+const { getConfig, setConfig } = require ('./util.js')
+// 页面操作
+const {
+  userLogin,
+  userLoginByCookies,
+  userLoginByQrcode,
+  startMonitor,
+  endMonitor,
+  requestFliter,
+  handlePageError
+} = require ('./pages.js')
 
+module.exports = function(){
   // 配置文件
-  const { getConfig, setConfig } = require('./util.js')
   const config = getConfig()
-
-  // 页面操作
-  const {
-    userLogin,
-    userLoginByCookies,
-    userLoginByQrcode,
-    startMonitor,
-    endMonitor,
-    requestFliter,
-    handlePageError
-  } = require('./pages.js')
 
   console.log('调试模式', config.debug);
   console.log('每天0~1点自动重启', config.autoRestart);
@@ -64,7 +63,6 @@ module.exports = function () {
       ]
     }).then(async browser => {
       globalBrowser = browser
-      console.log('puppeteer launched');
       const pageList = await browser.pages()
       const page = pageList[0]
       await requestFliter(page)
@@ -106,7 +104,8 @@ module.exports = function () {
 
       // 起飞
       loginFn(page).then(() => {
-        console.log('loginFn then');
+        // 登录成功后，设置配置缓存
+        global.configCache = true
         startMonitor(browser)
       })
 
