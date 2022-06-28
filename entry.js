@@ -1,10 +1,10 @@
-import { getConfig, setConfig } from './util.js'
-import inquirer from 'inquirer';
+const { getConfig, setConfig } = require('./util.js')
+const inquirer = require('inquirer')
 // 检查更新
-import checkUpdate from './checkUpdate.js'
-import { hasNewVersion } from './util.js'
-import fs from 'node:fs'
-import runApp from './app.js'
+const checkUpdate = require('./checkUpdate.js')
+const { hasNewVersion } = require('./util.js')
+const fs = require('node:fs')
+const runApp = require('./app.js')
 const defaultConfig = {
   "account": "",
   "password": "",

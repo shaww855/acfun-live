@@ -1,6 +1,6 @@
-import https from 'https'
-import { notify } from './notification/index.js'
-import { hasNewVersion } from './util.js'
+const https = require('https')
+const { notify } = require('./notification/index.js')
+const { hasNewVersion } = require('./util.js')
 
 const downloadInfo = `
 ---
@@ -10,7 +10,7 @@ const downloadInfo = `
 ---
 `
 
-export default function(){
+module.exports = function(){
   return new Promise((resolve, reject) => {
     return https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', { timeout:3000 }, (res) => {
     // return https.get('https://raw.githubusercontent.com/shaww855/acfun-live/main/package.json', { timeout:3000 }, (res) => {
