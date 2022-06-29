@@ -29,7 +29,8 @@ const defaultConfig = {
   "cookies": ""
 }
 
-global.version = JSON.parse(fs.readFileSync('./package.json', "utf8")).version
+const { version } = require('./package.json')
+global.version = version
 
 global.platformIsWin = process.platform === 'win32'
 
