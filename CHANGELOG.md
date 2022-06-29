@@ -4,6 +4,11 @@
 
 ## [未发布]
 
+## [1.5.3] - 2022-06-29  
+
+### 变更
+* 修复了错误的文件引入方式导致在win平台上闪退问题
+
 ## [1.5.2] - 2022-06-28  
 ### 新增    
 * Win 平台添加`记住登录状态`引导  
@@ -17,5 +22,6 @@
 * 说明文档新增配置文件中`cookies`和`version`的解释
 * 读取配置方式优化，在登录成功后配置储存于运行环境，避免频繁 I/O
   
-[未发布]: https://github.com/shaww855/acfun-live/compare/v1.5.2...HEAD
+[未发布]: https://github.com/shaww855/acfun-live/compare/v1.5.3...HEAD
+[1.5.3]: https://github.com/shaww855/acfun-live/compare/v1.5.2...1.5.3
 [1.5.2]: https://github.com/shaww855/acfun-live/compare/v1.5.1...v1.5.2
