@@ -3,6 +3,10 @@
 格式基于[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并且该项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
 ## [未发布]
+### 新增
+* 打包时顺便生成一个压缩的副本
+### 变更
+* 工作流调整，使用`Node16`打包，发布时上传压缩后的副本
 
 ## [1.5.3] - 2022-06-29  
 
