@@ -7,28 +7,30 @@ on:
 
 jobs:
   build:
-    name: Publish binaries
+    name: 打包并发布
     runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v3
-    - name: 'Get cache'
+    - name: 检查缓存
       uses: actions/setup-node@v3
       with:
-        node-version: '14'
+        node-version: '16'
         cache: 'npm'
         cache-dependency-path: '**/package-lock.json'
-    - name: Set env
+    - name: 设置环境变量
       run: npm config set puppeteer_skip_chromium_download=true
-    - name: Install
+    - name: 安装依赖
       run: npm ci
-    - name: Build
+    - name: 打包
       run: npm run build:win
-    - name: Upload to release
+    - name: 压缩
+      run: makecab acfunlive.exe acfunlive.zip
+    - name: 上传
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: acfunlive.exe
-        asset_name: acfunlive_win_$tag.exe
+        file: acfunlive.zip
+        asset_name: acfunlive_win_$tag.zip
         tag: ${{ github.ref }}
         overwrite: true
