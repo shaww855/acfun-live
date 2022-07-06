@@ -1,6 +1,6 @@
 const https = require('https')
 const { notify } = require('./notification/index.js')
-const { hasNewVersion } = require('./util.js')
+const { hasNewVersion } = require('../util.js')
 
 const downloadInfo = `
 ---

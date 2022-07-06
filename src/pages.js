@@ -1,5 +1,5 @@
 // 工具类函数
-const { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig } = require('./util.js')
+const { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig } = require('../util.js')
 const fs = require('node:fs')
 const QRCode = require('qrcode')
 const getInfo = require('./evaluateHandle.js')
