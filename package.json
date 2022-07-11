@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "node entry.js",
-    "build:win": "pkg entry.js -o acfunlive -t win --public && makecab acfunlive.exe acfunlive.zip"
+    "build:win": "pkg entry.js -o dist/acfunlive -t win --public"
   },
   "author": "shaw",
   "license": "ISC",
