@@ -25,12 +25,12 @@ jobs:
     - name: 打包
       run: npm run build:win
     - name: 压缩
-      run: makecab dist/acfunlive.exe dist/acfunlive.cab
+      run: powershell Compress-Archive dist/acfunlive.exe dist/publish.zip
     - name: 上传
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: dist/acfunlive.cab
-        asset_name: acfunlive_win_$tag.cab
+        file: dist/publish.zip
+        asset_name: acfunlive_win_$tag.zip
         tag: ${{ github.ref }}
         overwrite: true
