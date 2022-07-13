@@ -1,10 +1,10 @@
-const handleProxy = async ({ page, action, url, method = 'POST', retry = 0 }) => {
+const handleProxy = async ({ page, action, url, method = 'POST', retry = 0, headers = {}, body = null }) => {
   const msg = '获取 ' + action
   console.log('Fetch', url);
-  const handle = await page.evaluateHandle(({ url, method }) =>
+  const handle = await page.evaluateHandle(({ url, method, headers, body }) =>
     fetch(
       url,
-      { method }
+      { method, headers, body, credentials: 'include' }
     ).then(
       res => res.json()
     ).catch(err => {
@@ -16,7 +16,7 @@ const handleProxy = async ({ page, action, url, method = 'POST', retry = 0 }) =>
       }
     }
     ),
-    { url, method }
+    { url, method, headers, body }
   ).finally(() => {
     console.log(msg, 'done');
   })
@@ -28,7 +28,7 @@ const handleProxy = async ({ page, action, url, method = 'POST', retry = 0 }) =>
     if (res.handleError) {
       if (retry < 6) {
         console.log(`${msg} 第${retry}次失败`);
-        return handleProxy({ page, action, url, method, retry: retry + 1 })
+        return handleProxy({ page, action, url, method, retry: retry + 1, headers, body })
       } else {
         throw {
           ...res,
@@ -44,12 +44,12 @@ const handleProxy = async ({ page, action, url, method = 'POST', retry = 0 }) =>
   }).catch(err => {
     console.log(`解析${action}数据 第${retry}次失败`);
     console.error(err);
-    if (retry < 6) {
-      return handleProxy({ page, action, url, method, retry: retry + 1 })
-    } else {
-      throw err
-    }
-  }).finally(() => {
+      if (retry < 6) {
+        return handleProxy({ page, action, url, method, retry: retry + 1, headers, body })
+      } else {
+        throw err
+      }
+    }).finally(() => {
     handle.dispose()
   })
 }
@@ -150,11 +150,12 @@ module.exports = (action, page, data) => {
               uperName: e.user.name,
               title: e.title,
               createTime: e.createTime,
-              headUrl: e.user.headUrl
+              headUrl: e.user.headUrl,
+              liveId: e.liveId
             })
             )
-          // ).finally(() =>
-          //   page.close()
+            // ).finally(() =>
+            //   page.close()
           )
       )
     case '当日时长':
@@ -177,15 +178,32 @@ module.exports = (action, page, data) => {
           method: 'GET'
         })
           .then(res => res.liveList.map(e =>
-            ({
-              authorId: e.authorId,
-              title: e.title,
-              createTime: e.createTime
-            })
-            )
-          // }).finally(() =>
-          //   page.close()
+          ({
+            authorId: e.authorId,
+            title: e.title,
+            createTime: e.createTime
+          })
           )
+          )
+      )
+    case '获取token':
+      return handleProxy({
+        page,
+        action,
+        url: 'https://id.app.acfun.cn/rest/web/token/get',
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'sid=acfun.midground.api'
+      })
+    case '获取直播云剪辑地址':
+      return OpenLivePage(page).then(page =>
+        handleProxy({
+          page,
+          action,
+          url: `https://live.acfun.cn/rest/pc-direct/live/getLiveCutInfo?authorId=${data.authorId}&liveId=${data.liveId}`,
+          method: 'GET',
+          retry: 5
+        })
       )
 
     default:

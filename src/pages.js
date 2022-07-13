@@ -1,5 +1,5 @@
 // 工具类函数
-const { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig } = require('../util.js')
+const { formartDate, orderBy, getUidByUrl, isLiveTab, getConfig, setConfig, writeOnVideoUrl } = require('../util.js')
 const fs = require('node:fs')
 const QRCode = require('qrcode')
 const getInfo = require('./evaluateHandle.js')
@@ -366,6 +366,7 @@ async function roomExit (page, uid, browser = null) {
   return page.title().then(uperName => {
     errorTimes[uperName] = 0
     console.log('退出直播', uperName)
+
   }).catch(err => {
     console.error(err);
     console.log('退出直播', uid);
@@ -403,6 +404,8 @@ function roomOpen (browser, info, num = 0) {
         // 不使用OBS工具监控时才能点赞
         await afterOpenRoom(page, info.uperName)
       }
+
+      getOnVideoUrl(page, info)
     }).catch(err => {
       console.log('进入直播间失败');
       console.error(err);
@@ -637,6 +640,30 @@ async function handlePageError (page, uperName, err){
   //   console.log('捕捉到WebSocket错误', uperName);
   //   await page.close()
   // }
+}
+
+function getOnVideoUrl (page, info = {uperId: null,uperName:""}) {
+  getInfo('获取直播云剪辑地址', page, {
+    authorId: info.uperId,
+    liveId: info.liveId
+  }).then(res => {
+    if (res.liveCutStatus !== 1) {
+      console.log(`${info.uperName} 主播不允许剪辑`);
+      return
+    }
+    // 主播允许剪辑
+    const liveCutUrl = res.liveCutUrl
+    getInfo('获取token', page).then(res => {
+      const url = `https://onvideoapi.kuaishou.com/rest/infra/sts?authToken=${res["acfun.midground.api.at"]}&sid=acfun.midground.api&followUrl=${liveCutUrl}`
+      writeOnVideoUrl(info, url)
+    }).catch(err => {
+      console.log('保存爱咔地址时，获取acfun.midground.api.at失败');
+      console.log(err);
+    })
+  }).catch(err => {
+    console.log('生成爱咔云剪辑地址失败');
+    console.log(err);
+  })
 }
 
 module.exports = {

@@ -124,6 +124,19 @@ const hasNewVersion = (older, newer) => {
   return newer.some((e, i) => e > older[i])
 }
 
+const writeOnVideoUrl = (info, url) => {
+  fs.writeFile(
+    `./OnVideoUrl.txt`,
+    // `./OnVideoUrl/${new Date().toLocaleDateString().replaceAll('/', '-')}.txt`,
+    `${new Date().toLocaleTimeString()}${info.uperName}${url}\r\n`,
+    { flag: 'a+' },
+    err => {
+      if (err) {
+        console.error(err);
+      }
+    })
+}
+
 module.exports = {
   padNum,
   formartDate,
@@ -133,4 +146,5 @@ module.exports = {
   getConfig,
   setConfig,
   hasNewVersion,
+  writeOnVideoUrl
 }
