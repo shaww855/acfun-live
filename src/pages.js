@@ -87,7 +87,7 @@ async function userLoginByCookies (page) {
     })
   }
   await Promise.all(list)
-  return page.goto('https://www.acfun.cn', {waitUntil: 'domcontentloaded'}).catch(err => {
+  return page.goto('https://www.acfun.cn', { waitUntil: 'domcontentloaded' }).catch(err => {
     console.log('跳转主页失败');
     console.log(err);
     page.browser().close()
@@ -272,7 +272,7 @@ async function startMonitor (browser, times = 0) {
  * 关闭浏览器及清除定时器
  * @param {Object} browser 浏览器对象
  */
-async function endMonitor(browser) {
+async function endMonitor (browser) {
   clearTimeout(monitorTimeoutId)
   await browser.close()
 }
@@ -358,7 +358,7 @@ async function roomExit (page, uid, browser = null) {
     }
   }
 
-  
+
   if (page && page.isClosed()) {
     // 异步操作 检查牌子时已经执行退出
     return Promise.resolve()
@@ -393,7 +393,7 @@ function roomOpen (browser, info, num = 0) {
     })
 
     const url = config.useObsDanmaku ? `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false` : `https://live.acfun.cn/live/${info.uperId}`
-    return page.goto(url, {waitUntil: 'domcontentloaded'}).then(async () => {
+    return page.goto(url, { waitUntil: 'domcontentloaded' }).then(async () => {
       console.log('进入直播', info.uperName);
 
       errorTimes[info.uperName] = 0
@@ -464,7 +464,7 @@ async function DDVup (browser, liveUperInfo) {
   // console.log(liveUperInfo);
 
   if (liveUperInfo.length === 0) {
-    检测到所有主播均未开播的次数 ++
+    检测到所有主播均未开播的次数++
     console.log('---')
     console.log('拥有牌子的主播均未开播。')
     console.log('如果你确定有主播开播：请删除 config.json 文件，重启本工具，按照提示重新登录')
@@ -567,7 +567,7 @@ async function DDVup (browser, liveUperInfo) {
  * 拦截页面请求
  * @param {Object} page 页面
  */
-async function requestFliter (page){
+async function requestFliter (page) {
   const config = getConfig()
   if (config.debug) {
     return
@@ -595,7 +595,7 @@ async function requestFliter (page){
   });
 }
 
-async function handlePageError (page, uperName, err){
+async function handlePageError (page, uperName, err) {
   if (errorTimes[uperName] === 'loading') {
     console.error(uperName, `handlePageError 已超过5次，刷新页面中...`);
     return
@@ -642,24 +642,26 @@ async function handlePageError (page, uperName, err){
   // }
 }
 
-function getOnVideoUrl (page, info = {uperId: null,uperName:""}) {
-  getInfo('获取直播云剪辑地址', page, {
+function getOnVideoUrl (page, info = { uperId: null, uperName: "", createTime: null }) {
+  getInfo('云剪辑地址', page, {
     authorId: info.uperId,
     liveId: info.liveId
   }).then(res => {
     if (res.liveCutStatus !== 1) {
-      console.log(`${info.uperName} 主播不允许剪辑`);
+      // console.log(`${info.uperName} 主播不允许剪辑`);
+      writeOnVideoUrl(info, '主播不允许剪辑')
       return
     }
     // 主播允许剪辑
-    const liveCutUrl = res.liveCutUrl
-    getInfo('获取token', page).then(res => {
-      const url = `https://onvideoapi.kuaishou.com/rest/infra/sts?authToken=${res["acfun.midground.api.at"]}&sid=acfun.midground.api&followUrl=${liveCutUrl}`
-      writeOnVideoUrl(info, url)
-    }).catch(err => {
-      console.log('保存爱咔地址时，获取acfun.midground.api.at失败');
-      console.log(err);
-    })
+    writeOnVideoUrl(info, res.liveCutUrl)
+    // const liveCutUrl = res.liveCutUrl
+    // getInfo('获取token', page).then(res => {
+    //   const url = `https://onvideoapi.kuaishou.com/rest/infra/sts?authToken=${res["acfun.midground.api.at"]}&sid=acfun.midground.api&followUrl=${liveCutUrl}`
+    //   writeOnVideoUrl(info, url)
+    // }).catch(err => {
+    //   console.log('保存爱咔地址时，获取acfun.midground.api.at失败');
+    //   console.log(err);
+    // })
   }).catch(err => {
     console.log('生成爱咔云剪辑地址失败');
     console.log(err);

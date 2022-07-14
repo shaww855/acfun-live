@@ -195,11 +195,11 @@ module.exports = (action, page, data) => {
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'sid=acfun.midground.api'
       })
-    case '获取直播云剪辑地址':
+    case '云剪辑地址':
       return OpenLivePage(page).then(page =>
         handleProxy({
           page,
-          action,
+          action: `${action} ${data.authorId}`,
           url: `https://live.acfun.cn/rest/pc-direct/live/getLiveCutInfo?authorId=${data.authorId}&liveId=${data.liveId}`,
           method: 'GET',
           retry: 5

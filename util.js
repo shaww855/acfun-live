@@ -125,10 +125,19 @@ const hasNewVersion = (older, newer) => {
 }
 
 const writeOnVideoUrl = (info, url) => {
+  const Dir = './OnVideoUrl'
+  if (!fs.existsSync(Dir)) {
+    console.log('爱咔文件夹不存在，正在创建。');
+    fs.mkdir(Dir, err => {
+      if (err) {
+        console.log(err);
+      }
+    })
+  }
   fs.writeFile(
-    `./OnVideoUrl.txt`,
-    // `./OnVideoUrl/${new Date().toLocaleDateString().replaceAll('/', '-')}.txt`,
-    `${new Date().toLocaleTimeString()}${info.uperName}${url}\r\n`,
+    // `./OnVideoUrl.txt`,
+    `${Dir}/${new Date().toLocaleDateString().replaceAll('/', '-')}.txt`,
+    `${new Date().toLocaleTimeString()}: [${info.uperName} 开播于 ${new Date(info.createTime).toLocaleTimeString()}]${url}\r\n`,
     { flag: 'a+' },
     err => {
       if (err) {

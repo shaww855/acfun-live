@@ -2,6 +2,7 @@
 node_modules
 /dist
 /logs
+/OnVideoUrl
 
 # local env files
 .env.local
