@@ -145,17 +145,16 @@ module.exports = (action, page, data) => {
         })
           .then(res =>
             res.liveList.map(e =>
-            ({
-              authorId: e.authorId,
-              uperName: e.user.name,
-              title: e.title,
-              createTime: e.createTime,
-              headUrl: e.user.headUrl,
-              liveId: e.liveId
-            })
+              ({
+                authorId: e.authorId,
+                uperName: e.user.name,
+                title: e.title,
+                createTime: e.createTime,
+                headUrl: e.user.headUrl,
+                liveId: e.liveId,
+                portrait:e.portrait // 是否为手机开播
+              })
             )
-            // ).finally(() =>
-            //   page.close()
           )
       )
     case '当日时长':

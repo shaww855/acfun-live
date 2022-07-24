@@ -405,7 +405,7 @@ function roomOpen (browser, info, num = 0) {
         await afterOpenRoom(page, info.uperName)
       }
 
-      getOnVideoUrl(page, info)
+      // getOnVideoUrl(page, info)
     }).catch(err => {
       console.log('进入直播间失败');
       console.error(err);
@@ -654,14 +654,6 @@ function getOnVideoUrl (page, info = { uperId: null, uperName: "", createTime: n
     }
     // 主播允许剪辑
     writeOnVideoUrl(info, res.liveCutUrl)
-    // const liveCutUrl = res.liveCutUrl
-    // getInfo('获取token', page).then(res => {
-    //   const url = `https://onvideoapi.kuaishou.com/rest/infra/sts?authToken=${res["acfun.midground.api.at"]}&sid=acfun.midground.api&followUrl=${liveCutUrl}`
-    //   writeOnVideoUrl(info, url)
-    // }).catch(err => {
-    //   console.log('保存爱咔地址时，获取acfun.midground.api.at失败');
-    //   console.log(err);
-    // })
   }).catch(err => {
     console.log('生成爱咔云剪辑地址失败');
     console.log(err);
