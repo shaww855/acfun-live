@@ -1,6 +1,6 @@
 let data = {}
 
-const { getConfig, formartDate } = require('../util.js')
+const { getConfig, formartDate } = require('../../util.js')
 const IFTTT = require('./ifttt.js')
 const BARK = require('./bark.js')
 

@@ -1,6 +1,6 @@
 const schedule = require('node-schedule')
 const puppeteer = require('puppeteer')
-const { getConfig, setConfig } = require ('./util.js')
+const { getConfig } = require ('../util.js')
 // 页面操作
 const {
   userLogin,

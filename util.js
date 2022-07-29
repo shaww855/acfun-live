@@ -73,7 +73,7 @@ const getConfig = () => {
   }
   if (fs.existsSync(configPath)) {
     const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-    console.log(`= config.json config 已读取 =`);
+    // console.log(`= config.json config 已读取 =`);
     if (global.configCache) {
       // 需要设置缓存
       configCache = config
@@ -106,7 +106,7 @@ const setConfig = ({
     config[prop] = value
   }
   fs.writeFileSync(configPath, JSON.stringify(config, null, 4));
-  console.log(`= config.json cookies 已保存 =`);
+  // console.log(`= config.json cookies 已保存 =`);
 }
 
 /**
@@ -124,6 +124,28 @@ const hasNewVersion = (older, newer) => {
   return newer.some((e, i) => e > older[i])
 }
 
+const writeOnVideoUrl = (info, url) => {
+  const Dir = './OnVideoUrl'
+  if (!fs.existsSync(Dir)) {
+    console.log('爱咔文件夹不存在，正在创建。');
+    fs.mkdir(Dir, err => {
+      if (err) {
+        console.log(err);
+      }
+    })
+  }
+  fs.writeFile(
+    // `./OnVideoUrl.txt`,
+    `${Dir}/${new Date().toLocaleDateString().replaceAll('/', '-')}.txt`,
+    `${new Date().toLocaleTimeString()}: [${info.uperName} 开播于 ${new Date(info.createTime).toLocaleTimeString()}]${url}\r\n`,
+    { flag: 'a+' },
+    err => {
+      if (err) {
+        console.error(err);
+      }
+    })
+}
+
 module.exports = {
   padNum,
   formartDate,
@@ -133,4 +155,5 @@ module.exports = {
   getConfig,
   setConfig,
   hasNewVersion,
+  writeOnVideoUrl
 }

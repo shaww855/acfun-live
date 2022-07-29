@@ -1,14 +1,15 @@
 # AcFun-Live  
+## 介绍
 [![Actions Release](https://github.com/shaww855/acfun-live/actions/workflows/git-actions-release.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/git-actions-release.yml)
 [![CodeQL](https://github.com/shaww855/acfun-live/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/codeql-analysis.yml)  
 [![version](https://img.shields.io/github/package-json/v/shaww855/acfun-live)](https://github.com/shaww855/acfun-live/tags)
 [![downloads](https://img.shields.io/github/downloads/shaww855/acfun-live/total)](https://github.com/shaww855/acfun-live/releases)
 [![license](https://img.shields.io/github/license/shaww855/acfun-live)](https://github.com/shaww855/acfun-live/blob/main/LICENSE)  
-使用 Puppeteer 开启 AcFun 直播监控室，挂牌子，还有开播通知！😏  
-请认准唯二指定下载仓库 Gitee、Github。  
+使用 Puppeteer 开启 AcFun 直播监控室，定时检测主播开播情况，经验挂满后自动离开直播间。  
+请认准唯二指定下载仓库 Github、Gitee。  
 本工具完全免费、开源，有更好的点子欢迎PR。
 ## 隐私提示 
-本工具不会向A站以外的任何服务器发送或储存你的任何信息，也不会分享任何信息给任意第三方，所有操作均通过A站Api实现。  
+本工具不会向A站以外的任何服务器发送或储存你的任何信息，也不会分享任何信息给任意第三方，所有操作均通过A站API实现。  
  - Win 用户扫码登录不储存任何信息；账号密码登录则储存于运行环境中，关闭即销毁。  
  - Linux 用户账号密码明文存储于本地，请自行保证本地环境安全。  
 
@@ -17,13 +18,14 @@
   1. 查询你的粉丝牌列表及粉丝牌经验；  
   1. 使用你的账号信息查询主播开播信息；  
   1. 使用你的账号进入直播间。  
+
+## 更新日志  
+请参阅 [CHANGELOG.md](https://github.com/shaww855/acfun-live/blob/main/CHANGELOG.md)
 ## 运行环境  
 本工具通过操控 Chromium 实现各种操作，请始终保持你的浏览器为最新版本。  
 - ## Windows  
   **可选扫码登录，无需输入账号密码**  
-  支持 Windows10 及以上，请前往 发布页面 下载：   
-  - [国内下载地址](https://gitee.com/cn_shaw/acfun-live/releases)  
-  - [海外下载地址](https://github.com/shaww855/acfun-live/releases)  
+  支持 Windows10 及以上，请前往 [发布页面](https://github.com/shaww855/acfun-live/releases) 下载：   
 - ## Linux  
   - 安装  
       - NodeJs 和 NPM （尽量保持为最新版）
@@ -35,7 +37,7 @@
   - 进阶  
     使用进程守护挂载  
     **如果你在进程守护中配置了重启，请关闭 config.autoRestart 选项**   
-    例如 [PM2](https://pm2.keymetrics.io/) ，配置文件在 ecosystem.config.js ，用它也可以记录日志。
+    例如 [PM2](https://pm2.keymetrics.io/) ，配置文件在 `ecosystem.config.js`。
 
 
 ## 官方对第三方插件的态度  
@@ -67,7 +69,7 @@ serverRoomLimit | Array | 支持多台服务器 <br> 假如你有三台服务器
 serverIndex | Array | 当前是第几台，从0开始
 checkAllRoom | Boolean | 只要有牌子，不管是否关注都监控
 useObsDanmaku | Boolean | 使用官方OBS弹幕工具监控<br>开启此项时 自动点赞功能 会失效
-notification | Boolean<br>Array  | 借助第三方APP推送开播通知<br>true: 所有粉丝牌主播的通知<br>false: 不推送开播通知<br> [ Number ]: 指定uid开播推送，前提是已关注并有粉丝牌<br>此配置项会受 `checkAllRoom` 影响<br>服务器时间的 0~6 点不推送
+notification | Boolean<br>Array  | 借助第三方APP推送开播通知<br>true: 有粉丝牌的主播都通知<br>false: 不推送开播通知<br> [ Number ]: 指定uid开播推送，前提是已关注并有粉丝牌<br>此配置项会受 `checkAllRoom` 影响<br>服务器时间的 0~6 点不推送
 iftttKey | String | [IFTTT](https://ifttt.com/) 密钥<br>[配置方法](#IFTTT)
 barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  仅限IOS<br>[配置方法](#BARK)
 cookies | String<br>Array | 保存登录状态的字段<br>要么为空字符串，要么为`puppeteer`导出的`cookies`数组

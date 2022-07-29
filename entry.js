@@ -1,10 +1,10 @@
 const { getConfig, setConfig } = require('./util.js')
 const inquirer = require('inquirer')
 // 检查更新
-const checkUpdate = require('./checkUpdate.js')
+const checkUpdate = require('./src/checkUpdate.js')
 const { hasNewVersion } = require('./util.js')
 const fs = require('node:fs')
-const runApp = require('./app.js')
+const runApp = require('./src/app.js')
 const defaultConfig = {
   "account": "",
   "password": "",
@@ -208,6 +208,7 @@ const handleError = err => {
 
 process.on('uncaughtException', handleError)
 process.on("unhandledRejection", handleError);
+console.log('本工具完全开源免费，开源地址： https://github.com/shaww855/acfun-live');
 
 checkUpdate().then(() => {
   const config = getConfig()
