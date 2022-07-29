@@ -3,13 +3,15 @@
 格式基于[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并且该项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
 ## [未发布]
-
+## [1.5.4] - 2022-07-29
 ### 变更
-* 工作流调整，使用`Node16`打包，发布时上传压缩后的文件。
+* 工作流调整，使用 `Node16` 打包，发布压缩后的文件。
 * 源码目录结构调整。
 * 隐藏不影响使用的报错信息。
 * 调整说明文档。
 * 更新依赖包。
+### 修复
+* 修复配置项 `checkAllRoom` 为 `true` 时，发送通知报错的问题
 
 ## [1.5.3] - 2022-06-29  
 
@@ -29,6 +31,7 @@
 * 说明文档新增配置文件中`cookies`和`version`的解释。
 * 读取配置方式优化，在登录成功后配置储存于运行环境，避免频繁 I/O。
   
-[未发布]: https://github.com/shaww855/acfun-live/compare/v1.5.3...HEAD
-[1.5.3]: https://github.com/shaww855/acfun-live/compare/v1.5.2...1.5.3
-[1.5.2]: https://github.com/shaww855/acfun-live/compare/v1.5.1...v1.5.2
+[未发布]: https://github.com/shaww855/acfun-live/compare/main...dev
+[1.5.4]: https://github.com/shaww855/acfun-live/compare/v1.5.3...v1.5.4
+[1.5.3]: https://github.com/shaww855/acfun-live/compare/v1.5.2...v1.5.3
+[1.5.2]: https://github.com/shaww855/acfun-live/releases/tag/v1.5.2
