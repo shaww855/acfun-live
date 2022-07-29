@@ -44,12 +44,12 @@ const handleProxy = async ({ page, action, url, method = 'POST', retry = 0, head
   }).catch(err => {
     console.log(`解析${action}数据 第${retry}次失败`);
     console.error(err);
-      if (retry < 6) {
-        return handleProxy({ page, action, url, method, retry: retry + 1, headers, body })
-      } else {
-        throw err
-      }
-    }).finally(() => {
+    if (retry < 6) {
+      return handleProxy({ page, action, url, method, retry: retry + 1, headers, body })
+    } else {
+      throw err
+    }
+  }).finally(() => {
     handle.dispose()
   })
 }
@@ -145,15 +145,15 @@ module.exports = (action, page, data) => {
         })
           .then(res =>
             res.liveList.map(e =>
-              ({
-                authorId: e.authorId,
-                uperName: e.user.name,
-                title: e.title,
-                createTime: e.createTime,
-                headUrl: e.user.headUrl,
-                liveId: e.liveId,
-                portrait:e.portrait // 是否为手机开播
-              })
+            ({
+              authorId: e.authorId,
+              uperName: e.user.name,
+              title: e.title,
+              createTime: e.createTime,
+              headUrl: e.user.headUrl,
+              liveId: e.liveId,
+              portrait: e.portrait // 是否为手机开播
+            })
             )
           )
       )
@@ -176,13 +176,15 @@ module.exports = (action, page, data) => {
           url: `https://live.acfun.cn/api/channel/list?count=1000&pcursor=0`,
           method: 'GET'
         })
-          .then(res => res.liveList.map(e =>
-          ({
-            authorId: e.authorId,
-            title: e.title,
-            createTime: e.createTime
-          })
-          )
+          .then(res =>
+            res.liveList.map(e =>
+            ({
+              authorId: e.authorId,
+              title: e.title,
+              createTime: e.createTime,
+              headUrl: e.user.headUrl
+            })
+            )
           )
       )
     case '获取token':
@@ -191,7 +193,7 @@ module.exports = (action, page, data) => {
         action,
         url: 'https://id.app.acfun.cn/rest/web/token/get',
         method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'sid=acfun.midground.api'
       })
     case '云剪辑地址':
