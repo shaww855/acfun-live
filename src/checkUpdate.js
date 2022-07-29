@@ -10,10 +10,11 @@ const downloadInfo = `
 ---
 `
 
-module.exports = function(){
+module.exports = function () {
+  console.log('正在检查更新...');
   return new Promise((resolve, reject) => {
-    return https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', { timeout:3000 }, (res) => {
-    // return https.get('https://raw.githubusercontent.com/shaww855/acfun-live/main/package.json', { timeout:3000 }, (res) => {
+    // return https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', { timeout:3000 }, (res) => {
+    return https.get('https://raw.githubusercontent.com/shaww855/acfun-live/main/package.json', { timeout: 3000 }, (res) => {
     // return https.get('https://github.91chi.fun/https://raw.githubusercontent.com/shaww855/acfun-live/main/package.json', { timeout:3000 }, (res) => {
 
       const { statusCode } = res;

@@ -208,6 +208,7 @@ const handleError = err => {
 
 process.on('uncaughtException', handleError)
 process.on("unhandledRejection", handleError);
+console.log('本工具完全开源免费，开源地址： https://github.com/shaww855/acfun-live');
 
 checkUpdate().then(() => {
   const config = getConfig()

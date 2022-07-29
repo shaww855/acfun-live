@@ -73,7 +73,7 @@ const getConfig = () => {
   }
   if (fs.existsSync(configPath)) {
     const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-    console.log(`= config.json config 已读取 =`);
+    // console.log(`= config.json config 已读取 =`);
     if (global.configCache) {
       // 需要设置缓存
       configCache = config
@@ -106,7 +106,7 @@ const setConfig = ({
     config[prop] = value
   }
   fs.writeFileSync(configPath, JSON.stringify(config, null, 4));
-  console.log(`= config.json cookies 已保存 =`);
+  // console.log(`= config.json cookies 已保存 =`);
 }
 
 /**
