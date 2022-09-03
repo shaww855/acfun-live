@@ -10,12 +10,18 @@ const BARK = require('./bark.js')
  * @returns 
  */
 function liveStart (liveUperInfo) {
+  console.log(liveUperInfo);
   const { checkLiveTimeout, notification, iftttKey, barkKey } = getConfig()
   if (notification === false || notification.length === 0) return
   if (iftttKey + barkKey === '') {
     console.log('开播通知 发送失败，未配置相关key。');
     return
   }
+  if (typeof notification === 'object') {
+    liveUperInfo = liveUperInfo.filter(e => notification.includes(e.uperId))
+  }
+  if (liveUperInfo.length === 0) return
+
   const hours = new Date().getHours()
   if (hours === 0 && new Date().getMinutes() < 10) {
     // 每天0点10分触发 清空
@@ -40,10 +46,6 @@ function liveStart (liveUperInfo) {
     needToSend.push(element)
     data[element.uperId] = element
   });
-
-  if (typeof notification === 'object') needToSend = needToSend.filter(e => notification.includes(e.uperId))
-
-  if (needToSend.length === 0) return
 
   let message = ''
 

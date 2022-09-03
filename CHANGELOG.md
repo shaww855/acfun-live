@@ -3,6 +3,8 @@
 格式基于[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并且该项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
 ## [未发布]
+### 变更  
+* 开播通知现在支持无守护团勋章的主播
 ## [1.5.4] - 2022-07-29
 ### 变更
 * 工作流调整，使用 `Node16` 打包，发布压缩后的文件。

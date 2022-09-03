@@ -180,6 +180,8 @@ module.exports = (action, page, data) => {
             res.liveList.map(e =>
             ({
               authorId: e.authorId,
+              uperId: e.authorId,
+              uperName: e.user.name,
               title: e.title,
               createTime: e.createTime,
               headUrl: e.user.headUrl

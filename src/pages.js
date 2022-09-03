@@ -240,9 +240,8 @@ async function startMonitor (browser, times = 0) {
     throw err
   })
 
-  let liveAndClub = allLiveRoom.filter(e => e.fansClub)
-
-  liveStart(liveAndClub)
+  liveStart(allLiveRoom)
+  const liveAndClub = allLiveRoom.filter(e => e.fansClub)
 
   let liveUperInfo = []
   // 顺序获取
