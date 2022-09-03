@@ -10,7 +10,6 @@ const BARK = require('./bark.js')
  * @returns 
  */
 function liveStart (liveUperInfo) {
-  console.log(liveUperInfo);
   const { checkLiveTimeout, notification, iftttKey, barkKey } = getConfig()
   if (notification === false || notification.length === 0) return
   if (iftttKey + barkKey === '') {
