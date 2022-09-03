@@ -45,8 +45,9 @@ function liveStart (liveUperInfo) {
     needToSend.push(element)
     data[element.uperId] = element
   });
-
+  
   let message = ''
+  if (needToSend.length === 0) return
 
   if (needToSend.length === 1) {
     message = `主播：${ needToSend[0].uperName }\n时间：${formartDate(needToSend[0].createTime, '时间')}\n标题：${needToSend[0].title}` 
