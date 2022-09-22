@@ -3,6 +3,12 @@
 格式基于[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并且该项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
 ## [未发布]
+
+## [1.5.5] - 2022-09-22
+### 变更  
+* 开播通知现在支持无守护团勋章的主播
+* 版本更新文案调整
+* 计划性的依赖更新
 ## [1.5.4] - 2022-07-29
 ### 变更
 * 工作流调整，使用 `Node16` 打包，发布压缩后的文件。
@@ -32,6 +38,7 @@
 * 读取配置方式优化，在登录成功后配置储存于运行环境，避免频繁 I/O。
   
 [未发布]: https://github.com/shaww855/acfun-live/compare/main...dev
+[1.5.5]: https://github.com/shaww855/acfun-live/compare/v1.5.4...v1.5.5
 [1.5.4]: https://github.com/shaww855/acfun-live/compare/v1.5.3...v1.5.4
 [1.5.3]: https://github.com/shaww855/acfun-live/compare/v1.5.2...v1.5.3
 [1.5.2]: https://github.com/shaww855/acfun-live/releases/tag/v1.5.2

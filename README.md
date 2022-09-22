@@ -21,11 +21,11 @@
 
 ## 更新日志  
 请参阅 [CHANGELOG.md](https://github.com/shaww855/acfun-live/blob/main/CHANGELOG.md)
-## 运行环境  
+## 运行方法  
 本工具通过操控 Chromium 实现各种操作，请始终保持你的浏览器为最新版本。  
 - ## Windows  
   **可选扫码登录，无需输入账号密码**  
-  支持 Windows10 及以上，请前往 [发布页面](https://github.com/shaww855/acfun-live/releases) 下载：   
+  支持 Windows10 及以上，请前往 [发布页面](https://github.com/shaww855/acfun-live/releases) 下载解压后双击运行即可。   
 - ## Linux  
   - 安装  
       - NodeJs 和 NPM （尽量保持为最新版）
@@ -69,7 +69,7 @@ serverRoomLimit | Array | 支持多台服务器 <br> 假如你有三台服务器
 serverIndex | Array | 当前是第几台，从0开始
 checkAllRoom | Boolean | 只要有牌子，不管是否关注都监控
 useObsDanmaku | Boolean | 使用官方OBS弹幕工具监控<br>开启此项时 自动点赞功能 会失效
-notification | Boolean<br>Array  | 借助第三方APP推送开播通知<br>true: 有粉丝牌的主播都通知<br>false: 不推送开播通知<br> [ Number ]: 指定uid开播推送，前提是已关注并有粉丝牌<br>此配置项会受 `checkAllRoom` 影响<br>服务器时间的 0~6 点不推送
+notification | Boolean<br>Array  | 借助第三方APP推送开播通知<br>true: 有粉丝牌的主播都通知<br>false: 不推送开播通知<br> [ Number ]: 指定uid开播推送<br>此配置项会受 `checkAllRoom` 影响<br>服务器时间的 0~6 点不推送
 iftttKey | String | [IFTTT](https://ifttt.com/) 密钥<br>[配置方法](#IFTTT)
 barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  仅限IOS<br>[配置方法](#BARK)
 cookies | String<br>Array | 保存登录状态的字段<br>要么为空字符串，要么为`puppeteer`导出的`cookies`数组

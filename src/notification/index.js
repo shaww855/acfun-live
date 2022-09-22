@@ -16,6 +16,11 @@ function liveStart (liveUperInfo) {
     console.log('开播通知 发送失败，未配置相关key。');
     return
   }
+  if (typeof notification === 'object') {
+    liveUperInfo = liveUperInfo.filter(e => notification.includes(e.uperId))
+  }
+  if (liveUperInfo.length === 0) return
+
   const hours = new Date().getHours()
   if (hours === 0 && new Date().getMinutes() < 10) {
     // 每天0点10分触发 清空
@@ -40,12 +45,9 @@ function liveStart (liveUperInfo) {
     needToSend.push(element)
     data[element.uperId] = element
   });
-
-  if (typeof notification === 'object') needToSend = needToSend.filter(e => notification.includes(e.uperId))
-
-  if (needToSend.length === 0) return
-
+  
   let message = ''
+  if (needToSend.length === 0) return
 
   if (needToSend.length === 1) {
     message = `主播：${ needToSend[0].uperName }\n时间：${formartDate(needToSend[0].createTime, '时间')}\n标题：${needToSend[0].title}` 
