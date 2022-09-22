@@ -3,15 +3,19 @@ const { notify } = require('./notification/index.js')
 const { hasNewVersion } = require('../util.js')
 
 const downloadInfo = `
----
-唯二指定下载地址：
-中国大陆（GFW内） https://gitee.com/cn_shaw/acfun-live/releases
-其他地区及海外 https://github.com/shaww855/acfun-live/releases
----
+ ---------------------------------------------------------------
+| 唯二指定下载地址：                                               |
+| 中国大陆（GFW内） https://gitee.com/cn_shaw/acfun-live/releases  |
+| 其他地区及海外 https://github.com/shaww855/acfun-live/releases   |
+ ---------------------------------------------------------------
 `
 
 module.exports = function () {
-  console.log('正在检查更新...');
+  console.log(`
+   ---------------
+  | 正在检查更新... |
+   ---------------
+  `);
   return new Promise((resolve, reject) => {
     // return https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', { timeout:3000 }, (res) => {
     return https.get('https://raw.githubusercontent.com/shaww855/acfun-live/main/package.json', { timeout: 3000 }, (res) => {
@@ -62,13 +66,21 @@ module.exports = function () {
       } else {
         msg += '已是最新'
       }
-      console.log(msg);
+      console.log(`
+      ----------------------------------------
+     | 当前版本：${msg}|
+      ----------------------------------------
+     `);
     } else {
       console.error(res);
       throw new Error('读取版本号失败')
     }
   }).catch(err => {
-    console.error('检查更新失败，请关注');
+    console.log(`
+    ------------
+   | 检查更新失败 |
+    ------------
+   `);
     console.log(downloadInfo);
     console.error(err)
   })
