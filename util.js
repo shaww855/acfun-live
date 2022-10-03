@@ -89,6 +89,8 @@ const setConfig = ({
   value = '',
   userConfig = {}
 }) => {
+  delete userConfig.account
+  delete userConfig.password
   let config = getConfig()
   if (prop === null) {
     config = {
@@ -154,6 +156,7 @@ module.exports = {
   isLiveTab,
   getConfig,
   setConfig,
+  removeConfigFile,
   hasNewVersion,
   writeOnVideoUrl
 }

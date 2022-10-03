@@ -26,18 +26,41 @@ function userLogin (page) {
       await page.waitForSelector(loginSwitch)
       await page.click(loginSwitch)
       // console.log('sign in...');
-      if (global.platformIsWin) {
-        await page.type('#ipt-account-login', global.loginInfo.account);
-        await page.type('#ipt-pwd-login', global.loginInfo.password);
-      } else {
-        await page.type('#ipt-account-login', config.account);
-        await page.type('#ipt-pwd-login', config.password);
-      }
+      // if (global.platformIsWin) {
+      await inquirer.prompt([{
+        type: 'input',
+        name: 'account',
+        message: "请输入账号：",
+        validate: function (input) {
+          const done = this.async()
+          if (input === '') {
+            done('账号不能为空')
+          } else {
+            done(null, true)
+          }
+        }
+      }, {
+        type: 'password',
+        message: '请输入密码：',
+        mask: '*',
+        name: 'password',
+        validate: function (input) {
+          const done = this.async()
+          if (input === '') {
+            done('密码不能为空')
+          } else {
+            done(null, true)
+          }
+        }
+      }]).then(async answer => {
+        await page.type('#ipt-account-login', answer.account);
+        await page.type('#ipt-pwd-login', answer.password);
+      })
       const loginBtnSelector = '.btn-login'
       await page.waitForSelector(loginBtnSelector);
       await page.click(loginBtnSelector)
       await page.waitForNavigation()
-      if (process.platform !== 'win32' || config.debug === true || global.loginInfo.saveCookies) {
+      if (config.debug === true || global.loginInfo.saveCookies || !global.platformIsWin) {
         await page.cookies().then(cookieList => {
           setConfig({ prop: 'cookies', value: cookieList })
         })

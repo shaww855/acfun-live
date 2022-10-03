@@ -1,9 +1,7 @@
-const { getConfig, setConfig } = require('./util.js')
+const { getConfig, setConfig, removeConfigFile } = require('./util.js')
 const inquirer = require('inquirer')
 // 检查更新
 const checkUpdate = require('./src/checkUpdate.js')
-const { hasNewVersion } = require('./util.js')
-const fs = require('node:fs')
 const runApp = require('./src/app.js')
 const defaultConfig = {
   "account": "",
@@ -38,13 +36,15 @@ global.platformIsWin = process.platform === 'win32'
  * 登录方式
  * @returns Promise
  */
-const confirmLoginType = () => 
- inquirer.prompt([{
+const confirmLoginType = () =>
+  inquirer.prompt([{
     type: 'list',
     name: 'loginType',
     message: "请选择登录方式",
-    choices: global.platformIsWin ? ['扫码登录','账号密码'] : ['账号密码','cookies'],
-  }, {
+    choices: global.platformIsWin ? ['扫码登录', '账号密码'] : ['扫码登录', '账号密码', 'cookies'],
+    default: '账号密码'
+  },
+  {
     type: 'editor',
     name: 'cookies',
     message: "从已登录过账号密码的config.json文件中复制cookies项并粘贴：",
@@ -63,56 +63,17 @@ const confirmLoginType = () =>
       }
     }
   }, {
-    type: 'input',
-    name: 'account',
-    message: "请输入账号：",
-    when: answers => answers.loginType === '账号密码',
-    validate: function (input) {
-      const done = this.async()
-      if (input === '') {
-        done('账号不能为空')
-      } else {
-        done(null, true)
-      }
-    }
-  }, {
-    type: 'password',
-    message: '请输入密码：',
-    mask: '*',
-    name: 'password',
-    when: answers => answers.loginType === '账号密码',
-    validate: function (input) {
-      const done = this.async()
-      if (input === '') {
-        done('密码不能为空')
-      } else {
-        done(null, true)
-      }
-    }
-  }, {
     type: 'confirm',
     message: '记住登录状态',
     default: false,
-    name: 'saveCookies'
-  }, ]).then(answers => {
-    global.loginInfo = answers
-
-    const userConfig = {
-      ...answers
-    }
-
+    name: 'saveCookies',
+    when: global.platformIsWin,
+  },]).then(answers => {
     if (answers.loginType === 'cookies') {
-      userConfig.cookies = JSON.parse(answers.cookies)
+      console.log(answers);
+      answers.cookies = JSON.parse(answers.cookies)
     }
-    if (answers.loginType === '账号密码') {
-      if (global.platformIsWin) {
-        // 赋值全局账号密码
-        delete userConfig.account
-        delete userConfig.password
-      }
-    }
-    delete userConfig.loginType
-    return userConfig
+    global.loginInfo = answers
   })
 
 /**
@@ -171,17 +132,19 @@ const createConfiguration = () => {
       ...answers
     }
     if (global.loginInfo.loginType === 'cookies') {
-      userConfig.cookies = JSON.parse(answers.cookies)
+      userConfig.cookies = answers.cookies
     }
 
-    userConfig.serverRoomLimit = [ userConfig.serverRoomLimit ]
+    userConfig.serverRoomLimit = [userConfig.serverRoomLimit]
 
     delete userConfig.notificationApp
     setConfig({
       userConfig: {
         ...defaultConfig,
-        ...userConfig
-    } })
+        ...userConfig,
+        ...global.loginInfo
+      }
+    })
     return userConfig
   })
 }
@@ -210,56 +173,18 @@ process.on('uncaughtException', handleError)
 process.on("unhandledRejection", handleError);
 console.log('本工具完全开源免费，开源地址： https://github.com/shaww855/acfun-live');
 
-checkUpdate().then(() => {
-  const config = getConfig()
-  let 配置文件过期 = false
-  if (config !== null) {
-    if (config.version === undefined) {
-      // 没有版本信息
-      配置文件过期 = true
-    } else if (config.version === global.version) {
-      // 当前版本
-      配置文件过期 = false
-    } else if (hasNewVersion(config.version, global.version)) {
-      // 旧版本
-      配置文件过期 = true
-    } else {
-      // 新版本
-      配置文件过期 = false
-    }
-  }
+const config = getConfig()
 
-  if (global.platformIsWin === false) {
-    // Linux平台
-    if (config === null) {
-      setConfig({ userConfig: defaultConfig })
-      console.log('Linux请用户按照文档修改配置文件');
-      console.log('https://github.com/shaww855/acfun-live#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E');
-    } else if (配置文件过期) {
-      console.log('版本已更新，请按照文档重新创建配置文件');
-      console.log('https://github.com/shaww855/acfun-live#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E');
-    } else {
-      runApp()
-    }
-    return
-  }
-  // Win平台
-  if (config !== null && config.cookies !== '') {
-    global.loginInfo = {
-      ...config,
-      loginType: 'cookies'
-    }
-    runApp()
-    return
-  }
+if (config !== null) {
+  global.loginInfo = config
+  runApp()
+  checkUpdate()
+} else {
   confirmLoginType().then(async () => {
-    if (config === null) {
-      // 未配置
-      await createConfiguration()
-    } else if (配置文件过期) {
-      console.log('版本已更新，需要重新配置');
-      await createConfiguration()
-    }
+    console.log('版本已更新，需要重新配置');
+    await createConfiguration()
     runApp()
+  }).finally(() => {
+    checkUpdate()
   })
-})
+}
