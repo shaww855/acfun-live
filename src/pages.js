@@ -21,7 +21,23 @@ const { liveStart, notify } = require('./notification/index.js')
 function userLogin (page) {
   const config = getConfig()
   return new Promise(async (resolve, reject) => {
+    const ui = new inquirer.ui.BottomBar();
+    const clear = () => {
+      clearInterval(timeId)
+      console.log('');
+      ui.close()
+    }
+    let second = 0
+    const timeId = setInterval(() => {
+      second--
+      ui.updateBottomBar(`等待登录页响应...${second}s`);
+      if (second > 30) {
+        clear()
+        reject(`** 等待登录超时 **`)
+      }
+    }, 1000)
     page.goto('https://www.acfun.cn/login', { waitUntil: 'domcontentloaded' }).then(async () => {
+      clear()
       const loginSwitch = '#login-switch'
       await page.waitForSelector(loginSwitch)
       await page.click(loginSwitch)

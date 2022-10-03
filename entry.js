@@ -42,7 +42,7 @@ const confirmLoginType = () =>
     type: 'list',
     name: 'loginType',
     message: "请选择登录方式",
-    choices: global.platformIsWin ? ['扫码登录', '账号密码'] : ['扫码登录', '账号密码', 'cookies'],
+    choices: global.platformIsWin ? ['扫码登录', '账号密码'] : ['账号密码', 'cookies'],
     default: '账号密码'
   },
   {
