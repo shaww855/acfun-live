@@ -156,7 +156,6 @@ module.exports = {
   isLiveTab,
   getConfig,
   setConfig,
-  removeConfigFile,
   hasNewVersion,
   writeOnVideoUrl
 }

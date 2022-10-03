@@ -1,4 +1,4 @@
-const { getConfig, setConfig, removeConfigFile } = require('./util.js')
+const { getConfig, setConfig } = require('./util.js')
 const inquirer = require('inquirer')
 // 检查更新
 const checkUpdate = require('./src/checkUpdate.js')
@@ -31,6 +31,7 @@ const { version } = require('./package.json')
 global.version = version
 
 global.platformIsWin = process.platform === 'win32'
+global.platformIsWin = false
 
 /**
  * 登录方式
@@ -111,6 +112,7 @@ const createConfiguration = () => {
     message: '请输入 Chromium 为内核的浏览器执行路径：',
     default: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
     name: 'executablePath',
+    when: global.platformIsWin
   }, {
     //   type: 'confirm',
     //   message: '使用OBS弹幕工具监控',
@@ -142,7 +144,8 @@ const createConfiguration = () => {
       userConfig: {
         ...defaultConfig,
         ...userConfig,
-        ...global.loginInfo
+        ...global.loginInfo,
+        executablePath: global.platformIsWin ? answers.executablePath : ''
       }
     })
     return userConfig
@@ -175,7 +178,7 @@ console.log('本工具完全开源免费，开源地址： https://github.com/sh
 
 const config = getConfig()
 
-if (config !== null) {
+if (config !== null && global.version === config.version) {
   global.loginInfo = config
   runApp()
   checkUpdate()
