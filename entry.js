@@ -184,7 +184,7 @@ if (config !== null && global.version === config.version) {
   checkUpdate()
 } else {
   confirmLoginType().then(async () => {
-    console.log('版本已更新，需要重新配置');
+    console.log('配置文件不存在或工具版本已更新，需要重新配置');
     await createConfiguration()
     runApp()
   }).finally(() => {

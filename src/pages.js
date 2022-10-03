@@ -29,7 +29,7 @@ function userLogin (page) {
     }
     let second = 0
     const timeId = setInterval(() => {
-      second--
+      second++
       ui.updateBottomBar(`等待登录页响应...${second}s`);
       if (second > 30) {
         clear()

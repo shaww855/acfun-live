@@ -3,6 +3,8 @@
 格式基于[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并且该项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
 ## [未发布]
+### 变更  
+* 调整配置文件及检查更新逻辑，优化使用体验
 
 ## [1.5.5] - 2022-09-22
 ### 变更  
