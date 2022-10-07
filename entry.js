@@ -31,7 +31,6 @@ const { version } = require('./package.json')
 global.version = version
 
 global.platformIsWin = process.platform === 'win32'
-global.platformIsWin = false
 
 /**
  * 登录方式

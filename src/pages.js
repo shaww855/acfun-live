@@ -76,11 +76,6 @@ function userLogin (page) {
       await page.waitForSelector(loginBtnSelector);
       await page.click(loginBtnSelector)
       await page.waitForNavigation()
-      if (config.debug === true || global.loginInfo.saveCookies || !global.platformIsWin) {
-        await page.cookies().then(cookieList => {
-          setConfig({ prop: 'cookies', value: cookieList })
-        })
-      }
     }).catch(err => {
       console.error(err);
       page.browser().close()
@@ -91,6 +86,11 @@ function userLogin (page) {
       if (response.url().includes('/login/signin')) {
         const res = await response.json()
         if (res.result === 0) {
+          if (config.debug === true || global.loginInfo.saveCookies || !global.platformIsWin) {
+            await page.cookies().then(cookieList => {
+              setConfig({ prop: 'cookies', value: cookieList })
+            })
+          }
           resolve()
         } else {
           reject(`** ${res.error_msg} ** `)

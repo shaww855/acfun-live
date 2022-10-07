@@ -12,9 +12,9 @@ const downloadInfo = `
 
 module.exports = function () {
   console.log(`
-   ---------------
-  | 正在检查更新... |
-   ---------------
+ ---------------
+| 正在检查更新... |
+ ---------------
   `);
   return new Promise((resolve, reject) => {
     // return https.get('https://gitee.com/cn_shaw/acfun-live/raw/main/package.json', { timeout:3000 }, (res) => {
@@ -67,9 +67,9 @@ module.exports = function () {
         msg += '已是最新'
       }
       console.log(`
-      ---------------------------------------------------
-     | 当前版本：${msg}|
-      ---------------------------------------------------
+ ----------------------------------------------------
+| 当前版本：${msg}|
+ ----------------------------------------------------
      `);
     } else {
       console.error(res);
@@ -77,9 +77,9 @@ module.exports = function () {
     }
   }).catch(err => {
     console.log(`
-    ------------
-   | 检查更新失败 |
-    ------------
+ ------------
+| 检查更新失败 |
+ ------------
    `);
     console.error(err)
   }).finally(() => {
