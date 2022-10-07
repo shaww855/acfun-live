@@ -62,14 +62,14 @@ module.exports = function () {
       if (hasNewVersion(res.version, global.version)) {
         msg += `GitHub版本 ${res.version}，请关注` 
         notify(msg, 'https://github.com/shaww855/acfun-live/releases')
-        msg = `${msg}${downloadInfo}`
+        // msg = `${msg}${downloadInfo}`
       } else {
         msg += '已是最新'
       }
       console.log(`
-      ----------------------------------------
+      ---------------------------------------------------
      | 当前版本：${msg}|
-      ----------------------------------------
+      ---------------------------------------------------
      `);
     } else {
       console.error(res);
@@ -81,7 +81,8 @@ module.exports = function () {
    | 检查更新失败 |
     ------------
    `);
-    console.log(downloadInfo);
     console.error(err)
+  }).finally(() => {
+    console.log(downloadInfo);
   })
 }
