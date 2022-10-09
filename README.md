@@ -5,40 +5,37 @@
 [![version](https://img.shields.io/github/package-json/v/shaww855/acfun-live)](https://github.com/shaww855/acfun-live/tags)
 [![downloads](https://img.shields.io/github/downloads/shaww855/acfun-live/total)](https://github.com/shaww855/acfun-live/releases)
 [![license](https://img.shields.io/github/license/shaww855/acfun-live)](https://github.com/shaww855/acfun-live/blob/main/LICENSE)  
-使用 Puppeteer 开启 AcFun 直播监控室，定时检测主播开播情况，经验挂满后自动离开直播间。  
+自动挂牌子工具，定时检测主播开播情况，当日经验挂满后自动离开直播间，支持扫码登录。  
 请认准唯二指定下载仓库 Github、Gitee。  
 本工具完全免费、开源，有更好的点子欢迎PR。
-## 隐私提示 
-本工具不会向A站以外的任何服务器发送或储存你的任何信息，也不会分享任何信息给任意第三方，所有操作均通过A站API实现。  
- - Win 用户扫码登录不储存任何信息；账号密码登录则储存于运行环境中，关闭即销毁。  
- - Linux 用户账号密码明文存储于本地，请自行保证本地环境安全。  
 
-本工具仅限于如下操作：
-  1. 根据你提供的信息进行登录操作；  
-  1. 查询你的粉丝牌列表及粉丝牌经验；  
-  1. 使用你的账号信息查询主播开播信息；  
-  1. 使用你的账号进入直播间。  
-
-## 更新日志  
-请参阅 [CHANGELOG.md](https://github.com/shaww855/acfun-live/blob/main/CHANGELOG.md)
-## 运行方法  
-本工具通过操控 Chromium 实现各种操作，请始终保持你的浏览器为最新版本。  
-- ## Windows  
-  **可选扫码登录，无需输入账号密码**  
+## 下载运行  
+- ### Windows环境  
   支持 Windows10 及以上，请前往 [发布页面](https://github.com/shaww855/acfun-live/releases) 下载解压后双击运行即可。   
-- ## Linux  
+- ### Linux环境  
   - 安装  
       - NodeJs 和 NPM （尽量保持为最新版）
       - 下载源码  
       - 安装依赖包（建议 `npm ci`）  
-      - 按照 [配置文件说明](#配置文件说明) 创建名为 config.json 的配置文件
   - 运行  
     `npm run start` 或 `node entry.js`  
   - 进阶  
     使用进程守护挂载  
-    **如果你在进程守护中配置了重启，请关闭 config.autoRestart 选项**   
-    例如 [PM2](https://pm2.keymetrics.io/) ，配置文件在 `ecosystem.config.js`。
+    **如果你在进程守护中配置了定时重启，请关闭 config.autoRestart 选项**   
+    [PM2](https://pm2.keymetrics.io/) 配置示例文件在 `/ecosystem.config.js`。
 
+## 更新日志  
+请参阅 [CHANGELOG.md](https://github.com/shaww855/acfun-live/blob/main/CHANGELOG.md)
+## 隐私提示 
+本工具不会向A站以外的任何服务器发送或储存你的任何信息，也不会分享任何信息给任意第三方，所有操作均通过A站API实现。  
+ - Win 用户扫码登录不储存任何信息；账号密码登录则储存于运行环境中，关闭即销毁；同时开启记住登录状态选项，会将`cookies`储存于本地。  
+ - Linux 用户账号密码明文存储于本地，请自行保证本地环境安全。  
+
+本工具通过 Puppeteer 操控 Chromium 内核的浏览器实现如下操作：
+  1. 根据你提供的信息进行登录操作；  
+  1. 查询你的粉丝牌列表及粉丝牌经验；  
+  1. 使用你的账号信息查询主播开播信息；  
+  1. 使用你的账号进入直播间。  
 
 ## 官方对第三方插件的态度  
 - 2022-05-17 无常猴 [ac34895639](https://www.acfun.cn/a/ac34895639) [ac34899002](https://www.acfun.cn/a/ac34899002  
@@ -128,7 +125,7 @@ version | String | 当前版本号<br>本工具会将它与Github上的版本号
   https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md
   ---
   * Q  
-  打包懒人包时进度慢  
+  打包Windows单文件时进度慢或者失败  
   * A  
   可能是需要下载node包缓慢导致的  
     1. 去 https://github.com/vercel/pkg-fetch/releases 下载提示中的 `node` 版本包  
