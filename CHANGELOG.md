@@ -3,8 +3,12 @@
 格式基于[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并且该项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
 ## [未发布]
+
+## [1.5.6]
 ### 变更  
-* 调整配置文件及检查更新逻辑，优化使用体验
+* 调整配置文件引导
+* 调整检查新版本逻辑，避免阻塞进程
+* 调整说明文档
 
 ## [1.5.5] - 2022-09-22
 ### 变更  
@@ -40,6 +44,7 @@
 * 读取配置方式优化，在登录成功后配置储存于运行环境，避免频繁 I/O。
   
 [未发布]: https://github.com/shaww855/acfun-live/compare/main...dev
+[1.5.6]: https://github.com/shaww855/acfun-live/compare/v1.5.5...v1.5.6
 [1.5.5]: https://github.com/shaww855/acfun-live/compare/v1.5.4...v1.5.5
 [1.5.4]: https://github.com/shaww855/acfun-live/compare/v1.5.3...v1.5.4
 [1.5.3]: https://github.com/shaww855/acfun-live/compare/v1.5.2...v1.5.3
