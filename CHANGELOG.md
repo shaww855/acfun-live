@@ -3,6 +3,8 @@
 格式基于[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并且该项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
 ## [未发布]
+### 变更
+* 周期性地升级依赖包
 
 ## [1.5.6] - 2022-10-09
 ### 变更  

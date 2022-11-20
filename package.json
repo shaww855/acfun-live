@@ -15,9 +15,9 @@
   "author": "shaw",
   "license": "ISC",
   "dependencies": {
-    "inquirer": "^8.2.4",
+    "inquirer": "^8.2.5",
     "node-schedule": "^2.1.0",
-    "puppeteer": "^18.0.5",
+    "puppeteer": "^18.2.1",
     "qrcode": "^1.5.1"
   },
   "devDependencies": {
