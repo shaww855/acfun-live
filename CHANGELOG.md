@@ -3,7 +3,10 @@
 格式基于[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并且该项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
 ## [未发布]
+
+## [1.5.7] - 2023-01-10
 ### 变更
+* 依赖包`luxon`安全漏洞修复
 * 周期性地升级依赖包
 
 ## [1.5.6] - 2022-10-09
@@ -46,6 +49,7 @@
 * 读取配置方式优化，在登录成功后配置储存于运行环境，避免频繁 I/O。
   
 [未发布]: https://github.com/shaww855/acfun-live/compare/main...dev
+[1.5.7]: https://github.com/shaww855/acfun-live/compare/v1.5.6...v1.5.7
 [1.5.6]: https://github.com/shaww855/acfun-live/compare/v1.5.5...v1.5.6
 [1.5.5]: https://github.com/shaww855/acfun-live/compare/v1.5.4...v1.5.5
 [1.5.4]: https://github.com/shaww855/acfun-live/compare/v1.5.3...v1.5.4
