@@ -72,6 +72,7 @@ const getConfig = () => {
     return configCache
   }
   if (fs.existsSync(configPath)) {
+    console.log(fs.readFileSync(configPath, "utf8"));
     const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
     // console.log(`= config.json config 已读取 =`);
     if (global.configCache) {

@@ -16,11 +16,11 @@
   "license": "ISC",
   "dependencies": {
     "inquirer": "^8.2.5",
-    "node-schedule": "^2.1.0",
-    "puppeteer": "^19.5.0",
+    "node-schedule": "^2.1.1",
+    "puppeteer": "^19.8.3",
     "qrcode": "^1.5.1"
   },
   "devDependencies": {
-    "pkg": "^5.8.0"
+    "pkg": "^5.8.1"
   }
 }
