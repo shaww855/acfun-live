@@ -60,7 +60,7 @@ function liveStart (liveUperInfo) {
   let fn = null
   let path = ''
   const title = 'Acfun 开播通知'
-  const url = `https://m.acfun.cn/live/detail/${needToSend[0].authorId}`
+  const url = `https://m.acfun.cn/live/detail/${needToSend[0].authorId}?sid=16c907d462bd77b1`
   const headUrl = needToSend[0].headUrl.split('?')[0]
   const badge = needToSend.length
 
