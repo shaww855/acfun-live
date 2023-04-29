@@ -14,7 +14,8 @@ module.exports = {
     error_file: "./logs/acfun-err.log",
     out_file: "./logs/acfun-out.log",
     restart_delay: 1000,
-    cron_restart: '01 00 * * *',
+    // 每天00点01分和18点01分运行
+    cron_restart: '01 0,18 * * *', 
     env: {
       NODE_ENV: "development",
     },
