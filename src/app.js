@@ -51,8 +51,9 @@ module.exports = function () {
       // },
       executablePath: config.executablePath,
       args: [
-        // '--no-sandbox',
-        // '--disable-setuid-sandbox',
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage', // https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#tips
         '--disable-crash-reporte',
         '--disable-extensions',
         '--disable-smooth-scrolling',
