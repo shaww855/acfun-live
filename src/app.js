@@ -40,10 +40,11 @@ module.exports = function () {
 
   let globalBrowser = null
 
-  const Start = () => {
-    puppeteer.launch({
+  const Start = async () => {
+    const browser = await puppeteer.launch({
       devtools: config.debug, // 开发发者工具
       // headless: false, // 无头模式
+      headless: 'new',
       product: 'chrome',
       // defaultViewport: {
       //   width: 1366,
@@ -62,48 +63,46 @@ module.exports = function () {
         '--no-crash-upload',
         '--suppress-message-center-popups',
       ]
-    }).then(async browser => {
-      globalBrowser = browser
-      const pageList = await browser.pages()
-      const page = pageList[0]
-      await requestFliter(page)
-
-      page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
-
-      page.on('pageerror', error => {
-        handlePageError(page, '主页', error)
-      })
-
-      let loginFn = userLoginByCookies
-
-      // 开始登录
-      if (global.loginInfo.loginType === 'cookies' || config.cookies !== '') {
-        console.log('登录方式 Cookie');
-        loginFn = userLoginByCookies
-      } else if (global.loginInfo.loginType === '扫码登录') {
-        console.log('登录方式 扫码');
-        loginFn = userLoginByQrcode
-      } else if (global.loginInfo.account !== '' && global.loginInfo.password !== '') {
-        console.log('登录方式 账号密码');
-        loginFn = userLogin
-      } else {
-        throw (new Error('请确认登录方式'))
-      }
-
-
-      // 起飞
-      loginFn(page).then(() => {
-        // 登录成功后，设置配置缓存
-        global.configCache = true
-        startMonitor(browser)
-      })
-
     }).catch(err => {
       console.error(err)
       console.log('puppeteer启动失败，5秒后自动关闭');
       setTimeout(() => {
         process.exit(1)
       }, 5000)
+    })
+
+    const pageList = await browser.pages()
+    const page = pageList[0]
+    await requestFliter(page)
+
+    page.setDefaultTimeout(config.defaultTimeout * 1000 * 60)
+
+    page.on('pageerror', error => {
+      handlePageError(page, '主页', error)
+    })
+
+    let loginFn = userLoginByCookies
+
+    // 开始登录
+    if (global.loginInfo.loginType === 'cookies' || config.cookies !== '') {
+      console.log('登录方式 Cookie');
+      loginFn = userLoginByCookies
+    } else if (global.loginInfo.loginType === '扫码登录') {
+      console.log('登录方式 扫码');
+      loginFn = userLoginByQrcode
+    } else if (global.loginInfo.account !== '' && global.loginInfo.password !== '') {
+      console.log('登录方式 账号密码');
+      loginFn = userLogin
+    } else {
+      throw (new Error('请确认登录方式'))
+    }
+
+
+    // 起飞
+    loginFn(page).then(() => {
+      // 登录成功后，设置配置缓存
+      global.configCache = true
+      startMonitor(browser)
     })
   }
 
@@ -117,7 +116,7 @@ module.exports = function () {
   console.log(`定时重启工具运行中，规则：${rule}`);
   schedule.scheduleJob({ rule }, function () {
     console.log(`定时重启已触发，规则：${rule}`);
-    endMonitor(globalBrowser)
+    endMonitor(browser)
     Start()
   })
 }

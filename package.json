@@ -17,8 +17,8 @@
   "dependencies": {
     "inquirer": "^8.2.5",
     "node-schedule": "^2.1.1",
-    "puppeteer": "^19.9.0",
-    "qrcode": "^1.5.1"
+    "puppeteer": "^20.2.1",
+    "qrcode": "^1.5.3"
   },
   "devDependencies": {
     "pkg": "^5.8.1"

@@ -3,6 +3,9 @@
 格式基于[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并且该项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
 ## [未发布]
+* PM2重启时间调整  
+* 适配 Chrome 112 新的无头模式  
+* 周期性地升级依赖包
 
 ## [1.5.8] - 2023-04-18
 ### 变更
