@@ -1,6 +1,6 @@
 {
   "name": "acfun-live",
-  "version": "1.5.8",
+  "version": "1.5.9",
   "description": "使用 Puppeteer 开启 acfun 直播监控室，挂牌子！😏",
   "main": "index.js",
   "bin": "app.js",
