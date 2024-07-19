@@ -26,6 +26,10 @@ const defaultConfig = {
   "barkKey": "",
   "cookies": ""
 }
+// 页面操作
+const {
+  pauseMonitor,
+} = require("./src/pages.js");
 
 const { version } = require('./package.json')
 global.version = version
@@ -162,13 +166,14 @@ const handleError = err => {
   console.log('出现错误，10秒后自动关闭...');
   console.log('如频繁报错，请删除config.json文件后，重新开打工具');
   console.log('或截图反馈给开发者');
+  pauseMonitor()
 
-  setTimeout(() => {
-    console.log('祝您身体健康，再见');
-  }, 7000)
-  setTimeout(() => {
-    process.exit(1)
-  }, 10000)
+  // setTimeout(() => {
+  //   console.log('祝您身体健康，再见');
+  // }, 7000)
+  // setTimeout(() => {
+  //   process.exit(1)
+  // }, 10000)
 }
 
 process.on('uncaughtException', handleError)

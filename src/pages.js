@@ -316,6 +316,13 @@ async function endMonitor (browser) {
 }
 
 /**
+ * 暂停挂牌子
+ */
+function pauseMonitor() {
+  clearTimeout(monitorTimeoutId);
+}
+
+/**
  * 检查已打开的页面，关闭符合条件的直播间，标记已打开的直播
  * @param {Object} browser 浏览器对象
  * @param {Array} list 正在直播的信息
@@ -712,6 +719,7 @@ module.exports = {
   userLoginByQrcode,
   startMonitor,
   endMonitor,
+  pauseMonitor,
   checkOpenedPages,
   roomExit,
   roomOpen,

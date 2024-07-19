@@ -43,8 +43,10 @@ module.exports = function () {
   const Start = () => {
     puppeteer.launch({
       devtools: config.debug, // 开发发者工具
-      // headless: false, // 无头模式
+      headless: false, // 无头模式
       product: 'chrome',
+      timeout: config.defaultTimeout * 1000 * 60,
+      protocolTimeout: config.defaultTimeout * 1000 * 60,
       // defaultViewport: {
       //   width: 1366,
       //   height: 768
