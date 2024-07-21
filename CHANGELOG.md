@@ -3,6 +3,9 @@
 格式基于[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并且该项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
 ## [未发布]
+### 变更
+* 标签页保活，用于抵消Edge的标签睡眠功能
+* 二维码登录超时逻辑优化
 
 ## [1.5.9] - 2024-07-18
 ### 变更
