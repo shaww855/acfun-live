@@ -75,7 +75,7 @@ function userLogin (page) {
       const loginBtnSelector = '.btn-login'
       await page.waitForSelector(loginBtnSelector);
       await page.click(loginBtnSelector)
-      await page.waitForNavigation()
+      // await page.waitForNavigation()
     }).catch(err => {
       console.error(err);
       page.browser().close()
@@ -300,7 +300,7 @@ async function startMonitor (browser, times = 0) {
   }))
 
   DDVup(browser, liveUperInfo)
-
+  console.log(config.checkLiveTimeout, '分钟后检测粉丝牌进度');
   monitorTimeoutId = setTimeout(() => {
     startMonitor(browser, times + 1)
   }, 1000 * 60 * config.checkLiveTimeout)
@@ -331,7 +331,6 @@ async function checkOpenedPages (browser, list) {
   const config = getConfig()
   // console.log('checkOpenedPages', list);
   let pages = await browser.pages()
-  // console.log('循环当前标签页');
   const promiseList = []
   for (let index = 0; index < pages.length; index++) {
     const page = pages[index];
@@ -494,6 +493,38 @@ async function afterOpenRoom (page) {
   // })
 }
 
+function keepAlive (browser) {
+  return browser.pages().then(async pages => { 
+    console.log('===');
+    console.log('需要保活的标签页', pages.length);
+    // 依次切换到每个页面并执行操作
+    for (let index = 0; index < pages.length; index++) {
+      console.log('--');
+      const page = pages[index];
+      // 将焦点切换到当前页面
+      await page.bringToFront();
+
+      // 在这里可以执行页面操作，例如截图、提取页面内容等
+      // 示例：打印当前页面的 URL
+      if (page.url() === 'https://www.acfun.cn/') {
+        console.log('关闭首页');
+        await page.close()
+        // await page.close();
+      } else {
+        await page.title().then(title => {
+          console.log('保活', title);
+        })
+        const randomDelay = 3000;
+        await page.waitForTimeout(randomDelay)
+        // await page.waitForTimeout(randomDelay);
+      }
+      console.log(`[${index + 1}/${pages.length}] 执行完成`);
+    }
+    console.log('标签页保活已完成');
+    console.log('===');
+  })
+}
+
 /**
  * 开启DD监控室
  * @param {Object} browser 浏览器对象
@@ -602,6 +633,7 @@ async function DDVup (browser, liveUperInfo) {
     }
   })
   await Promise.all(promiseList).then(() => {
+    keepAlive(browser)
   }).catch(err => {
     console.log('DD行为失败');
     console.error(err);

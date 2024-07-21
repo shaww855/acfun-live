@@ -129,7 +129,7 @@ const createConfiguration = () => {
   }, {
     type: 'confirm',
     message: '只要有粉丝牌，即使未关注主播也需要监控',
-    default: false,
+    default: true,
     name: 'checkAllRoom'
   }]).then((answers) => {
     // 赋值全局登录类型
@@ -163,17 +163,22 @@ const handleError = err => {
   //   return
   // }
   console.log(err)
-  console.log('出现错误，10秒后自动关闭...');
-  console.log('如频繁报错，请删除config.json文件后，重新开打工具');
-  console.log('或截图反馈给开发者');
-  pauseMonitor()
-
-  // setTimeout(() => {
-  //   console.log('祝您身体健康，再见');
-  // }, 7000)
-  // setTimeout(() => {
-  //   process.exit(1)
-  // }, 10000)
+  if (global.platformIsWin) {
+    console.log('出现错误，已暂停运行！');
+    console.log('如频繁报错，请删除config.json文件后，重新开打工具');
+    console.log('或截图反馈给开发者');
+    endMonitor()
+  } else {    
+    console.log('出现错误，10秒后自动关闭...');
+    console.log('如频繁报错，请删除config.json文件后，重新开打工具');
+    console.log('或截图反馈给开发者');
+    setTimeout(() => {
+      console.log('祝您身体健康，再见');
+    }, 7000)
+    setTimeout(() => {
+      process.exit(1)
+    }, 10000)
+  }
 }
 
 process.on('uncaughtException', handleError)

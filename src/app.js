@@ -43,7 +43,7 @@ module.exports = function () {
   const Start = () => {
     puppeteer.launch({
       devtools: config.debug, // 开发发者工具
-      headless: false, // 无头模式
+      // headless: false, // 无头模式
       product: 'chrome',
       timeout: config.defaultTimeout * 1000 * 60,
       protocolTimeout: config.defaultTimeout * 1000 * 60,
@@ -62,6 +62,14 @@ module.exports = function () {
         '--enforce-gl-minimums', // Enforce GL minimums
         '--no-crash-upload',
         '--suppress-message-center-popups',
+        // '--kiosk',
+        // '--edge-kiosk-type=public-browsing',
+        // '--no-first-run',
+        // '--disable-gpu',
+        // '--enable-low-end-device-mode', 
+        '--browser-test',
+        // '--disable-dev-shm-usage',
+        // '--disable-mipmap-generation'
       ]
     }).then(async browser => {
       globalBrowser = browser

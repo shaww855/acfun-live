@@ -173,7 +173,7 @@ module.exports = (action, page, data) => {
         handleProxy({
           page,
           action,
-          url: `https://live.acfun.cn/api/channel/list?count=50&pcursor=0`,
+          url: `https://live.acfun.cn/api/channel/list?count=200&pcursor=0`,
           // https://live.acfun.cn/api/channel/list?count=100&pcursor=&filters=[%7B%22filterType%22:1,+%22filterId%22:0%7D]
           method: 'GET'
         })
