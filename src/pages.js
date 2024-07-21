@@ -136,22 +136,22 @@ async function userLoginByCookies (page) {
 /**
  * 用户登录
  * @param {Object} page 页面
+ * @param {Number} [scanTime=0] 扫码超时次数
  */
-function userLoginByQrcode (page) {
+function userLoginByQrcode (page, scanTime = 0) {
   const config = getConfig()
   return new Promise(async (resolve, reject) => {
     const qrcodePath = "./qrcode.png"
 
-    console.log('↓↓↓ 请使用 AcFun APP 扫码并确认登录 ↓↓↓');
     page.goto('https://www.acfun.cn/login', { waitUntil: 'domcontentloaded' }).catch(err => {
       console.error(err);
       page.browser().close()
       reject('打开登录页失败');
     })
-    const ui = new inquirer.ui.BottomBar();
     let timeId = null
     page.on('response', async response => {
       if (response.url().includes('/rest/pc-direct/qr/start')) {
+        console.log('↓↓↓ 请使用 AcFun APP 扫码并确认登录 ↓↓↓');
         const res = await response.json()
         if (res.result === 0) {
           // 保存二维码图片至本地
@@ -171,6 +171,7 @@ function userLoginByQrcode (page) {
             console.log(url)
             let second = res.expireTime / 1000
             // let second = 20
+            const ui = new inquirer.ui.BottomBar();
             timeId = setInterval(() => {
               second--
               ui.updateBottomBar(`二维码将在 ${second}秒 后失效`);
@@ -179,7 +180,22 @@ function userLoginByQrcode (page) {
                 ui.updateBottomBar(`二维码已失效`);
                 console.log('');
                 ui.close()
-                reject(`** 等待扫码登录超时 **`)
+                
+                if (scanTime < 20) {
+                  console.log(`** 等待扫码登录超时 **`)
+                  try {
+                    fs.unlinkSync(qrcodePath);
+                  } catch (err) {
+                    console.log('二维码图片清理失败，可手动删除。');
+                    console.error(err)
+                  }
+                  page.click('.refresh-btn').catch(err => {
+                    console.error(err)
+                    reject('重新获取二维码失败');
+                  })
+                } else {
+                  reject('`** 等待扫码登录超时 **`')
+                }
               }
             }, 1000)
           })

@@ -29,6 +29,7 @@ const defaultConfig = {
 // 页面操作
 const {
   pauseMonitor,
+  endMonitor
 } = require("./src/pages.js");
 
 const { version } = require('./package.json')
