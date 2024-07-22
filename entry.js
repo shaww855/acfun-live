@@ -37,6 +37,8 @@ global.version = version
 
 global.platformIsWin = process.platform === 'win32'
 
+global.QQgroup = 726686920
+
 /**
  * 登录方式
  * @returns Promise
@@ -168,7 +170,7 @@ const handleError = err => {
 
   console.log('出现错误，10秒后自动关闭...');
   console.log('如频繁报错，请删除config.json文件后，重新开打工具');
-  console.log('或截图反馈给开发者');
+  console.log('或截图反馈至唯一指定扣扣群：', global.QQgroup);
   setTimeout(() => {
     console.log('祝您身体健康，再见，3秒后关闭！');
   }, 7000)
@@ -180,6 +182,7 @@ const handleError = err => {
 process.on('uncaughtException', handleError)
 process.on("unhandledRejection", handleError);
 console.log('本工具完全开源免费，开源地址： https://github.com/shaww855/acfun-live');
+console.log('2024年7月公告  本工具唯一指定扣扣群：', global.QQgroup);
 
 const config = getConfig()
 
