@@ -180,7 +180,7 @@ function userLoginByQrcode (page, scanTime = 0) {
                 ui.updateBottomBar(`二维码已失效`);
                 console.log('');
                 ui.close()
-                
+
                 if (scanTime < 20) {
                   console.log(`** 等待扫码登录超时 **`)
                   try {
@@ -510,7 +510,7 @@ async function afterOpenRoom (page) {
 }
 
 function keepAlive (browser) {
-  return browser.pages().then(async pages => { 
+  return browser.pages().then(async pages => {
     console.log('===');
     console.log('需要保活的标签页', pages.length);
     // 依次切换到每个页面并执行操作
@@ -530,9 +530,7 @@ function keepAlive (browser) {
         await page.title().then(title => {
           console.log('保活', title);
         })
-        const randomDelay = 3000;
-        await page.waitForTimeout(randomDelay)
-        // await page.waitForTimeout(randomDelay);
+        await sleep(3000);
       }
       console.log(`[${index + 1}/${pages.length}] 执行完成`);
     }
@@ -759,6 +757,15 @@ function getOnVideoUrl (page, info = { uperId: null, uperName: "", createTime: n
     console.log('生成爱咔云剪辑地址失败');
     console.log(err);
   })
+}
+
+/**
+ * 等待
+ * @param {number} ms 毫秒
+ * @returns 等待指定时间
+ */
+function sleep (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 module.exports = {

@@ -66,7 +66,7 @@ module.exports = function () {
         // '--edge-kiosk-type=public-browsing',
         // '--no-first-run',
         // '--disable-gpu',
-        // '--enable-low-end-device-mode', 
+        // '--enable-low-end-device-mode',
         '--browser-test',
         // '--disable-dev-shm-usage',
         // '--disable-mipmap-generation'
