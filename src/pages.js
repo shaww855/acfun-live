@@ -75,7 +75,7 @@ function userLogin (page) {
       const loginBtnSelector = '.btn-login'
       await page.waitForSelector(loginBtnSelector);
       await page.click(loginBtnSelector)
-      await page.waitForNavigation()
+      // await page.waitForNavigation()
     }).catch(err => {
       console.error(err);
       page.browser().close()
@@ -136,22 +136,22 @@ async function userLoginByCookies (page) {
 /**
  * 用户登录
  * @param {Object} page 页面
+ * @param {Number} [scanTime=0] 扫码超时次数
  */
-function userLoginByQrcode (page) {
+function userLoginByQrcode (page, scanTime = 0) {
   const config = getConfig()
   return new Promise(async (resolve, reject) => {
     const qrcodePath = "./qrcode.png"
 
-    console.log('↓↓↓ 请使用 AcFun APP 扫码并确认登录 ↓↓↓');
     page.goto('https://www.acfun.cn/login', { waitUntil: 'domcontentloaded' }).catch(err => {
       console.error(err);
       page.browser().close()
       reject('打开登录页失败');
     })
-    const ui = new inquirer.ui.BottomBar();
     let timeId = null
     page.on('response', async response => {
       if (response.url().includes('/rest/pc-direct/qr/start')) {
+        console.log('↓↓↓ 请使用 AcFun APP 扫码并确认登录 ↓↓↓');
         const res = await response.json()
         if (res.result === 0) {
           // 保存二维码图片至本地
@@ -171,6 +171,7 @@ function userLoginByQrcode (page) {
             console.log(url)
             let second = res.expireTime / 1000
             // let second = 20
+            const ui = new inquirer.ui.BottomBar();
             timeId = setInterval(() => {
               second--
               ui.updateBottomBar(`二维码将在 ${second}秒 后失效`);
@@ -179,7 +180,22 @@ function userLoginByQrcode (page) {
                 ui.updateBottomBar(`二维码已失效`);
                 console.log('');
                 ui.close()
-                reject(`** 等待扫码登录超时 **`)
+
+                if (scanTime < 20) {
+                  console.log(`** 等待扫码登录超时 **`)
+                  try {
+                    fs.unlinkSync(qrcodePath);
+                  } catch (err) {
+                    console.log('二维码图片清理失败，可手动删除。');
+                    console.error(err)
+                  }
+                  page.click('.refresh-btn').catch(err => {
+                    console.error(err)
+                    reject('重新获取二维码失败');
+                  })
+                } else {
+                  reject('`** 等待扫码登录超时 **`')
+                }
               }
             }, 1000)
           })
@@ -300,7 +316,7 @@ async function startMonitor (browser, times = 0) {
   }))
 
   DDVup(browser, liveUperInfo)
-
+  console.log(config.checkLiveTimeout, '分钟后检测粉丝牌进度');
   monitorTimeoutId = setTimeout(() => {
     startMonitor(browser, times + 1)
   }, 1000 * 60 * config.checkLiveTimeout)
@@ -316,6 +332,13 @@ async function endMonitor (browser) {
 }
 
 /**
+ * 暂停挂牌子
+ */
+function pauseMonitor() {
+  clearTimeout(monitorTimeoutId);
+}
+
+/**
  * 检查已打开的页面，关闭符合条件的直播间，标记已打开的直播
  * @param {Object} browser 浏览器对象
  * @param {Array} list 正在直播的信息
@@ -324,7 +347,6 @@ async function checkOpenedPages (browser, list) {
   const config = getConfig()
   // console.log('checkOpenedPages', list);
   let pages = await browser.pages()
-  // console.log('循环当前标签页');
   const promiseList = []
   for (let index = 0; index < pages.length; index++) {
     const page = pages[index];
@@ -487,6 +509,36 @@ async function afterOpenRoom (page) {
   // })
 }
 
+function keepAlive (browser) {
+  return browser.pages().then(async pages => {
+    console.log('===');
+    console.log('需要保活的标签页', pages.length);
+    // 依次切换到每个页面并执行操作
+    for (let index = 0; index < pages.length; index++) {
+      console.log('--');
+      const page = pages[index];
+      // 将焦点切换到当前页面
+      await page.bringToFront();
+
+      // 在这里可以执行页面操作，例如截图、提取页面内容等
+      // 示例：打印当前页面的 URL
+      if (page.url() === 'https://www.acfun.cn/') {
+        console.log('关闭首页');
+        await page.close()
+        // await page.close();
+      } else {
+        await page.title().then(title => {
+          console.log('保活', title);
+        })
+        await sleep(3000);
+      }
+      console.log(`[${index + 1}/${pages.length}] 执行完成`);
+    }
+    console.log('标签页保活已完成');
+    console.log('===');
+  })
+}
+
 /**
  * 开启DD监控室
  * @param {Object} browser 浏览器对象
@@ -595,6 +647,7 @@ async function DDVup (browser, liveUperInfo) {
     }
   })
   await Promise.all(promiseList).then(() => {
+    keepAlive(browser)
   }).catch(err => {
     console.log('DD行为失败');
     console.error(err);
@@ -706,12 +759,22 @@ function getOnVideoUrl (page, info = { uperId: null, uperName: "", createTime: n
   })
 }
 
+/**
+ * 等待
+ * @param {number} ms 毫秒
+ * @returns 等待指定时间
+ */
+function sleep (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 module.exports = {
   userLogin,
   userLoginByCookies,
   userLoginByQrcode,
   startMonitor,
   endMonitor,
+  pauseMonitor,
   checkOpenedPages,
   roomExit,
   roomOpen,

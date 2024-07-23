@@ -137,6 +137,13 @@ version | String | 当前版本号<br>本工具会将它与Github上的版本号
   其他问题请参照 `Puppeteer` 官方解决方案  
   * A  
   https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md
+  --- 
+  * Q  
+  在`linux-arm64`中使用新版本 `Puppeteer` (v20+) 无法启动浏览器
+  * A  
+  需要手动安装`chromium-browser`，并在`config.json`中指定运行路径`/usr/bin/chromium-browser`  
+  `apt install chromium-browser`  
+  [[Bug]: Failed to launch the browser process! syntax error: "(" unexpected on ARM Linux ](https://github.com/puppeteer/puppeteer/issues/10404)
 
 
 ## Stargazers over time
