@@ -2,10 +2,13 @@
 此项目的所有更改都将记录在此文件中。
 格式基于[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并且该项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
-## [未发布]
-### 变更
-* 标签页保活，用于抵消Edge的标签睡眠功能
-* 二维码登录超时逻辑优化
+## [未发布]  
+
+## [1.5.10] -2024-07-24
+### 新增  
+* 标签页保活，用于抵消Edge的标签睡眠功能  
+### 变更  
+* 二维码登录超时逻辑优化  
 
 ## [1.5.9] - 2024-07-18
 ### 变更
@@ -61,6 +64,7 @@
 * 读取配置方式优化，在登录成功后配置储存于运行环境，避免频繁 I/O。
 
 [未发布]: https://github.com/shaww855/acfun-live/compare/main...dev
+[1.5.10]: https://github.com/shaww855/acfun-live/compare/v1.5.9...v1.5.10
 [1.5.9]: https://github.com/shaww855/acfun-live/compare/v1.5.8...v1.5.9
 [1.5.8]: https://github.com/shaww855/acfun-live/compare/v1.5.7...v1.5.8
 [1.5.7]: https://github.com/shaww855/acfun-live/compare/v1.5.6...v1.5.7
