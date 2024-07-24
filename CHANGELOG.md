@@ -3,6 +3,8 @@
 格式基于[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并且该项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
 ## [未发布]  
+### 变更
+* 工作流调整，使用 `Node18` 打包，发布压缩后的文件。  
 
 ## [1.5.10] -2024-07-24
 ### 新增  
