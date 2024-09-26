@@ -3,8 +3,14 @@
 格式基于[Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并且该项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
 ## [未发布]  
+### 变更
+* 工作流调整，使用 `Node18` 打包，发布压缩后的文件。  
 
-## [1.5.10] -2024-07-24
+## [1.5.11] - 2024-09-26
+### 变更  
+* 修复windows环境启动白屏问题
+
+## [1.5.10] - 2024-07-24
 ### 新增  
 * 标签页保活，用于抵消Edge的标签睡眠功能  
 ### 变更  
@@ -34,7 +40,8 @@
 ### 变更
 * 开播通知现在支持无守护团勋章的主播
 * 版本更新文案调整
-* 计划性的依赖更新
+* 计划性的依赖更新  
+
 ## [1.5.4] - 2022-07-29
 ### 变更
 * 工作流调整，使用 `Node16` 打包，发布压缩后的文件。
@@ -64,6 +71,7 @@
 * 读取配置方式优化，在登录成功后配置储存于运行环境，避免频繁 I/O。
 
 [未发布]: https://github.com/shaww855/acfun-live/compare/main...dev
+[1.5.11]: https://github.com/shaww855/acfun-live/compare/v1.5.10...v1.5.11
 [1.5.10]: https://github.com/shaww855/acfun-live/compare/v1.5.9...v1.5.10
 [1.5.9]: https://github.com/shaww855/acfun-live/compare/v1.5.8...v1.5.9
 [1.5.8]: https://github.com/shaww855/acfun-live/compare/v1.5.7...v1.5.8

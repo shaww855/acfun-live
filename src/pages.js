@@ -210,7 +210,6 @@ function userLoginByQrcode (page, scanTime = 0) {
       if (response.url() === 'https://www.acfun.cn/') {
         clearInterval(timeId)
         console.log('');
-        ui.close()
         console.log('扫码登录成功');
         try {
           fs.unlinkSync(qrcodePath);
