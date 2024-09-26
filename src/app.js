@@ -53,6 +53,7 @@ module.exports = function () {
       // },
       executablePath: config.executablePath,
       args: [
+        '--headless=old',
         // '--no-sandbox',
         // '--disable-setuid-sandbox',
         '--disable-crash-reporte',
