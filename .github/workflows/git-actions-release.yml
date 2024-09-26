@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
+    branches: [dev]
 
 jobs:
   build:
@@ -19,7 +21,7 @@ jobs:
         cache: 'npm'
         cache-dependency-path: '**/package-lock.json'
     - name: 设置环境变量
-      run: npm config set puppeteer_skip_chromium_download=true
+      run: ENV PUPPETEER_SKIP_DOWNLOAD true
     - name: 安装依赖
       run: npm ci
     - name: 打包
