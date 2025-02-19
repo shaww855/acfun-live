@@ -10,7 +10,7 @@ export async function loginByQrcode() {
   const qrcodeStartRes = await qrcodeStart().then((res) => {
     saveQrcodeImg(res.imageData);
     showQrcode(res.qrLoginToken);
-    console.log(res);
+    // console.log(res);
     return res;
   });
   const qrcodeScanResultRes = await qrcodeScanResult(
@@ -35,12 +35,12 @@ export async function loginByQrcode() {
     qrcodeScanResultRes.qrLoginSignature,
   )
     .then((res) => {
-      console.log(res);
+      // console.log(res);
       if (res.result == 0) {
         console.log("登录成功，欢迎", res.ac_username);
 
         try {
-          global.config.饼干 = res.cookies.map(e => e.split(';')[0])
+          global.config.饼干 = res.cookies.map((e) => e.split(";")[0]);
 
           const str = res.cookies[0];
           const regex = /Expires=([^;]+); Domain/;
@@ -126,4 +126,48 @@ function showQrcode(qrLoginToken) {
       global.logger.info("二维码打印成功");
     },
   );
+}
+
+/**
+ * 拦截页面请求
+ * @param {Object} page 页面
+ */
+export async function requestFliter(page) {
+  if (global.config.调试) {
+    return;
+  }
+  await page.setRequestInterception(true);
+  page.on("request", (request) => {
+    if (request.resourceType() === "image") {
+      request.continue({
+        url: "https://ali-imgs.acfun.cn/kos/nlav10360/static/common/widget/appGuide/img/appclose.192fa4f1ecb6c48661d8.png",
+      });
+    } else if (request.url().includes(".flv")) {
+      // 拦截直播流
+      request.abort();
+    } else if (request.url().includes("/perfLog")) {
+      // 拦截疑似日志
+      request.abort();
+    } else if (request.url().includes("/hm.baidu.com")) {
+      // 拦截疑似日志
+      request.abort();
+    } else if (request.url().includes("/collect")) {
+      // 拦截疑似错误信息收集
+      request.abort();
+    } else request.continue();
+  });
+}
+
+export async function watcherUper(pageList, info) {
+  for (let index = 0; index < pageList.length; index++) {
+    const page = pageList[index];
+    console.log(page.url());
+  }
+  if (info.timeDifference === 0) {
+    // 牌子已满
+    console.log("牌子已满");
+  } else {
+    // 继续监控
+    console.log("继续监控");
+  }
 }

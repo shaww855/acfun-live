@@ -30,13 +30,13 @@ process.on("uncaughtException", (error) => {
 getConfig()
   .then(() => {
     console.log("配置文件读取成功");
-    global.logger.info(`配置文件读取成功，${global.config}`);
+    global.logger.info(`配置文件读取成功，${JSON.stringify(global.config)}`);
     main();
   })
   .catch(() => {
     if (global.platformIsWin) {
       makeUserConfig().then((res) => {
-        console.log("makeUserConfig ok");
+        main()
       });
     } else {
       throw new Error("非windows平台，请手动新增配置文件后再试！");

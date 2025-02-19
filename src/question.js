@@ -12,7 +12,7 @@ const questionList = [
   {
     type: "input",
     name: "白名单",
-    message: "请输入白名单（例：123,456）",
+    message: "请输入白名单uid（例：123,456）",
     validate(input) {
       return validateUid(input);
     },
@@ -20,7 +20,7 @@ const questionList = [
   {
     type: "input",
     name: "黑名单",
-    message: "请输入黑名单（例：123,456）",
+    message: "请输入黑名单uid（例：654,321）",
     validate(input) {
       return validateUid(input);
     },
@@ -56,7 +56,29 @@ const questionList = [
 
 export function makeUserConfig() {
   return inquirer.prompt(questionList).then((answers) => {
-    console.log(answers);
+    // console.log(answers);
+
+    try {
+      if (trim(answers.白名单) !== "") {
+        answers.白名单 = answers.白名单.split(",");
+      } else {
+        answers.白名单 = [];
+      }
+    } catch (error) {
+      answers.白名单 = [];
+      console.log("整理白名单失败，将留空");
+    }
+
+    try {
+      if (trim(answers.黑名单) !== "") {
+        answers.黑名单 = answers.黑名单.split(",");
+      } else {
+        answers.黑名单 = [];
+      }
+    } catch (error) {
+      answers.黑名单 = [];
+      console.log("整理黑名单失败，将留空");
+    }
 
     delete answers.引导方式;
     global.config = {
