@@ -87,7 +87,7 @@ async function monitor(browser, times = 0) {
     }));
   });
 
-  console.log("守护团数量", 守护团列表.length, 守护团列表[0]);
+  console.log("守护团数量", 守护团列表.length);
 
   let 所有正在直播列表 = [];
 
@@ -97,7 +97,7 @@ async function monitor(browser, times = 0) {
   } else {
     const 守护团列表uperId = 守护团列表.map((e) => e.uperId);
     let list = await channelList().then((e) => e.liveList);
-    console.log("正在直播主播数量", list.length, list[0]);
+    console.log("正在直播主播数量", list.length);
     所有正在直播列表 = list.filter((e) =>
       守护团列表uperId.includes(e.authorId),
     );
@@ -187,6 +187,8 @@ async function monitor(browser, times = 0) {
         page = pageList[targetIndex];
         msg = "时长已满 退出";
         page && (await page.close());
+      } else {
+        msg = "时长已满 跳过";
       }
     } else {
       if (targetIndex > -1) {
@@ -219,13 +221,15 @@ async function monitor(browser, times = 0) {
     );
     console.log(`[${index + 1}/${需要关注的直播.length}]`, msg);
     console.log("---");
-
   }
-  console.log('再次检测时间', moment().add(3,'minute').format('YYYY/MM/DD HH:mm:ss'));
+  console.log(
+    "再次检测时间",
+    moment().add(10, "minute").format("YYYY/MM/DD HH:mm:ss"),
+  );
   monitorTimeoutId = setTimeout(
     () => {
       monitor(browser, times + 1);
     },
-    1000 * 60 * 3,
+    1000 * 60 * 10,
   );
 }

@@ -2,7 +2,7 @@ import { getConfig } from "./userConfig.js";
 import { makeUserConfig } from "./question.js";
 import "./log.js";
 import "./globalValue.js";
-import "./welcome.js";
+import welcome from "./welcome.js";
 import main from "./browser/index.js";
 
 process.on("uncaughtException", (error) => {
@@ -27,18 +27,23 @@ process.on("uncaughtException", (error) => {
   }
 });
 
-getConfig()
-  .then(() => {
-    console.log("配置文件读取成功");
-    global.logger.info(`配置文件读取成功，${JSON.stringify(global.config)}`);
-    main();
-  })
-  .catch(() => {
-    if (global.platformIsWin) {
-      makeUserConfig().then((res) => {
-        main()
-      });
-    } else {
-      throw new Error("非windows平台，请手动新增配置文件后再试！");
-    }
-  });
+async function start() {
+  await welcome();
+  getConfig()
+    .then(() => {
+      console.log("配置文件读取成功");
+      global.logger.info(`配置文件读取成功，${JSON.stringify(global.config)}`);
+      main();
+    })
+    .catch(() => {
+      if (global.platformIsWin) {
+        makeUserConfig().then((res) => {
+          main();
+        });
+      } else {
+        throw new Error("非windows平台，请手动新增配置文件后再试！");
+      }
+    });
+}
+
+start();

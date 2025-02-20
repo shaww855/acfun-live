@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
-import path from "node:path";
+// import path from "node:path";
 
-// const configPath = './config.js'
-const configPath = path.join(import.meta.dirname, "./config.json");
+const configPath = "./config.json";
+// const configPath = path.join(import.meta.dirname, "./config.json");
 
 export const defaultConfig = {
   调试: false,

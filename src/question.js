@@ -59,23 +59,25 @@ export function makeUserConfig() {
     // console.log(answers);
 
     try {
-      if (trim(answers.白名单) !== "") {
+      if (answers.白名单.trim() !== "") {
         answers.白名单 = answers.白名单.split(",");
       } else {
         answers.白名单 = [];
       }
     } catch (error) {
+      console.error(error);
       answers.白名单 = [];
       console.log("整理白名单失败，将留空");
     }
 
     try {
-      if (trim(answers.黑名单) !== "") {
+      if (answers.黑名单.trim() !== "") {
         answers.黑名单 = answers.黑名单.split(",");
       } else {
         answers.黑名单 = [];
       }
     } catch (error) {
+      console.error(error);
       answers.黑名单 = [];
       console.log("整理黑名单失败，将留空");
     }

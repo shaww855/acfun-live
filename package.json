@@ -16,7 +16,9 @@
   "main": "index.js",
   "scripts": {
     "prettier": "pnpm exec prettier --write src/**/*.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "buildSingleFile": ".\\node_modules\\.bin\\esbuild .\\src\\index.js --bundle --platform=node --outdir=dist --format=cjs",
+    "publish": "pkg .\\dist\\index.js --target=latest --platform=win --output=dist\\index"
   },
   "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0",
   "dependencies": {
@@ -30,6 +32,7 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
+    "esbuild": "^0.25.0",
     "eslint": "^9.19.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.31.0",
@@ -37,5 +40,10 @@
     "eslint-plugin-promise": "^7.2.1",
     "pkg": "^5.8.1",
     "prettier": "3.4.2"
+  },
+  "pkg": {
+    "assets": [
+      "./src/*.js"
+    ]
   }
 }
