@@ -3,6 +3,8 @@ import { qrcodeScanResult, qrcodeStart, qrcodeAcceptResult } from "./api.js";
 import fs from "fs";
 import moment from "moment";
 import { saveConfig } from "../userConfig.js";
+
+moment.locale("zh-cn");
 /**
  * 用户扫码登录
  */
@@ -15,7 +17,7 @@ export async function loginByQrcode() {
   });
   const qrcodeScanResultRes = await qrcodeScanResult(
     qrcodeStartRes.qrLoginToken,
-    qrcodeStartRes.qrLoginSignature,
+    qrcodeStartRes.qrLoginSignature
   )
     .then((res) => {
       if (res.qrLoginSignature) {
@@ -32,7 +34,7 @@ export async function loginByQrcode() {
 
   return qrcodeAcceptResult(
     qrcodeStartRes.qrLoginToken,
-    qrcodeScanResultRes.qrLoginSignature,
+    qrcodeScanResultRes.qrLoginSignature
   )
     .then((res) => {
       // console.log(res);
@@ -47,8 +49,8 @@ export async function loginByQrcode() {
           const match = str.match(regex);
 
           if (match) {
-            global.config.饼干过期时间 = moment(match[1]).format(
-              "YYYY/MM/DD HH:mm:ss",
+            global.config.饼干过期时间 = moment(new Date(match[1])).format(
+              "YYYY/MM/DD HH:mm:ss"
             );
           } else {
             global.logger.error(`饼干过期时间处理失败，${res.cookies[0]}`);
@@ -103,7 +105,7 @@ function saveQrcodeImg(base64Data) {
       global.logger.info("保存二维码图片失败");
     } else {
       console.log(
-        "如二维码图片无法扫描，请自行打开本工具目录下的二维码图片进行扫码",
+        "如二维码图片无法扫描，请自行打开本工具目录下的二维码图片进行扫码"
       );
     }
   });
@@ -124,7 +126,7 @@ function showQrcode(qrLoginToken) {
       }
       console.log(string);
       global.logger.info("二维码打印成功");
-    },
+    }
   );
 }
 
