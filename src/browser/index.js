@@ -72,7 +72,7 @@ async function monitor(browser, times = 0) {
     "第",
     times + 1,
     "次检查直播状态",
-    moment().format("YYYY/MM/DD HH:mm:ss")
+    moment().format("YYYY/MM/DD HH:mm:ss"),
   );
 
   const 守护团列表 = await medalList().then((res) => {
@@ -101,7 +101,7 @@ async function monitor(browser, times = 0) {
     let list = await channelList().then((e) => e.liveList);
     console.log("正在直播主播数量", list.length);
     所有正在直播列表 = list.filter((e) =>
-      守护团列表uperId.includes(e.authorId)
+      守护团列表uperId.includes(e.authorId),
     );
   }
 
@@ -120,13 +120,13 @@ async function monitor(browser, times = 0) {
   if (global.config.白名单.length > 0) {
     console.log("存在白名单，忽略黑名单！");
     需要关注的直播 = 所有正在直播列表.filter((e) =>
-      global.config.白名单.includes(e.authorId)
+      global.config.白名单.includes(e.authorId),
     );
   } else if (global.config.黑名单.length > 0) {
     console.log("存在黑名单", global.config.黑名单.length);
     需要关注的直播 = 所有正在直播列表.filter(
       // 过滤有粉丝团的直播间
-      (e) => !global.config.黑名单.includes(e.authorId)
+      (e) => !global.config.黑名单.includes(e.authorId),
     );
   } else {
     需要关注的直播 = 所有正在直播列表;
@@ -137,7 +137,7 @@ async function monitor(browser, times = 0) {
     console.log("---");
     console.log("拥有牌子的主播均未开播。");
     console.log(
-      "如果你确定有主播开播：请删除 config.json 文件，重启本工具，按照提示重新登录"
+      "如果你确定有主播开播：请删除 config.json 文件，重启本工具，按照提示重新登录",
     );
     if (检测到所有主播均未开播的次数 > 24) {
       // 每十分钟检测一次，则24为：连续四小时都没有主播开播
@@ -206,14 +206,14 @@ async function monitor(browser, times = 0) {
           page.setDefaultNavigationTimeout(1000 * 60 * 5);
           await requestFliter(page);
           await page.goto(
-            `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false`
+            `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false`,
           );
         });
       }
     }
 
     console.log(
-      `开播时间 ${moment(info.createTime).format("YYYY/MM/DD HH:mm:ss")}`
+      `开播时间 ${moment(info.createTime).format("YYYY/MM/DD HH:mm:ss")}`,
     );
     console.log(`标题： ${info.title}`);
     console.log(
@@ -221,19 +221,19 @@ async function monitor(browser, times = 0) {
       info.clubName,
       `(${info.timeLimitStr})`,
       info.uperName,
-      info.uperId
+      info.uperId,
     );
     console.log(`[${index + 1}/${需要关注的直播.length}]`, msg);
     console.log("---");
   }
   console.log(
     "再次检测时间",
-    moment().add(10, "minute").format("YYYY/MM/DD HH:mm:ss")
+    moment().add(10, "minute").format("YYYY/MM/DD HH:mm:ss"),
   );
   monitorTimeoutId = setTimeout(
     () => {
       monitor(browser, times + 1);
     },
-    1000 * 60 * 10
+    1000 * 60 * 10,
   );
 }

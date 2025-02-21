@@ -45,7 +45,9 @@ instance.interceptors.response.use(
 );
 axiosRetry(instance, {
   retries: 5,
-  retryDelay: 3000,
+  retryDelay: (retryCount) => {
+    return retryCount * 3000;
+  },
   onRetry: (retryCount, error, requestConfig) => {
     console.log("请求失败");
     console.log(retryCount, error, requestConfig);
