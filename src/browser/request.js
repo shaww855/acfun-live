@@ -49,11 +49,13 @@ axiosRetry(instance, {
     return retryCount * 3000;
   },
   onRetry: (retryCount, error, requestConfig) => {
-    console.log("请求失败");
-    console.log(retryCount, error, requestConfig);
+    console.log(`请求第${retryCount}次重试失败`, error.message);
+    global.logger.error(`请求第${retryCount}次重试失败 ${error.message}`);
   },
   onMaxRetryTimesExceeded: (error, retryCount) => {
-    global.logger.error(error);
+    global.logger.error(
+      `请求达到最大重试次数 ${retryCount}次 ${error.message}`,
+    );
   },
 });
 

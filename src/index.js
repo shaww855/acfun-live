@@ -3,27 +3,30 @@ import { makeUserConfig } from "./question.js";
 import "./log.js";
 import "./globalValue.js";
 import welcome from "./welcome.js";
-import main from "./browser/index.js";
+import main, { closeBrowser } from "./browser/index.js";
 
 process.on("uncaughtException", (error) => {
   if (error instanceof Error && error.name === "ExitPromptError") {
     global.logger.info("用户取消配置引导");
     process.exit();
   } else {
-    console.error(error);
+    console.error(error.message);
     global.logger.error(error.message);
     console.log("请尝试删除 config.json 文件后重试");
     console.log("如无法解决，请保留日志文件并反馈至唯一指定扣扣群：726686920");
-    console.log("5s后自动退出，再见！");
+    closeBrowser().then(() => {
+      console.log("5s后自动重启！");
 
-    let time = 5;
-    setInterval(() => {
-      time--;
-      console.log(time);
-      if (time == 1) {
-        process.exit(1);
-      }
-    }, 1000);
+      let timeCount = 5;
+      const timeid = setInterval(() => {
+        timeCount--;
+        console.log(timeCount);
+        if (timeCount == 1) {
+          clearInterval(timeid);
+          start();
+        }
+      }, 1000);
+    });
   }
 });
 

@@ -14,6 +14,7 @@ moment.locale("zh-cn");
 
 let monitorTimeoutId = null;
 let 检测到所有主播均未开播的次数 = 0;
+let browserObj = null;
 
 export default async function main() {
   if (global.platformIsWin) {
@@ -22,10 +23,14 @@ export default async function main() {
     }
   } else {
   }
+
+  console.log("正在获取登录信息");
   await personalInfo().then((res) => {
     console.log(`==${res.info.userName}，欢迎使用==`);
     console.log("当前账号登录过期时间：", global.config.饼干过期时间);
   });
+
+  console.log("正在启动", global.config.浏览器路径);
   puppeteer
     .launch({
       devtools: global.config.调试,
@@ -39,7 +44,8 @@ export default async function main() {
       ],
     })
     .then(async (browser) => {
-      console.log("浏览器已启动");
+      console.log("启动成功");
+      browserObj = browser;
       // ac_username=%E6%B3%A5%E5%A3%95; Max-Age=2592000; Expires=Mon, 03-Mar-2025 15: 03: 02 GMT; Domain=acfun.cn; Path=/
 
       const pageList = await browser.pages();
@@ -236,4 +242,16 @@ async function monitor(browser, times = 0) {
     },
     1000 * 60 * 10,
   );
+}
+
+/**
+ * 关闭浏览器
+ * @returns
+ */
+export function closeBrowser() {
+  console.log("浏览器已关闭");
+  if (browserObj) {
+    return browserObj.close();
+  }
+  return Promise.resolve();
 }
