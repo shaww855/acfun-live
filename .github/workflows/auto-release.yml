@@ -24,47 +24,47 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup Node.js v22
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '22.x'
-        cache: 'npm'
+        node-version: '20'
+        cache: 'pnpm'
 
-    - name: Cache dependencies
-      uses: actions/cache@v3
-      with:
-        path: |
-          node_modules
-          ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('package*.json') }}
+    - name: Install pnpm
+      run: npm install -g pnpm@9
 
     - name: Install dependencies
       run: |
-        npm ci
-        npm install -g pkg
+        pnpm install
+        pnpm add -g pkg
 
-    - name: Resolve version
+    - name: Convert version format
       id: version
       run: |
         if [ -n "${{ inputs.custom_version }}" ]; then
-          echo "VERSION=${{ inputs.custom_version}}" >> $GITHUB_ENV
+          VERSION_TAG="${{ inputs.custom_version}}"
         else
-          git fetch --tags
-          LATEST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
-          echo "VERSION=${LATEST_TAG#v}" >> $GITHUB_ENV
+          VERSION_TAG=$(git describe --tags --abbrev=0)
         fi
-        echo "Using version: $VERSION"
+        
+        # 转换 v1.2.3 → v_1_2_3
+        CONVERTED_VERSION=$(echo "$VERSION_TAG" | sed 's/\./_/g')
+        echo "VERSION=${VERSION_TAG#v}" >> $GITHUB_ENV
+        echo "CONVERTED_VERSION=$CONVERTED_VERSION" >> $GITHUB_ENV
+        echo "Tag Version: $VERSION_TAG"
+        echo "Converted Version: $CONVERTED_VERSION"
 
-    - name: Build package
-      run: npm run publish
+    - name: Build project
+      run: node build.js
       env:
         NODE_OPTIONS: '--experimental-vm-modules'
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ env.VERSION }}
-        name: Release v${{ env.VERSION }}
+        tag_name: ${{ env.VERSION_TAG }}
+        name: Release ${{ env.CONVERTED_VERSION }}
         files: |
-          dist/index_${{ env.VERSION }}.exe
-          dist/index_${{ env.VERSION }}.zip
+          dist/index_${{ env.CONVERTED_VERSION }}.exe
+          dist/index_${{ env.CONVERTED_VERSION }}.zip
+        draft: true

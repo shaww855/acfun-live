@@ -23,10 +23,10 @@ try {
     fs.mkdirSync(distPath, { recursive: true });
   }
 
-  // 构建命令模板
+  // 修复 esbuild 调用方式
   const buildCommands = [
-    `node ./node_modules/esbuild/bin/esbuild ./src/index.js --bundle --platform=node --outfile=dist/index_${version}.cjs --format=cjs`,
-    `pkg ./dist/index_${version}.cjs --target latest --platform win --output dist/index_${version}.exe`
+    `npx esbuild ./src/index.js --bundle --platform=node --outfile=dist/index_${version}.cjs --format=cjs`,
+    `npx pkg ./dist/index_${version}.cjs --target latest --platform win --output dist/index_${version}.exe`
   ];
 
   // 执行构建命令
@@ -34,7 +34,8 @@ try {
     stdio: 'inherit',
     env: { 
       ...process.env,
-      NODE_OPTIONS: '--experimental-vm-modules'
+      // 添加 Linux 环境需要的 Node 选项
+      NODE_OPTIONS: '--experimental-vm-modules --no-warnings'
     }
   }));
 
