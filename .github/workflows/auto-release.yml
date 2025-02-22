@@ -3,55 +3,68 @@ name: Auto Release
 on:
   push:
     tags:
-      - 'v.*.*.*'  # 匹配标准的语义化版本标签 (如 v1.2.3)
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      custom_version:
+        description: 'Manual version (格式：vx.x.x)'
+        required: false
+        default: ''
 
 jobs:
   build-and-release:
-    runs-on: ubuntu-latest  # 使用更快的 Ubuntu 环境
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
 
-    - name: Setup Node.js with pnpm
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js v22
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
-        cache: 'pnpm'
+        node-version: '22.x'
+        cache: 'npm'
 
-    - name: Install pnpm
-      run: npm install -g pnpm
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          node_modules
+          ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('package*.json') }}
 
     - name: Install dependencies
-      run: pnpm install --frozen-lockfile
+      run: |
+        npm ci
+        npm install -g pkg
 
-    - name: Convert tag version
+    - name: Resolve version
       id: version
       run: |
-        # 将 v1.2.3 → v_1_2_3
-        converted_version=$(echo "${{ github.ref_name }}" | sed 's/\./_/g')
-        echo "converted_version=${converted_version}" >> $GITHUB_OUTPUT
+        if [ -n "${{ inputs.custom_version }}" ]; then
+          echo "VERSION=${{ inputs.custom_version}}" >> $GITHUB_ENV
+        else
+          git fetch --tags
+          LATEST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          echo "VERSION=${LATEST_TAG#v}" >> $GITHUB_ENV
+        fi
+        echo "Using version: $VERSION"
 
-    - name: Build project
-      run: node build.js
+    - name: Build package
+      run: npm run publish
       env:
-        CI: true
-        BUILD_VERSION: ${{ steps.version.outputs.converted_version }}
+        NODE_OPTIONS: '--experimental-vm-modules'
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
       with:
-        name: release-assets
-        path: |
-          dist/*.zip
-          dist/*.exe
-
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ github.ref_name }}
-        name: Release ${{ github.ref_name }}
-        draft: true
+        tag_name: v${{ env.VERSION }}
+        name: Release v${{ env.VERSION }}
         files: |
-          dist/*_${{ steps.version.outputs.converted_version }}.zip
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          dist/index_${{ env.VERSION }}.exe
+          dist/index_${{ env.VERSION }}.zip
