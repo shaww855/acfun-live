@@ -40,7 +40,7 @@ export async function loginByQrcode() {
       // console.log(res);
       if (res.result == 0) {
         console.log("登录成功，欢迎", res.ac_username);
-
+        global.logger('登录成功')
         try {
           global.config.饼干 = res.cookies.map((e) => e.split(";")[0]);
 
@@ -158,18 +158,4 @@ export async function requestFliter(page) {
       request.abort();
     } else request.continue();
   });
-}
-
-export async function watcherUper(pageList, info) {
-  for (let index = 0; index < pageList.length; index++) {
-    const page = pageList[index];
-    console.log(page.url());
-  }
-  if (info.timeDifference === 0) {
-    // 牌子已满
-    console.log("牌子已满");
-  } else {
-    // 继续监控
-    console.log("继续监控");
-  }
 }

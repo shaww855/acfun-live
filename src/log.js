@@ -1,5 +1,7 @@
+import moment from "moment";
 import * as winston from "winston";
 import "winston-daily-rotate-file";
+const { combine, timestamp, label, printf } = winston.format;
 
 const transport = new winston.transports.DailyRotateFile({
   dirname: "logs",
@@ -8,6 +10,10 @@ const transport = new winston.transports.DailyRotateFile({
   zippedArchive: true,
   maxSize: "20m",
   maxFiles: "7d",
+});
+
+const myFormat = printf(({ level, message, label, timestamp }) => {
+  return `${moment(timestamp).format("YYYY-MM-DD HH:mm:ss")} [${level}] ${message}`;
 });
 
 transport.on("error", (error) => {
@@ -19,5 +25,6 @@ transport.on("rotate", (oldFilename, newFilename) => {
 });
 
 global.logger = winston.createLogger({
+  format: combine(timestamp(), myFormat),
   transports: [transport],
 });

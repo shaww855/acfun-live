@@ -12,7 +12,7 @@ const questionList = [
   {
     type: "input",
     name: "白名单",
-      message: "你是单推吗？请输入uid（例：123,456）",
+    message: "你是单推吗？请输入uid（例：123,456）",
     validate(input) {
       return validateUid(input);
     },
@@ -21,8 +21,8 @@ const questionList = [
     type: "input",
     name: "黑名单",
     message: "有不想看的主播吗？请输入uid（例：654,321）",
-    when (answers) {
-      return answers.白名单.trim() === ''
+    when(answers) {
+      return answers.白名单.trim() === "";
     },
     validate(input) {
       return validateUid(input);

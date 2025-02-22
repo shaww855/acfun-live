@@ -1,5 +1,5 @@
 import puppeteer from "puppeteer-core";
-import { loginByQrcode, requestFliter, watcherUper } from "./page.js";
+import { loginByQrcode, requestFliter } from "./page.js";
 import {
   personalInfo,
   medalList,
@@ -8,7 +8,6 @@ import {
   extraInfo,
 } from "./api.js";
 import moment from "moment";
-import { sleep } from "../utils.js";
 
 moment.locale("zh-cn");
 
@@ -166,7 +165,7 @@ async function monitor(browser, times = 0) {
     pageListUrl.push(page.url());
   }
 
-  let isFull = 0
+  let isFull = 0;
   console.log("顺序获取守护团信息");
   for (let index = 0; index < 需要关注的直播.length; index++) {
     const element = 需要关注的直播[index];
@@ -191,7 +190,7 @@ async function monitor(browser, times = 0) {
     let msg = "";
     if (info.timeDifference === 0) {
       // 满了
-      isFull ++
+      isFull++;
       if (targetIndex > -1) {
         // 找到
         page = pageList[targetIndex];
@@ -235,9 +234,16 @@ async function monitor(browser, times = 0) {
     console.log("---");
   }
 
-  console.log('总数', 需要关注的直播.length, '时长已满', isFull, '时长未满', 需要关注的直播.length - isFull);
-  
-  const nextM = 10
+  console.log(
+    "总数",
+    需要关注的直播.length,
+    "时长已满",
+    isFull,
+    "时长未满",
+    需要关注的直播.length - isFull,
+  );
+
+  const nextM = 10;
   console.log(
     "再次检测时间",
     moment().add(nextM, "minute").format("YYYY/MM/DD HH:mm:ss"),
