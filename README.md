@@ -2,7 +2,8 @@
 
 ## 介绍
 
-[![CodeQL](https://github.com/shaww855/acfun-live/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/codeql-analysis.yml)
+[![CodeQL](https://github.com/shaww855/acfun-live/actions/workflows/codeql.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/codeql.yml)
+[![Auto Release](https://github.com/shaww855/acfun-live/actions/workflows/auto-release.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/auto-release.yml)
 [![version](https://img.shields.io/github/package-json/v/shaww855/acfun-live)](https://github.com/shaww855/acfun-live/tags)
 [![downloads](https://img.shields.io/github/downloads/shaww855/acfun-live/total)](https://github.com/shaww855/acfun-live/releases)
 [![license](https://img.shields.io/github/license/shaww855/acfun-live)](https://github.com/shaww855/acfun-live/blob/main/LICENSE)  
