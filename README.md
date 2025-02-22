@@ -4,13 +4,12 @@
 
 [![CodeQL Advanced](https://github.com/shaww855/acfun-live/actions/workflows/codeql.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/codeql.yml)
 [![Auto Release](https://github.com/shaww855/acfun-live/actions/workflows/auto-release.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/auto-release.yml)  
-
 ![GitHub Created At](https://img.shields.io/github/created-at/shaww855/acfun-live)
 ![GitHub Release](https://img.shields.io/github/v/release/shaww855/acfun-live)
 [![downloads](https://img.shields.io/github/downloads/shaww855/acfun-live/total)](https://github.com/shaww855/acfun-live/releases)
 ![GitHub License](https://img.shields.io/github/license/shaww855/acfun-live)  
 
-自动挂牌子工具，定时检测主播开播情况，当日时长挂满后自动离开直播间，支持扫码登录。  
+扫码免密登录，时刻关注你喜爱的主播，自动增加观看时长。  
 请认准唯二指定下载仓库 Github、Gitee。  
 本工具完全免费、开源，有更好的点子欢迎PR。
 

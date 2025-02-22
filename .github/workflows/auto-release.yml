@@ -58,8 +58,8 @@ jobs:
     - name: Verify artifacts
       run: |
         ls -lh dist/
-        [ -f dist/index_${{ env.CONVERTED_VERSION }}.exe ] || exit 1
-        [ -f dist/index_${{ env.CONVERTED_VERSION }}.zip ] || exit 1
+        [ -f dist/acfunlive_${{ env.CONVERTED_VERSION }}.exe ] || exit 1
+        [ -f dist/acfunlive_${{ env.CONVERTED_VERSION }}.zip ] || exit 1
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -67,7 +67,7 @@ jobs:
         tag_name: ${{ env.RAW_VERSION }}
         name: Release ${{ env.CONVERTED_VERSION }}
         files: |
-          dist/index_${{ env.CONVERTED_VERSION }}.exe
-          dist/index_${{ env.CONVERTED_VERSION }}.zip
+          dist/acfunlive_${{ env.CONVERTED_VERSION }}.exe
+          dist/acfunlive_${{ env.CONVERTED_VERSION }}.zip
         draft: true
         body: "自动生成的预览版，请检查后发布"
