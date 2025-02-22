@@ -7,10 +7,9 @@ import main, { closeBrowser } from "./browser/index.js";
 
 process.on("uncaughtException", (error) => {
   if (error instanceof Error && error.name === "ExitPromptError") {
-    global.logger.info("用户取消配置引导");
+    global.logger.error("用户取消配置引导");
     process.exit();
   } else {
-    console.error(error.message);
     global.logger.error(error.message);
     console.log("请尝试删除 config.json 文件后重试");
     console.log("如无法解决，请保留日志文件并反馈至唯一指定扣扣群：726686920");
@@ -34,7 +33,6 @@ async function start() {
   await welcome();
   getConfig()
     .then(() => {
-      console.log("配置文件读取成功");
       global.logger.info(`配置文件读取成功，${JSON.stringify(global.config)}`);
       main();
     })

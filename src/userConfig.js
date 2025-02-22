@@ -30,8 +30,7 @@ export function getConfig() {
         resolve();
       })
       .catch((err) => {
-        global.logger.error("读取配置文件失败");
-        global.logger.error(err);
+        global.logger.error("读取配置文件失败", err);
         reject(err);
       });
   });
@@ -45,11 +44,9 @@ export function saveConfig() {
   return fs
     .writeFile(configPath, data)
     .then((res) => {
-      global.logger.info("保存配置文件成功");
-      global.logger.info(JSON.stringify(global.config));
+      global.logger.info("保存配置文件成功", JSON.stringify(global.config));
     })
     .catch((err) => {
-      global.logger.error("保存配置文件失败");
-      global.logger.error(err);
+      global.logger.error("保存配置文件失败", err);
     });
 }

@@ -21,15 +21,12 @@ export async function loginByQrcode() {
   )
     .then((res) => {
       if (res.qrLoginSignature) {
-        console.log("扫码成功，请在手机上确认登录。");
-        global.logger.info("扫码成功");
+        global.logger.info("扫码成功，请在手机上确认登录。");
       }
       return res;
     })
     .catch((err) => {
-      console.log("等待确认超时");
-      global.logger.info("等待确认超时");
-      global.logger.error(err.message);
+      global.logger.info("等待确认超时", err.message);
     });
 
   return qrcodeAcceptResult(
@@ -53,13 +50,13 @@ export async function loginByQrcode() {
               "YYYY/MM/DD HH:mm:ss",
             );
           } else {
-            global.logger.error(`饼干过期时间处理失败，${res.cookies[0]}`);
+            global.logger.debug(`饼干过期时间处理失败，${res.cookies[0]}`);
             throw new Error("饼干过期时间处理失败");
           }
           const dateStr = res.cookies[0].split("Expires=");
         } catch (error) {
           console.log("解析饼干失败");
-          global.logger.error(`解析饼干失败，${error.message}`);
+          global.logger.debug(`解析饼干失败，${error.message}`);
           throw error;
         }
         saveConfig();
@@ -85,9 +82,7 @@ export async function loginByQrcode() {
       }
     })
     .catch((err) => {
-      console.log("二维码授权失败");
-      global.logger.info("二维码授权失败");
-      global.logger.error(err.message);
+      global.logger.error("二维码授权失败", err.message);
     });
 }
 
@@ -101,8 +96,7 @@ function saveQrcodeImg(base64Data) {
   const dataBuffer = Buffer.from(base64Data, "base64");
   fs.writeFile(qrcodePath, dataBuffer, (err) => {
     if (err) {
-      console.error(err);
-      global.logger.info("保存二维码图片失败");
+      global.logger.error("保存二维码图片失败", err.message);
     } else {
       console.log(
         "如二维码图片无法扫描，请自行打开本工具目录下的二维码图片进行扫码",

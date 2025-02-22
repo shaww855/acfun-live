@@ -14,7 +14,7 @@ instance.interceptors.request.use(
     return config;
   },
   function (error) {
-    global.logger.error(error.message);
+    global.logger.error('构造请求体失败', error.message);
     return Promise.reject(error);
   },
 );
@@ -27,7 +27,7 @@ instance.interceptors.response.use(
     if (response.config.url.includes("/rest/pc-direct/qr/acceptResult")) {
       // 扫描确认登录时
       const responseCookies = response.headers["set-cookie"];
-      global.logger.info(`扫描确认登录 设置饼干 ${responseCookies}`);
+      global.logger.debug(`扫描确认登录 设置饼干 ${responseCookies}`);
       // console.log('responseCookies', responseCookies);
 
       if (responseCookies) {
@@ -39,7 +39,7 @@ instance.interceptors.response.use(
   function (error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Do something with response error
-    global.logger.error(error.message);
+    global.logger.error('构造返回体失败',error.message);
     return Promise.reject(error);
   },
 );
