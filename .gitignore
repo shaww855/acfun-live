@@ -1,8 +1,7 @@
 .DS_Store
 node_modules
 /dist
-/logs
-/OnVideoUrl
+**/logs
 
 # local env files
 .env.local
@@ -15,11 +14,10 @@ yarn-error.log*
 
 # Editor directories and files
 .idea
-.vscode
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw*
 qrcode.png
-config.json
+**/config.json

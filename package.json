@@ -1,26 +1,48 @@
 {
   "name": "acfun-live",
-  "version": "1.5.12",
-  "description": "使用 Puppeteer 开启 acfun 直播监控室，挂牌子！😏",
-  "main": "index.js",
-  "bin": "app.js",
+  "version": "2.0.0",
+  "description": "使用 Puppeteer 开启 AcFun 直播监控室，挂牌子！😏",
+  "homepage": "https://github.com/shaww855/acfun-live#readme",
+  "bugs": {
+    "url": "https://github.com/shaww855/acfun-live/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/shaww855/acfun-live"
+    "url": "git+https://github.com/shaww855/acfun-live.git"
   },
-  "scripts": {
-    "start": "node entry.js",
-    "build:win": "pkg entry.js -o dist/acfunlive -t win --public"
-  },
+  "license": "GPL-3.0",
   "author": "shaw",
-  "license": "ISC",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .\\src\\index.js",
+    "prettier": "pnpm exec prettier --write src/**/*.js",
+    "publish": "node .\\build.js"
+  },
+  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0",
   "dependencies": {
-    "inquirer": "^8.2.5",
-    "node-schedule": "^2.1.1",
-    "puppeteer": "^22.13.0",
-    "qrcode": "^1.5.1"
+    "axios": "^1.7.9",
+    "axios-retry": "^4.5.0",
+    "inquirer": "^12.4.2",
+    "log4js": "^6.9.1",
+    "moment": "^2.30.1",
+    "puppeteer-core": "^24.2.1",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
-    "pkg": "^5.8.1"
+    "archiver": "^7.0.1",
+    "esbuild": "^0.25.0",
+    "eslint": "^9.21.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-n": "^17.15.1",
+    "eslint-plugin-promise": "^7.2.1",
+    "pkg": "^5.8.1",
+    "prettier": "3.5.2"
+  },
+  "pkg": {
+    "assets": [
+      "./src/*.js"
+    ]
   }
 }
