@@ -15,6 +15,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "start": "node .\\src\\index.js",
     "prettier": "pnpm exec prettier --write src/**/*.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "buildSingleFile": ".\\node_modules\\.bin\\esbuild .\\src\\index.js --bundle --platform=node --outdir=dist --format=cjs",
@@ -25,11 +26,10 @@
     "axios": "^1.7.9",
     "axios-retry": "^4.5.0",
     "inquirer": "^12.3.3",
+    "log4js": "^6.9.1",
     "moment": "^2.30.1",
     "puppeteer-core": "^24.1.1",
-    "qrcode": "^1.5.4",
-    "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "esbuild": "^0.25.0",

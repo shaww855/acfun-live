@@ -1,30 +1,31 @@
-import moment from "moment";
-import * as winston from "winston";
-import "winston-daily-rotate-file";
-const { combine, timestamp, label, printf } = winston.format;
+import log4js from "log4js";
 
-const transport = new winston.transports.DailyRotateFile({
-  dirname: "logs",
-  filename: "%DATE%.log",
-  datePattern: "YYYY-MM-DD",
-  zippedArchive: true,
-  maxSize: "20m",
-  maxFiles: "7d",
-});
+log4js.configure({
+  appenders: {
+    console: { type: "console" },
+    dateFileOut: {
+      type: "dateFile",
+      filename: "logs/datefile.log",
+      pattern: "yyyy-MM-dd.log",
+      maxLogSize: 10485760,
+      backups: 3,
+      alwaysIncludePattern: true,
+    },
+  },
 
-const myFormat = printf(({ level, message, label, timestamp }) => {
-  return `${moment(timestamp).format("YYYY-MM-DD HH:mm:ss")} [${level}] ${message}`;
+  categories: {
+    default: { appenders: ["dateFileOut"], level: "all" },
+    acfunlive: { appenders: ["console", "dateFileOut"], level: "info" },
+  },
 });
+const logger = log4js.getLogger("acfunlive");
 
-transport.on("error", (error) => {
-  // log or handle errors here
-});
-
-transport.on("rotate", (oldFilename, newFilename) => {
-  // do something fun
-});
-
-global.logger = winston.createLogger({
-  format: combine(timestamp(), myFormat),
-  transports: [transport],
-});
+logger.debug("debugdebugdebugdebug");
+export default logger;
+export async function shutdown() {
+  return Promise.then((resolve) => {
+    log4js.shutdown(() => {
+      resolve();
+    });
+  });
+}

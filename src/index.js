@@ -1,28 +1,54 @@
 import { getConfig } from "./userConfig.js";
 import { makeUserConfig } from "./question.js";
-import "./log.js";
+import logger, { shutdown } from "./log.js";
 import "./globalValue.js";
 import welcome from "./welcome.js";
 import main, { closeBrowser } from "./browser/index.js";
 
+let timeid = null;
+let userClose = false;
+
+process.on("SIGINT", async () => {
+  userClose = true;
+  logger.warn("收到用户的退出命令，再见。");
+  await closeBrowser();
+  await shutdown();
+  process.exit();
+});
+
 process.on("uncaughtException", (error) => {
+  if (userClose) {
+    return;
+  }
   if (error instanceof Error && error.name === "ExitPromptError") {
-    global.logger.error("用户取消配置引导");
+    logger.error("用户取消配置引导");
     process.exit();
   } else {
-    global.logger.error(error.message);
-    console.log("请尝试删除 config.json 文件后重试");
-    console.log("如无法解决，请保留日志文件并反馈至唯一指定扣扣群：726686920");
+    clearInterval(timeid);
+    timeid = null;
+    logger.error(`捕获未知错误！ ${error.message}`);
+    logger.warn("请尝试删除 config.json 文件后重试");
+    logger.warn("如无法解决，请保留日志文件并反馈至唯一指定扣扣群：726686920");
     closeBrowser().then(() => {
-      console.log("5s后自动重启！");
-
+      let msg = "5s后自动退出！";
+      if (global.config.出错时 === "自动重启") {
+        msg = "5s后自动重启！";
+      }
       let timeCount = 5;
-      const timeid = setInterval(() => {
+      timeid = setInterval(() => {
         timeCount--;
-        console.log(timeCount);
+        logger.info(timeCount);
         if (timeCount == 1) {
           clearInterval(timeid);
-          start();
+          timeid = null;
+
+          if (global.出错时 === "自动重启") {
+            start();
+          } else {
+            shutdown().finally(() => {
+              process.exit();
+            });
+          }
         }
       }, 1000);
     });
@@ -33,7 +59,7 @@ async function start() {
   await welcome();
   getConfig()
     .then(() => {
-      global.logger.info(`配置文件读取成功，${JSON.stringify(global.config)}`);
+      logger.info(`配置文件读取成功 ${JSON.stringify(global.config)}`);
       main();
     })
     .catch(() => {

@@ -1,5 +1,6 @@
 import inquirer from "inquirer";
 import { defaultConfig, saveConfig } from "./userConfig.js";
+import logger from "./log.js";
 
 const questionList = [
   {
@@ -8,6 +9,13 @@ const questionList = [
     message: "您似乎是第一次运行，请选择引导方式",
     choices: ["快速", "进阶"],
     default: "快速",
+  },
+  {
+    type: "list",
+    name: "出错时",
+    message: "请选择工具报错时的行为",
+    choices: ["自动重启", "挂起等待", "自动关闭"],
+    default: "自动重启",
   },
   {
     type: "input",
@@ -59,8 +67,6 @@ const questionList = [
 
 export function makeUserConfig() {
   return inquirer.prompt(questionList).then((answers) => {
-    // console.log(answers);
-
     try {
       if (answers.白名单.trim() !== "") {
         answers.白名单 = answers.白名单.split(",");
@@ -70,7 +76,7 @@ export function makeUserConfig() {
     } catch (error) {
       console.error(error);
       answers.白名单 = [];
-      console.log("整理白名单失败，将留空");
+      logger.info("整理白名单失败，将留空");
     }
 
     try {
@@ -80,9 +86,9 @@ export function makeUserConfig() {
         answers.黑名单 = [];
       }
     } catch (error) {
-      console.error(error);
       answers.黑名单 = [];
-      console.log("整理黑名单失败，将留空");
+      logger.info("整理黑名单失败，将留空");
+      logger.error(error);
     }
 
     delete answers.引导方式;

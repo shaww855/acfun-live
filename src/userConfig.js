@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
-// import path from "node:path";
+import logger from "./log.js";
 
 const configPath = "./config.json";
 // const configPath = path.join(import.meta.dirname, "./config.json");
 
 export const defaultConfig = {
   调试: false,
-  自动重启: false,
+  出错时: "重启",
   记住登录状态: false,
   监控间隔分钟: 10,
   浏览器路径: "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
@@ -30,7 +30,8 @@ export function getConfig() {
         resolve();
       })
       .catch((err) => {
-        global.logger.error("读取配置文件失败", err);
+        console.error("读取配置文件失败");
+        logger.error(err);
         reject(err);
       });
   });
@@ -43,10 +44,12 @@ export function saveConfig() {
   const data = JSON.stringify(global.config);
   return fs
     .writeFile(configPath, data)
-    .then((res) => {
-      global.logger.info("保存配置文件成功", JSON.stringify(global.config));
+    .then(() => {
+      logger.info("保存配置文件成功");
+      logger.debug(JSON.stringify(global.config));
     })
     .catch((err) => {
-      global.logger.error("保存配置文件失败", err);
+      logger.error("保存配置文件失败");
+      logger.error(err);
     });
 }
