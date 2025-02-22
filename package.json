@@ -15,9 +15,9 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node .\\src\\index.js",
+    "start": "node ./src/index.js",
     "prettier": "npm exec prettier --write src/**/*.js",
-    "publish": "node .\\build.js",
+    "publish": "node ./build.js",
     "prepublish": "npm run prettier"
   },
   "packageManager": "pnpm@9.15.4",
