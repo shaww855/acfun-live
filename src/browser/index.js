@@ -124,7 +124,7 @@ async function monitor(browser, times = 0) {
 
   // 根据配置过滤直播间
   if (global.config.白名单.length > 0) {
-    console.log("存在白名单，忽略黑名单！");
+    console.log("当前用户是单推人，单推数：", global.config.白名单.length);
     需要关注的直播 = 所有正在直播列表.filter((e) =>
       global.config.白名单.includes(e.authorId),
     );
@@ -166,6 +166,7 @@ async function monitor(browser, times = 0) {
     pageListUrl.push(page.url());
   }
 
+  let isFull = 0
   console.log("顺序获取守护团信息");
   for (let index = 0; index < 需要关注的直播.length; index++) {
     const element = 需要关注的直播[index];
@@ -190,6 +191,7 @@ async function monitor(browser, times = 0) {
     let msg = "";
     if (info.timeDifference === 0) {
       // 满了
+      isFull ++
       if (targetIndex > -1) {
         // 找到
         page = pageList[targetIndex];
@@ -232,15 +234,19 @@ async function monitor(browser, times = 0) {
     console.log(`[${index + 1}/${需要关注的直播.length}]`, msg);
     console.log("---");
   }
+
+  console.log('总数', 需要关注的直播.length, '时长已满', isFull, '时长未满', 需要关注的直播.length - isFull);
+  
+  const nextM = 10
   console.log(
     "再次检测时间",
-    moment().add(10, "minute").format("YYYY/MM/DD HH:mm:ss"),
+    moment().add(nextM, "minute").format("YYYY/MM/DD HH:mm:ss"),
   );
   monitorTimeoutId = setTimeout(
     () => {
       monitor(browser, times + 1);
     },
-    1000 * 60 * 10,
+    1000 * 60 * nextM,
   );
 }
 
