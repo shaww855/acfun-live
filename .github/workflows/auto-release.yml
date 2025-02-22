@@ -25,24 +25,10 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        cache: 'pnpm'
-
-    - name: Install pnpm
-      run: |
-        # 使用 corepack 确保 pnpm 版本一致性
-        corepack enable
-        corepack prepare pnpm@9.15.4 --activate
 
     - name: Install dependencies
       run: |
-        pnpm install
-        pnpm add -D pkg
-
-    - name: Clean cache (强制刷新)
-      run: |
-        pnpm store prune
-        rm -rf node_modules
-        pnpm cache clean --force
+        npm install
 
     - name: Build project
       run: node build.js
