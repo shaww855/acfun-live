@@ -104,7 +104,7 @@ function validateUid(input) {
   if (input.trim() == "") {
     return true;
   }
-  if (/^(\d+[-,]?)*\d+$/g.test(input)) {
+  if (/^(\d+[-,])+?\d+$/g.test(input)) {
     return true;
   }
 
