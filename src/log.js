@@ -20,7 +20,6 @@ log4js.configure({
 });
 const logger = log4js.getLogger("acfunlive");
 
-logger.debug("debugdebugdebugdebug");
 export default logger;
 export async function shutdown() {
   return Promise.then((resolve) => {
