@@ -2,7 +2,7 @@
 
 ## 介绍
 
-[![CodeQL Advanced](https://github.com/shaww855/acfun-live/actions/workflows/codeql.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/codeql.yml)
+[![CodeQL Advanced](https://github.com/shaww855/acfun-live/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/codeql-analysis.yml)
 [![Auto Release](https://github.com/shaww855/acfun-live/actions/workflows/auto-release.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/auto-release.yml)  
 ![GitHub Created At](https://img.shields.io/github/created-at/shaww855/acfun-live)
 ![GitHub Release](https://img.shields.io/github/v/release/shaww855/acfun-live)
