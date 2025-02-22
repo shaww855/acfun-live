@@ -1,0 +1,57 @@
+name: Auto Release
+
+on:
+  push:
+    tags:
+      - 'v.*.*.*'  # 匹配标准的语义化版本标签 (如 v1.2.3)
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest  # 使用更快的 Ubuntu 环境
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js with pnpm
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'pnpm'
+
+    - name: Install pnpm
+      run: npm install -g pnpm
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Convert tag version
+      id: version
+      run: |
+        # 将 v1.2.3 → v_1_2_3
+        converted_version=$(echo "${{ github.ref_name }}" | sed 's/\./_/g')
+        echo "converted_version=${converted_version}" >> $GITHUB_OUTPUT
+
+    - name: Build project
+      run: node build.js
+      env:
+        CI: true
+        BUILD_VERSION: ${{ steps.version.outputs.converted_version }}
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-assets
+        path: |
+          dist/*.zip
+          dist/*.exe
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
+        draft: true
+        files: |
+          dist/*_${{ steps.version.outputs.converted_version }}.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

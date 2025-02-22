@@ -1,5 +1,6 @@
 import axios from "axios";
 import { readFile } from "fs/promises";
+import packgeData from "../package.json";
 
 export default async function () {
   console.log(`
@@ -27,12 +28,12 @@ export default async function () {
   //   console.log("最新版本：", response.data["版本号"]);
   // });
 
-  return readFile("./package.json").then((res) => {
-    const packgeData = JSON.parse(res);
-    if (packgeData) {
-      console.log("工具版本：", packgeData.version);
-      console.log("推荐使用浏览器：Chromium 133.0.6943.98  Firefox 135.0");
-      console.log("开源地址", packgeData.homepage);
-    }
-  });
+  // return readFile("./package.json").then((res) => {
+  //   const packgeData = JSON.parse(res);
+  if (packgeData) {
+    console.log("工具版本：", packgeData.version);
+    console.log("推荐使用浏览器：Chromium 133.0.6943.98  Firefox 135.0");
+    console.log("开源地址", packgeData.homepage);
+  }
+  // });
 }
