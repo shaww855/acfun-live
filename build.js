@@ -6,12 +6,9 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// 版本号处理函数
-const formatVersion = (version) => version.replace(/\./g, '_');
-
 try {
   const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
-  const version = formatVersion(pkg.version);
+  const version = process.env.BUILD_VERSION.replace(/\./g, '_');
   const distPath = path.join(__dirname, 'dist');
 
   // 清理dist目录（保留config.json）

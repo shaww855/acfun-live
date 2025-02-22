@@ -2,12 +2,15 @@
 
 ## 介绍
 
-[![CodeQL](https://github.com/shaww855/acfun-live/actions/workflows/codeql.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/codeql.yml)
-[![Auto Release](https://github.com/shaww855/acfun-live/actions/workflows/auto-release.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/auto-release.yml)
-[![version](https://img.shields.io/github/package-json/v/shaww855/acfun-live)](https://github.com/shaww855/acfun-live/tags)
+[![CodeQL Advanced](https://github.com/shaww855/acfun-live/actions/workflows/codeql.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/codeql.yml)
+[![Auto Release](https://github.com/shaww855/acfun-live/actions/workflows/auto-release.yml/badge.svg)](https://github.com/shaww855/acfun-live/actions/workflows/auto-release.yml)  
+
+![GitHub Created At](https://img.shields.io/github/created-at/shaww855/acfun-live)
+![GitHub Release](https://img.shields.io/github/v/release/shaww855/acfun-live)
 [![downloads](https://img.shields.io/github/downloads/shaww855/acfun-live/total)](https://github.com/shaww855/acfun-live/releases)
-[![license](https://img.shields.io/github/license/shaww855/acfun-live)](https://github.com/shaww855/acfun-live/blob/main/LICENSE)  
-自动挂牌子工具，定时检测主播开播情况，当日经验挂满后自动离开直播间，支持扫码登录。  
+![GitHub License](https://img.shields.io/github/license/shaww855/acfun-live)  
+
+自动挂牌子工具，定时检测主播开播情况，当日时长挂满后自动离开直播间，支持扫码登录。  
 请认准唯二指定下载仓库 Github、Gitee。  
 本工具完全免费、开源，有更好的点子欢迎PR。
 
@@ -47,7 +50,6 @@
 - 2021-06-08 活动猴 [ac29442323](https://www.acfun.cn/a/ac29442323)  
   > 用户不得以任何不正当手段及其他破坏活动规则、违背活动公平原则的方式参与本活动。一经发现，本平台有权撤消活动资格，亦有权收回用户已领取的现金奖励、实物奖品或者虚拟奖品，并保留追究该用户责任的权利。如因前述不正当手段被本平台追究责任造成的损失，本平台不进行任何赔偿或补偿。不正当手段及舞弊行为包括但不限于：下载非官方客户端；使用模拟器、插件、外挂等非法工具扫码、下载、安装、注册、登录、赠与、领取奖励；恶意购买；虚假分享；倒买倒卖；注册多个账号；篡改设备数据；恶意牟利等扰乱平台秩序；<b>使用插件、外挂、系统或第三方工具</b>对本平台及本次活动进行干扰、破坏、修改或施加其他影响及本平台认为的其他不正当手段
   
-
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/shaww855/acfun-live.svg)](https://starchart.cc/shaww855/acfun-live)

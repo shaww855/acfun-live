@@ -21,7 +21,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # 获取完整提交历史
+        fetch-depth: 0
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -30,28 +30,30 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies
-      run: npm ci  # 使用严格依赖版本
+      run: npm ci
 
     - name: Resolve version
       id: version
       run: |
         if [ -n "${{ inputs.custom_version }}" ]; then
-          VERSION_TAG="${{ inputs.custom_version}}"
+          RAW_VERSION="${{ inputs.custom_version}}"
         else
-          VERSION_TAG=$(git describe --tags --abbrev=0)
+          RAW_VERSION=$(git describe --tags --abbrev=0)
         fi
+
+        # 移除v前缀并转换格式：v2.0.0 → 2_0_0
+        CLEAN_VERSION=${RAW_VERSION#v}
+        CONVERTED_VERSION=$(echo "$CLEAN_VERSION" | sed 's/\./_/g')
         
-        # 转换 v1.2.3 → v_1_2_3
-        CONVERTED_VERSION=$(echo "$VERSION_TAG" | sed 's/\./_/g')
-        echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
+        echo "RAW_VERSION=$RAW_VERSION" >> $GITHUB_ENV
+        echo "CLEAN_VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
         echo "CONVERTED_VERSION=$CONVERTED_VERSION" >> $GITHUB_ENV
-        echo "BUILD_VERSION=${VERSION_TAG#v}" >> $GITHUB_ENV
 
     - name: Build project
       run: node build.js
       env:
         NODE_OPTIONS: '--experimental-vm-modules'
-        BUILD_VERSION: ${{ env.BUILD_VERSION }}
+        BUILD_VERSION: ${{ env.CLEAN_VERSION }}  # 传递给构建脚本的是 2.0.0
 
     - name: Verify artifacts
       run: |
@@ -62,7 +64,7 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ env.VERSION_TAG }}
+        tag_name: ${{ env.RAW_VERSION }}
         name: Release ${{ env.CONVERTED_VERSION }}
         files: |
           dist/index_${{ env.CONVERTED_VERSION }}.exe
