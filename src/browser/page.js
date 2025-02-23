@@ -169,7 +169,7 @@ export async function monitor(browser, times = 0) {
   logger.info("===");
   logger.info(`第${times + 1}次检查直播状态`);
 
-  const 守护团列表 = await medalList().then((res) => {
+  const 守护徽章列表 = await medalList().then((res) => {
     return res.medalList.map((e) => ({
       clubName: e.clubName,
       currentDegreeLimit: e.currentDegreeLimit,
@@ -183,21 +183,26 @@ export async function monitor(browser, times = 0) {
     }));
   });
 
-  logger.info("守护团数量", 守护团列表.length);
+  logger.info("守护徽章数量", 守护徽章列表.length);
 
   let 所有正在直播列表 = [];
 
-  if (global.config.忽略有牌子但未关注的直播间) {
-    logger.info("忽略有牌子但未关注的直播间");
-    所有正在直播列表 = await channelListFollow().then((e) => e.liveList);
-  } else {
-    const 守护团列表uperId = 守护团列表.map((e) => e.uperId);
+  // if (global.config.忽略有牌子但未关注的直播间) {
+  //   logger.info("忽略有牌子但未关注的直播间");
+  //   所有正在直播列表 = await channelListFollow().then((e) => e.liveList);
+  // } else {
+    const 守护徽章列表uperId = 守护徽章列表.map((e) => e.uperId);
     let list = await channelList().then((e) => e.liveList);
-    logger.info(`正在直播主播数量 ${list.length}`);
-    所有正在直播列表 = list.filter((e) =>
-      守护团列表uperId.includes(e.authorId),
-    );
+  logger.info(`正在直播主播数量 ${list.length}`);
+  if (global.config.忽略有牌子但未关注的直播间) {
+    list = list.filter(e => e.user.isFollowing)
+    logger.info(`其中已关注的主播 ${list.length} ${list.map(e => e.user.name)}`)
   }
+    所有正在直播列表 = list.filter((e) =>
+    守护徽章列表uperId.includes(e.authorId),
+  );
+  logger.info(`并且拥有守护徽章 ${所有正在直播列表.length} ${所有正在直播列表.map(e => e.user.name)}`)
+  // }
 
   所有正在直播列表 = 所有正在直播列表.map((e) => ({
     authorId: e.authorId,
@@ -245,7 +250,7 @@ export async function monitor(browser, times = 0) {
 
   // todo 开播通知
 
-  logger.info(`需要关注的直播 ${需要关注的直播.length}`);
+  logger.info(`过滤黑白名单后 ${需要关注的直播.length} ${需要关注的直播.map(e => e.uperName)}`);
 
   const pageList = await browser.pages();
   const pageListUrl = [];
@@ -255,13 +260,13 @@ export async function monitor(browser, times = 0) {
   }
 
   let isFull = 0;
-  logger.info("正在对比已开播主播和已加入守护团的信息");
+  logger.info("开始对比已开播主播和拥有的守护徽章");
   logger.info("---");
   for (let index = 0; index < 需要关注的直播.length; index++) {
     const element = 需要关注的直播[index];
     const info = await extraInfo(element.uperId).then((res) => {
       const medalInfo = res.medalDegreeLimit;
-      const target = 守护团列表.find((e) => e.uperId === element.uperId);
+      const target = 守护徽章列表.find((e) => e.uperId === element.uperId);
       return {
         ...target,
         ...element,

@@ -6,9 +6,20 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-try {
+// 统一版本号获取逻辑
+const getVersion = () => {
+  // 优先使用环境变量
+  if (process.env.BUILD_VERSION) {
+    return process.env.BUILD_VERSION.replace(/\./g, '_');
+  }
+  
+  // 本地开发读取 package.json
   const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
-  const version = process.env.BUILD_VERSION.replace(/\./g, '_');
+  return pkg.version.replace(/\./g, '_');
+};
+
+try {
+  const version = getVersion();
   const distPath = path.join(__dirname, 'dist');
 
   // 清理dist目录（保留config.json）
