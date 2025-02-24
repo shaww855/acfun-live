@@ -9,6 +9,7 @@ const instance = axios.create({
 });
 instance.interceptors.request.use(
   function (config) {
+    logger.debug(`请求 ${config.url}`);
     if (global.config.饼干.length) {
       const cookie = global.config.饼干.join('; ');
       config.headers['Cookie'] = cookie;
@@ -26,6 +27,8 @@ instance.interceptors.response.use(
     // Do something with response data
     // console.log("interceptors", response.data);
     // console.log(response);
+    logger.debug(`响应 ${response.config.url}`);
+    // logger.debug(JSON.stringify(response.data));
     if (response.config.url.includes('/rest/pc-direct/qr/acceptResult')) {
       // 扫描确认登录时
       const responseCookies = response.headers['set-cookie'];

@@ -19,6 +19,18 @@ export const defaultConfig = {
   饼干过期时间: null,
 };
 
+function maskCookie(configData) {
+  let response = configData;
+  if (configData.饼干.length > 0) {
+    response = {
+      ...configData,
+      饼干: '***',
+    };
+  }
+
+  return JSON.stringify(response);
+}
+
 /**
  * 读取配置文件
  */
@@ -27,6 +39,8 @@ export function getConfig() {
     fs.readFile(configPath, { encoding: 'utf8' })
       .then((res) => {
         global.config = JSON.parse(res);
+        logger.info(`配置文件读取成功`);
+        logger.debug(maskCookie(global.config));
         resolve();
       })
       .catch((err) => {
@@ -46,7 +60,7 @@ export function saveConfig() {
     .writeFile(configPath, data)
     .then(() => {
       logger.info('保存配置文件成功');
-      logger.debug(JSON.stringify(global.config));
+      logger.debug(maskCookie(global.config));
     })
     .catch((err) => {
       logger.error('保存配置文件失败');

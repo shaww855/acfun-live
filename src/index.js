@@ -1,6 +1,7 @@
 import { getConfig } from './userConfig.js';
 import { makeUserConfig } from './question.js';
-import logger, { shutdown } from './log.js';
+import logger from './log.js';
+import log4js from 'log4js';
 import './globalValue.js';
 import welcome from './welcome.js';
 import main, { closeBrowser } from './browser/index.js';
@@ -12,7 +13,7 @@ process.on('SIGINT', async () => {
   userClose = true;
   logger.warn('收到用户的退出命令，再见。');
   await closeBrowser();
-  await shutdown();
+  await log4js.shutdown();
   process.exit();
 });
 
@@ -63,7 +64,6 @@ async function start() {
   await welcome();
   getConfig()
     .then(() => {
-      logger.info(`配置文件读取成功 ${JSON.stringify(global.config)}`);
       main();
     })
     .catch(() => {

@@ -221,7 +221,7 @@ export async function monitor(browser, times = 0) {
 
   // 根据配置过滤直播间
   if (global.config.白名单.length > 0) {
-    logger.info(`当前用户是单推人，单推数： ${global.config.白名单.length}`);
+    logger.info(`当前用户是单推人  单推数 ${global.config.白名单.length}`);
     需要关注的直播 = 所有正在直播列表.filter((e) =>
       global.config.白名单.includes(e.authorId),
     );
