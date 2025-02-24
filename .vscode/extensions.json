@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    // ESLint 扩展（语法检查和自动修复）
+    "dbaeumer.vscode-eslint",
+    // Prettier 扩展（代码格式化）
+    "esbenp.prettier-vscode"
+  ]
+}

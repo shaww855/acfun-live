@@ -1,0 +1,7 @@
+# 继承 .gitignore 规则
+.github/
+.vscode/
+dist/
+logs/
+package-lock.json
+package.json
