@@ -1,4 +1,4 @@
-import QRCode from "qrcode";
+import QRCode from 'qrcode';
 import {
   qrcodeScanResult,
   qrcodeStart,
@@ -7,14 +7,14 @@ import {
   channelList,
   channelListFollow,
   extraInfo,
-} from "./api.js";
-import fs from "fs";
-import moment from "moment";
-import { saveConfig } from "../userConfig.js";
-import logger from "../log.js";
-import { sleep } from "../utils.js";
+} from './api.js';
+import fs from 'fs';
+import moment from 'moment';
+import { saveConfig } from '../userConfig.js';
+import logger from '../log.js';
+import { sleep } from '../utils.js';
 
-moment.locale("zh-cn");
+moment.locale('zh-cn');
 /**
  * 用户扫码登录
  */
@@ -30,12 +30,12 @@ export async function loginByQrcode() {
   )
     .then((res) => {
       if (res.qrLoginSignature) {
-        logger.info("扫码成功，请在手机上确认登录。");
+        logger.info('扫码成功，请在手机上确认登录。');
       }
       return res;
     })
     .catch((err) => {
-      logger.error("等待确认超时");
+      logger.error('等待确认超时');
       logger.error(err.message);
     });
 
@@ -47,7 +47,7 @@ export async function loginByQrcode() {
       if (res.result == 0) {
         logger.info(`登录成功，欢迎${res.ac_username}`);
         try {
-          global.config.饼干 = res.cookies.map((e) => e.split(";")[0]);
+          global.config.饼干 = res.cookies.map((e) => e.split(';')[0]);
 
           const str = res.cookies[0];
           const regex = /Expires=([^;]+); Domain/;
@@ -55,13 +55,13 @@ export async function loginByQrcode() {
 
           if (match) {
             global.config.饼干过期时间 = moment(new Date(match[1])).format(
-              "YYYY/MM/DD HH:mm:ss",
+              'YYYY/MM/DD HH:mm:ss',
             );
           } else {
             logger.debug(`饼干过期时间处理失败，${res.cookies[0]}`);
-            throw new Error("饼干过期时间处理失败");
+            throw new Error('饼干过期时间处理失败');
           }
-          const dateStr = res.cookies[0].split("Expires=");
+          const dateStr = res.cookies[0].split('Expires=');
         } catch (error) {
           logger.debug(`解析饼干失败，${error.message}`);
           throw error;
@@ -89,25 +89,25 @@ export async function loginByQrcode() {
       }
     })
     .catch((err) => {
-      logger.error("二维码授权失败");
+      logger.error('二维码授权失败');
       logger.error(err.message);
     });
 }
 
-const qrcodePath = "./qrcode.png";
+const qrcodePath = './qrcode.png';
 
 /**
  * 保存二维码图片
  * @param {String} base64Data 图片base64信息
  */
 function saveQrcodeImg(base64Data) {
-  const dataBuffer = Buffer.from(base64Data, "base64");
+  const dataBuffer = Buffer.from(base64Data, 'base64');
   fs.writeFile(qrcodePath, dataBuffer, (err) => {
     if (err) {
       logger.error(`保存二维码图片失败： ${err.message}`);
     } else {
       console.log(
-        "如二维码图片无法扫描，请自行打开本工具目录下的二维码图片进行扫码",
+        '如二维码图片无法扫描，请自行打开本工具目录下的二维码图片进行扫码',
       );
     }
   });
@@ -118,16 +118,16 @@ function saveQrcodeImg(base64Data) {
  * @param {String} qrLoginToken token
  */
 function showQrcode(qrLoginToken) {
-  console.log("↓↓↓ 请使用 AcFun APP 扫码并确认登录 ↓↓↓");
+  console.log('↓↓↓ 请使用 AcFun APP 扫码并确认登录 ↓↓↓');
   QRCode.toString(
     `http://scan.acfun.cn/l/${qrLoginToken}`,
-    { type: "terminal", small: true },
+    { type: 'terminal', small: true },
     function (err, string) {
       if (err) {
         throw err;
       }
       console.log(string);
-      logger.info("二维码打印成功");
+      logger.info('二维码打印成功');
     },
   );
 }
@@ -141,21 +141,21 @@ export async function requestFliter(page) {
     return;
   }
   await page.setRequestInterception(true);
-  page.on("request", (request) => {
-    if (request.resourceType() === "image") {
+  page.on('request', (request) => {
+    if (request.resourceType() === 'image') {
       request.continue({
-        url: "https://ali-imgs.acfun.cn/kos/nlav10360/static/common/widget/appGuide/img/appclose.192fa4f1ecb6c48661d8.png",
+        url: 'https://ali-imgs.acfun.cn/kos/nlav10360/static/common/widget/appGuide/img/appclose.192fa4f1ecb6c48661d8.png',
       });
-    } else if (request.url().includes(".flv")) {
+    } else if (request.url().includes('.flv')) {
       // 拦截直播流
       request.abort();
-    } else if (request.url().includes("/perfLog")) {
+    } else if (request.url().includes('/perfLog')) {
       // 拦截疑似日志
       request.abort();
-    } else if (request.url().includes("/hm.baidu.com")) {
+    } else if (request.url().includes('/hm.baidu.com')) {
       // 拦截疑似日志
       request.abort();
-    } else if (request.url().includes("/collect")) {
+    } else if (request.url().includes('/collect')) {
       // 拦截疑似错误信息收集
       request.abort();
     } else request.continue();
@@ -166,7 +166,7 @@ let monitorTimeoutId = null;
 let 检测到所有主播均未开播的次数 = 0;
 
 export async function monitor(browser, times = 0) {
-  logger.info("===");
+  logger.info('===');
   logger.info(`第${times + 1}次检查直播状态`);
 
   const 守护徽章列表 = await medalList().then((res) => {
@@ -183,7 +183,7 @@ export async function monitor(browser, times = 0) {
     }));
   });
 
-  logger.info("守护徽章数量", 守护徽章列表.length);
+  logger.info('守护徽章数量', 守护徽章列表.length);
 
   let 所有正在直播列表 = [];
 
@@ -237,16 +237,16 @@ export async function monitor(browser, times = 0) {
 
   if (需要关注的直播.length === 0) {
     检测到所有主播均未开播的次数++;
-    logger.info("---");
-    logger.info("拥有牌子的主播均未开播。");
+    logger.info('---');
+    logger.info('拥有牌子的主播均未开播。');
     logger.info(
-      "如果你确定有主播开播：请删除 config.json 文件，重启本工具，按照提示重新登录",
+      '如果你确定有主播开播：请删除 config.json 文件，重启本工具，按照提示重新登录',
     );
     if (检测到所有主播均未开播的次数 > 24) {
       // 每十分钟检测一次，则24为：连续四小时都没有主播开播
       // 连续长时间无主播开播，可能为cookie过期，发送通知提醒
       检测到所有主播均未开播的次数 = 0;
-      logger.warn("连续四小时未检测到主播开播，可能为cookie过期，请及时检查。");
+      logger.warn('连续四小时未检测到主播开播，可能为cookie过期，请及时检查。');
     }
   } else {
     检测到所有主播均未开播的次数 = 0;
@@ -266,8 +266,8 @@ export async function monitor(browser, times = 0) {
   }
 
   let isNotFull = 0;
-  logger.info("开始对比已开播主播和拥有的守护徽章");
-  logger.info("---");
+  logger.info('开始对比已开播主播和拥有的守护徽章');
+  logger.info('---');
   for (let index = 0; index < 需要关注的直播.length; index++) {
     const element = 需要关注的直播[index];
     const info = await extraInfo(element.uperId).then((res) => {
@@ -278,7 +278,7 @@ export async function monitor(browser, times = 0) {
         ...element,
         ...medalInfo,
         timeLimitStr:
-          medalInfo.liveWatchDegree + "/" + medalInfo.liveWatchDegreeLimit,
+          medalInfo.liveWatchDegree + '/' + medalInfo.liveWatchDegreeLimit,
         noTimeLimit: medalInfo.liveWatchDegree < medalInfo.liveWatchDegreeLimit,
         timeDifference:
           medalInfo.liveWatchDegreeLimit - medalInfo.liveWatchDegree,
@@ -287,7 +287,7 @@ export async function monitor(browser, times = 0) {
 
     logger.info(`数量：${index + 1}/${需要关注的直播.length}`);
     logger.info(
-      `开播时间 ${moment(info.createTime).format("YYYY/MM/DD HH:mm:ss")}`,
+      `开播时间 ${moment(info.createTime).format('YYYY/MM/DD HH:mm:ss')}`,
     );
     logger.info(`标题：${info.title}`);
     logger.info(
@@ -303,10 +303,10 @@ export async function monitor(browser, times = 0) {
       if (targetIndex > -1) {
         // 找到
         page = pageList[targetIndex];
-        logger.info("退出聊天室");
+        logger.info('退出聊天室');
         page && (await page.close());
       } else {
-        logger.info("跳过");
+        logger.info('跳过');
       }
     } else {
       isNotFull++;
@@ -314,7 +314,7 @@ export async function monitor(browser, times = 0) {
       if (targetIndex > -1) {
         // 找到
         page = pageList[targetIndex];
-        logger.info("切换标签页至前台");
+        logger.info('切换标签页至前台');
         await page.bringToFront();
         await sleep(3000);
         // logger.info("刷新聊天室");
@@ -322,7 +322,7 @@ export async function monitor(browser, times = 0) {
       } else {
         // 没找到并且没有挂满的则新建;
         await browser.newPage().then(async (page) => {
-          logger.info("新建标签页完成");
+          logger.info('新建标签页完成');
           // 设置5分钟的超时允许
           page.setDefaultNavigationTimeout(1000 * 60 * 5);
           await requestFliter(page);
@@ -331,12 +331,12 @@ export async function monitor(browser, times = 0) {
               `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false`,
             )
             .finally(() => {
-              logger.info("已进入聊天室");
+              logger.info('已进入聊天室');
             });
         });
       }
     }
-    logger.info("---");
+    logger.info('---');
   }
   logger.info(
     `[观看时长未满/筛选后的主播总数] [${isNotFull}/${需要关注的直播.length}]`,
@@ -344,7 +344,7 @@ export async function monitor(browser, times = 0) {
 
   const nextM = 10;
   logger.warn(
-    `下次检测时间 ${moment().add(nextM, "minute").format("YYYY/MM/DD HH:mm:ss")}`,
+    `下次检测时间 ${moment().add(nextM, 'minute').format('YYYY/MM/DD HH:mm:ss')}`,
   );
   monitorTimeoutId = setTimeout(
     () => {

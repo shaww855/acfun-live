@@ -1,12 +1,12 @@
-import log4js from "log4js";
+import log4js from 'log4js';
 
 log4js.configure({
   appenders: {
-    console: { type: "console" },
+    console: { type: 'console' },
     dateFileOut: {
-      type: "dateFile",
-      filename: "logs/datefile.log",
-      pattern: "yyyy-MM-dd.log",
+      type: 'dateFile',
+      filename: 'logs/datefile.log',
+      pattern: 'yyyy-MM-dd.log',
       maxLogSize: 10485760,
       backups: 3,
       alwaysIncludePattern: true,
@@ -14,11 +14,11 @@ log4js.configure({
   },
 
   categories: {
-    default: { appenders: ["dateFileOut"], level: "all" },
-    acfunlive: { appenders: ["console", "dateFileOut"], level: "info" },
+    default: { appenders: ['dateFileOut'], level: 'all' },
+    acfunlive: { appenders: ['console', 'dateFileOut'], level: 'info' },
   },
 });
-const logger = log4js.getLogger("acfunlive");
+const logger = log4js.getLogger('acfunlive');
 
 export default logger;
 export async function shutdown() {

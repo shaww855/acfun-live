@@ -14,7 +14,7 @@ export default async function () {
 `);
 
   const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
-  console.log("当前版本：", pkg.version);
-  console.log("推荐使用浏览器：Chromium 133.0.6943.98  Firefox 135.0");
-  console.log(`开源地址：`, pkg.homepage)
+  console.log('当前版本：', pkg.version);
+  console.log('推荐使用浏览器：Chromium 133.0.6943.98  Firefox 135.0');
+  console.log(`开源地址：`, pkg.homepage);
 }
