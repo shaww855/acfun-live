@@ -191,17 +191,21 @@ export async function monitor(browser, times = 0) {
   //   logger.info("忽略有牌子但未关注的直播间");
   //   所有正在直播列表 = await channelListFollow().then((e) => e.liveList);
   // } else {
-    const 守护徽章列表uperId = 守护徽章列表.map((e) => e.uperId);
-    let list = await channelList().then((e) => e.liveList);
+  const 守护徽章列表uperId = 守护徽章列表.map((e) => e.uperId);
+  let list = await channelList().then((e) => e.liveList);
   logger.info(`正在直播主播数量 ${list.length}`);
   if (global.config.忽略有牌子但未关注的直播间) {
-    list = list.filter(e => e.user.isFollowing)
-    logger.info(`其中已关注的主播 ${list.length} ${list.map(e => e.user.name)}`)
+    list = list.filter((e) => e.user.isFollowing);
+    logger.info(
+      `其中已关注的主播 ${list.length} ${list.map((e) => e.user.name)}`,
+    );
   }
-    所有正在直播列表 = list.filter((e) =>
+  所有正在直播列表 = list.filter((e) =>
     守护徽章列表uperId.includes(e.authorId),
   );
-  logger.info(`并且拥有守护徽章 ${所有正在直播列表.length} ${所有正在直播列表.map(e => e.user.name)}`)
+  logger.info(
+    `并且拥有守护徽章 ${所有正在直播列表.length} ${所有正在直播列表.map((e) => e.user.name)}`,
+  );
   // }
 
   所有正在直播列表 = 所有正在直播列表.map((e) => ({
@@ -250,7 +254,9 @@ export async function monitor(browser, times = 0) {
 
   // todo 开播通知
 
-  logger.info(`过滤黑白名单后 ${需要关注的直播.length} ${需要关注的直播.map(e => e.uperName)}`);
+  logger.info(
+    `过滤黑白名单后 ${需要关注的直播.length} ${需要关注的直播.map((e) => e.uperName)}`,
+  );
 
   const pageList = await browser.pages();
   const pageListUrl = [];
@@ -259,7 +265,7 @@ export async function monitor(browser, times = 0) {
     pageListUrl.push(page.url());
   }
 
-  let isFull = 0;
+  let isNotFull = 0;
   logger.info("开始对比已开播主播和拥有的守护徽章");
   logger.info("---");
   for (let index = 0; index < 需要关注的直播.length; index++) {
@@ -294,7 +300,6 @@ export async function monitor(browser, times = 0) {
     if (info.timeDifference === 0) {
       logger.info(`时长已满 ${info.timeLimitStr}`);
       // 满了
-      isFull++;
       if (targetIndex > -1) {
         // 找到
         page = pageList[targetIndex];
@@ -304,6 +309,7 @@ export async function monitor(browser, times = 0) {
         logger.info("跳过");
       }
     } else {
+      isNotFull++;
       logger.info(`时长未满 ${info.timeLimitStr}`);
       if (targetIndex > -1) {
         // 找到
@@ -333,7 +339,7 @@ export async function monitor(browser, times = 0) {
     logger.info("---");
   }
   logger.info(
-    `[观看时长已达到上线/需要关注的直播间] [${isFull}/${需要关注的直播.length}]`,
+    `[观看时长未满/筛选后的主播总数] [${isNotFull}/${需要关注的直播.length}]`,
   );
 
   const nextM = 10;
