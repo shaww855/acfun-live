@@ -1,7 +1,7 @@
 import { getConfig } from './userConfig.js';
 import { makeUserConfig } from './question.js';
 import logger from './log.js';
-import log4js from 'log4js';
+// import log4js from 'log4js';
 import './globalValue.js';
 import welcome from './welcome.js';
 import main, { closeBrowser } from './browser/index.js';
@@ -13,7 +13,7 @@ process.on('SIGINT', async () => {
   userClose = true;
   logger.warn('收到用户的退出命令，再见。');
   await closeBrowser();
-  await log4js.shutdown();
+  // await log4js.shutdown();
   process.exit();
 });
 
@@ -49,9 +49,9 @@ process.on('uncaughtException', (error) => {
             if (global.config && global.config.出错时 === '自动重启') {
               start();
             } else {
-              shutdown().finally(() => {
-                process.exit();
-              });
+              // log4js.shutdown().finally(() => {
+              process.exit();
+              // });
             }
           }
         }, 1000);

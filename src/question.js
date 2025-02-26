@@ -63,6 +63,15 @@ const questionList = [
       return answers.引导方式 == '进阶' && global.platformIsWin;
     },
   },
+  {
+    type: 'editor',
+    name: '手动指定拥有守护团徽章的UID',
+    message:
+      '因站方API限制，如果你拥有超过500个守护团徽章，请输入对应UID，以英文逗号隔开',
+    when(answers) {
+      return answers.引导方式 == '进阶' && global.platformIsWin;
+    },
+  },
 ];
 
 export function makeUserConfig() {
@@ -88,6 +97,19 @@ export function makeUserConfig() {
     } catch (error) {
       answers.黑名单 = [];
       logger.info('整理黑名单失败，将留空');
+      logger.error(error);
+    }
+
+    try {
+      if (answers.手动指定拥有守护团徽章的UID.trim() !== '') {
+        answers.手动指定拥有守护团徽章的UID =
+          answers.手动指定拥有守护团徽章的UID.split(',');
+      } else {
+        answers.手动指定拥有守护团徽章的UID = [];
+      }
+    } catch (error) {
+      answers.手动指定拥有守护团徽章的UID = [];
+      logger.info('整理 手动指定拥有守护团徽章的UID 失败，将留空');
       logger.error(error);
     }
 

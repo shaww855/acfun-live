@@ -17,6 +17,7 @@ export const defaultConfig = {
   bark通知: null,
   饼干: [],
   饼干过期时间: null,
+  手动指定拥有守护团徽章的UID: [],
 };
 
 function maskCookie(configData) {
@@ -45,7 +46,7 @@ export function getConfig() {
       })
       .catch((err) => {
         console.error('读取配置文件失败');
-        logger.error(err);
+        logger.error(err.message);
         reject(err);
       });
   });

@@ -7,6 +7,7 @@ import {
   channelList,
   channelListFollow,
   extraInfo,
+  medalInfo,
 } from './api.js';
 import fs from 'fs';
 import moment from 'moment';
@@ -169,19 +170,7 @@ export async function monitor(browser, times = 0) {
   logger.info('===');
   logger.info(`第${times + 1}次检查直播状态`);
 
-  const 守护徽章列表 = await medalList().then((res) => {
-    return res.medalList.map((e) => ({
-      clubName: e.clubName,
-      currentDegreeLimit: e.currentDegreeLimit,
-      friendshipDegree: e.friendshipDegree,
-      friendshipToLevelUp: e.currentDegreeLimit - e.friendshipDegree,
-      joinClubTime: e.joinClubTime,
-      level: e.level,
-      uperId: e.uperId,
-      uperName: e.uperName,
-      wearMedal: e.wearMedal,
-    }));
-  });
+  const 守护徽章列表 = await 整理守护勋章列表();
 
   logger.info('守护徽章数量', 守护徽章列表.length);
 
@@ -274,7 +263,6 @@ export async function monitor(browser, times = 0) {
       const medalInfo = res.medalDegreeLimit;
       const target = 守护徽章列表.find((e) => e.uperId === element.uperId);
       return {
-        ...target,
         ...element,
         ...medalInfo,
         timeLimitStr:
@@ -282,6 +270,7 @@ export async function monitor(browser, times = 0) {
         noTimeLimit: medalInfo.liveWatchDegree < medalInfo.liveWatchDegreeLimit,
         timeDifference:
           medalInfo.liveWatchDegreeLimit - medalInfo.liveWatchDegree,
+        ...target,
       };
     });
 
@@ -352,4 +341,43 @@ export async function monitor(browser, times = 0) {
     },
     1000 * 60 * nextM,
   );
+}
+
+async function 整理守护勋章列表() {
+  if (
+    global.config.手动指定拥有守护团徽章的UID &&
+    global.config.手动指定拥有守护团徽章的UID.length > 0
+  ) {
+    logger.info(
+      `正在获取指定的守护团徽章 ${global.config.手动指定拥有守护团徽章的UID}`,
+    );
+    logger.info('将忽略黑白名单配置！');
+
+    const list = [];
+    for (
+      let index = 0;
+      index < global.config.手动指定拥有守护团徽章的UID.length;
+      index++
+    ) {
+      const element = global.config.手动指定拥有守护团徽章的UID[index];
+      await medalInfo(element).then((res) => {
+        const medal = res.medal;
+        list.push({
+          clubName: medal.clubName,
+          level: medal.level,
+          uperId: element,
+          uperName: medal.uperName,
+        });
+      });
+    }
+    return list;
+  }
+  return medalList().then((res) => {
+    return res.medalList.map((e) => ({
+      clubName: e.clubName,
+      level: e.level,
+      uperId: e.uperId,
+      uperName: e.uperName,
+    }));
+  });
 }
