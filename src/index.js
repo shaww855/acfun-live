@@ -14,7 +14,7 @@ process.on('SIGINT', async () => {
   logger.warn('收到用户的退出命令，再见。');
   await closeBrowser();
   // await log4js.shutdown();
-  process.exit();
+  process.exit(0);
 });
 
 process.on('uncaughtException', (error) => {
@@ -39,6 +39,7 @@ process.on('uncaughtException', (error) => {
           msg = '5s后自动重启！';
         }
         let timeCount = 5;
+        logger.info(msg);
         timeid = setInterval(() => {
           timeCount--;
           logger.info(timeCount);
@@ -50,7 +51,7 @@ process.on('uncaughtException', (error) => {
               start();
             } else {
               // log4js.shutdown().finally(() => {
-              process.exit();
+              process.exit(0);
               // });
             }
           }
