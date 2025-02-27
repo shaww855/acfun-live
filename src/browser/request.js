@@ -1,7 +1,7 @@
-import axios from "axios";
-import axiosRetry from "axios-retry";
-import logger from "../log.js";
-import { saveConfig } from "../userConfig.js";
+import axios from 'axios';
+import axiosRetry from 'axios-retry';
+import logger from '../log.js';
+import { saveConfig } from '../userConfig.js';
 
 const instance = axios.create({
   withCredentials: true,
@@ -9,9 +9,10 @@ const instance = axios.create({
 });
 instance.interceptors.request.use(
   function (config) {
+    logger.debug(`请求 ${config.url}`);
     if (global.config.饼干.length) {
-      const cookie = global.config.饼干.join("; ");
-      config.headers["Cookie"] = cookie;
+      const cookie = global.config.饼干.join('; ');
+      config.headers['Cookie'] = cookie;
     }
     return config;
   },
@@ -26,9 +27,11 @@ instance.interceptors.response.use(
     // Do something with response data
     // console.log("interceptors", response.data);
     // console.log(response);
-    if (response.config.url.includes("/rest/pc-direct/qr/acceptResult")) {
+    logger.debug(`响应 ${response.config.url}`);
+    // logger.debug(JSON.stringify(response.data));
+    if (response.config.url.includes('/rest/pc-direct/qr/acceptResult')) {
       // 扫描确认登录时
-      const responseCookies = response.headers["set-cookie"];
+      const responseCookies = response.headers['set-cookie'];
       logger.debug(`扫描确认登录 设置饼干 ${responseCookies}`);
       // console.log('responseCookies', responseCookies);
 
@@ -42,7 +45,7 @@ instance.interceptors.response.use(
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Do something with response error
     logger.error(
-      `接口请求失败： ${error.message} ${error.response ? error.response.data : "无响应内容"}`,
+      `接口请求失败： ${error.message} ${error.response ? error.response.data : '无响应内容'}`,
     );
     if (error.status === 401) {
       // 登录超时

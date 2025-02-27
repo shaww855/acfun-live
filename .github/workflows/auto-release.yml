@@ -13,7 +13,7 @@ on:
 
 jobs:
   build-and-release:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest  # 修改为Windows环境
     permissions:
       contents: write
 
@@ -34,28 +34,31 @@ jobs:
 
     - name: Resolve version
       id: version
+      shell: bash  # 显式指定使用Bash
       run: |
         if [ -n "${{ inputs.custom_version }}" ]; then
-          RAW_VERSION="${{ inputs.custom_version}}"
+          TAG_VERSION="${{ inputs.custom_version}}"
         else
-          RAW_VERSION=$(git describe --tags --abbrev=0)
+          TAG_VERSION=$(git describe --tags --abbrev=0)
         fi
 
-        # 移除v前缀并转换格式：v2.0.0 → 2_0_0
-        CLEAN_VERSION=${RAW_VERSION#v}
+        # 提取纯净版本号 (v2.0.0 → 2.0.0)
+        CLEAN_VERSION=${TAG_VERSION#v}
+        # 转换格式为下划线
         CONVERTED_VERSION=$(echo "$CLEAN_VERSION" | sed 's/\./_/g')
-        
-        echo "RAW_VERSION=$RAW_VERSION" >> $GITHUB_ENV
-        echo "CLEAN_VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
+
+        echo "BUILD_VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
         echo "CONVERTED_VERSION=$CONVERTED_VERSION" >> $GITHUB_ENV
+        echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
 
     - name: Build project
       run: node build.js
       env:
         NODE_OPTIONS: '--experimental-vm-modules'
-        BUILD_VERSION: ${{ env.CLEAN_VERSION }}  # 传递给构建脚本的是 2.0.0
+        BUILD_VERSION: ${{ env.BUILD_VERSION }}
 
     - name: Verify artifacts
+      shell: bash  # 显式指定使用Bash
       run: |
         ls -lh dist/
         [ -f dist/acfunlive_${{ env.CONVERTED_VERSION }}.exe ] || exit 1
@@ -64,7 +67,7 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ env.RAW_VERSION }}
+        tag_name: ${{ env.TAG_VERSION }}
         name: Release ${{ env.CONVERTED_VERSION }}
         files: |
           dist/acfunlive_${{ env.CONVERTED_VERSION }}.exe

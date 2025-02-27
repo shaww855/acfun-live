@@ -1,6 +1,6 @@
 {
   "name": "acfun-live",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "使用 Puppeteer 开启 AcFun 直播监控室，挂牌子！😏",
   "homepage": "https://github.com/shaww855/acfun-live#readme",
   "bugs": {
@@ -16,11 +16,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./src/index.js",
-    "prettier": "npm exec prettier --write src/**/*.js",
-    "publish": "node ./build.js",
-    "prepublish": "npm run prettier"
+    "format": "prettier --write '**/*.{js,json}'",
+    "publish": "node ./build.js"
   },
-  "packageManager": "pnpm@9.15.4",
   "dependencies": {
     "axios": "^1.7.9",
     "axios-retry": "^4.5.0",
@@ -31,14 +29,14 @@
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.21.0",
     "archiver": "^7.0.1",
     "esbuild": "^0.25.0",
+    "eslint": "^9.21.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "globals": "^16.0.0",
     "pkg": "^5.8.1",
-    "prettier": "3.5.2"
-  },
-  "pkg": {
-    "assets": [
-      "./src/*.js"
-    ]
+    "prettier": "^3.5.2"
   }
 }

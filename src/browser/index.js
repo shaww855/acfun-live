@@ -1,10 +1,10 @@
-import puppeteer from "puppeteer-core";
-import { loginByQrcode, requestFliter, monitor } from "./page.js";
-import { personalInfo } from "./api.js";
-import moment from "moment";
-import logger from "../log.js";
+import puppeteer from 'puppeteer-core';
+import { loginByQrcode, requestFliter, monitor } from './page.js';
+import { personalInfo } from './api.js';
+import moment from 'moment';
+import logger from '../log.js';
 
-moment.locale("zh-cn");
+moment.locale('zh-cn');
 
 let browserObj = null;
 
@@ -16,7 +16,7 @@ export default async function main() {
   } else {
   }
 
-  logger.info("正在获取登录信息");
+  logger.info('正在获取登录信息');
   await personalInfo().then((res) => {
     logger.info(`==${res.info.userName}，欢迎使用==`);
     logger.info(`当前账号登录过期时间：${global.config.饼干过期时间}`);
@@ -26,13 +26,13 @@ export default async function main() {
   puppeteer
     .launch({
       devtools: global.config.调试,
-      product: "chrome",
+      product: 'chrome',
       executablePath: global.config.浏览器路径,
       args: [
-        "--disable-crash-reporte",
-        "--disable-extensions",
-        "--disable-smooth-scrolling",
-        "--no-crash-upload",
+        '--disable-crash-reporte',
+        '--disable-extensions',
+        '--disable-smooth-scrolling',
+        '--no-crash-upload',
       ],
     })
     .then(async (browser) => {
@@ -44,7 +44,7 @@ export default async function main() {
       const page = pageList[0];
       await requestFliter(page);
       await readCookies(page);
-      logger.info("饼干设置完成");
+      logger.info('饼干设置完成');
       // await page.goto("https://www.acfun.cn/");
       await monitor(browser);
     });
@@ -52,9 +52,9 @@ export default async function main() {
 
 function readCookies(page) {
   const CookieData = global.config.饼干.map((cookie) => {
-    const list = cookie.split("=");
+    const list = cookie.split('=');
     return {
-      domain: ".acfun.cn",
+      domain: '.acfun.cn',
       name: list[0],
       value: list[1],
     };
@@ -71,5 +71,5 @@ export async function closeBrowser() {
   if (browserObj) {
     await browserObj.close();
   }
-  logger.info("浏览器已关闭");
+  logger.info('浏览器已关闭');
 }
