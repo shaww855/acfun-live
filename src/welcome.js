@@ -11,7 +11,7 @@ export default async function () {
 
 `);
 
-  console.log('当前版本：', '2.0.0');
+  console.log('当前版本：', '2.1.0');
   console.log('推荐使用浏览器：Chromium 133.0.6943.98  Firefox 135.0');
   console.log(`开源地址：`, 'https://github.com/shaww855/acfun-live#readme');
 }

@@ -1,6 +1,6 @@
 {
   "name": "acfun-live",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "使用 Puppeteer 开启 AcFun 直播监控室，挂牌子！😏",
   "homepage": "https://github.com/shaww855/acfun-live#readme",
   "bugs": {
