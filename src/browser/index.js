@@ -72,6 +72,7 @@ function readCookies(page) {
 export async function closeBrowser() {
   if (browserObj) {
     await browserObj.close();
+    browserObj = null;
   }
   logger.info('浏览器已关闭');
 }

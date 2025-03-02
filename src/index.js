@@ -14,7 +14,7 @@ process.on('SIGINT', async () => {
   logger.warn('收到用户的退出命令，再见。');
   await closeBrowser();
   // await log4js.shutdown();
-  process.exit(0);
+  process.exitCode = 1;
 });
 
 process.on('uncaughtException', (error) => {
@@ -23,11 +23,10 @@ process.on('uncaughtException', (error) => {
   }
   if (error instanceof Error && error.name === 'ExitPromptError') {
     logger.error('用户取消配置引导');
-    process.exit();
+    process.exitCode = 1;
   } else {
     logger.error(`捕获未知错误！ ${error.message}`);
-    if (timeid != null) {
-    } else {
+    if (timeid === null) {
       logger.warn('请尝试删除 config.json 文件后重试');
       logger.warn(
         '如无法解决，请保留日志文件并反馈至唯一指定扣扣群：726686920',
@@ -51,7 +50,7 @@ process.on('uncaughtException', (error) => {
               start();
             } else {
               // log4js.shutdown().finally(() => {
-              process.exit(0);
+              process.exitCode = 1;
               // });
             }
           }
