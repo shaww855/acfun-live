@@ -24,7 +24,7 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   function (response) {
     // Any status code that lie within the range of 2xx cause this function to trigger
-    
+
     const logResponse = JSON.stringify(response.data);
     logger.debug(
       `响应 ${logResponse.length} ${logResponse.length > 1000 ? '返回内容过长' : logResponse}`,

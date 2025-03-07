@@ -9,7 +9,6 @@ let timeid = null;
 let userClose = false;
 
 process.on('SIGINT', async () => {
-  logger.debug('退出');
   userClose = true;
   logger.warn('收到用户的退出命令，再见。');
   process.nextTick(() => {
