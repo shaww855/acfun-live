@@ -31,11 +31,9 @@ export default async function main() {
       executablePath: global.config.浏览器路径,
       args: [
         '--disable-crash-reporte',
-        '--disable-extensions',
         '--disable-smooth-scrolling',
         '--no-crash-upload',
       ],
-      // ignoreDefaultArgs: ['--disable-extensions'],
     })
     .then(async (browser) => {
       logger.info(`启动成功，浏览器版本：${await browser.version()}`);

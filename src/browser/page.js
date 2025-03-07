@@ -62,7 +62,7 @@ export async function loginByQrcode() {
             logger.debug(`饼干过期时间处理失败，${res.cookies[0]}`);
             throw new Error('饼干过期时间处理失败');
           }
-          const dateStr = res.cookies[0].split('Expires=');
+          // const dateStr = res.cookies[0].split('Expires=');
         } catch (error) {
           logger.debug(`解析饼干失败，${error.message}`);
           throw error;
@@ -107,7 +107,7 @@ function saveQrcodeImg(base64Data) {
     if (err) {
       logger.error(`保存二维码图片失败： ${err.message}`);
     } else {
-      console.log(
+      logger.info(
         '如二维码图片无法扫描，请自行打开本工具目录下的二维码图片进行扫码',
       );
     }
@@ -119,7 +119,7 @@ function saveQrcodeImg(base64Data) {
  * @param {String} qrLoginToken token
  */
 function showQrcode(qrLoginToken) {
-  console.log('↓↓↓ 请使用 AcFun APP 扫码并确认登录 ↓↓↓');
+  logger.info('↓↓↓ 请使用 AcFun APP 扫码并确认登录 ↓↓↓');
   QRCode.toString(
     `http://scan.acfun.cn/l/${qrLoginToken}`,
     { type: 'terminal', small: true },
@@ -128,7 +128,7 @@ function showQrcode(qrLoginToken) {
         throw err;
       }
       console.log(string);
-      logger.info('二维码打印成功');
+      logger.debug('二维码打印成功');
     },
   );
 }

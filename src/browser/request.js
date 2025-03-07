@@ -24,11 +24,11 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   function (response) {
     // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
-    // console.log("interceptors", response.data);
-    // console.log(response);
-    logger.debug(`响应 ${response.config.url}`);
-    // logger.debug(JSON.stringify(response.data));
+    
+    const logResponse = JSON.stringify(response.data);
+    logger.debug(
+      `响应 ${logResponse.length} ${logResponse.length > 1000 ? '返回内容过长' : logResponse}`,
+    );
     if (response.config.url.includes('/rest/pc-direct/qr/acceptResult')) {
       // 扫描确认登录时
       const responseCookies = response.headers['set-cookie'];

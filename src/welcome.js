@@ -16,7 +16,7 @@ export default async function () {
   defTitle = `挂牌子工具 v${version}`;
   process.title = defTitle;
   console.log('当前版本：', version);
-  console.log('推荐使用浏览器：Chromium 133.0.6943.98  Firefox 135.0');
+  console.log('推荐使用浏览器：Chromium 133.0.6943.126  Firefox 135.0.1');
   console.log(`开源地址：`, 'https://github.com/shaww855/acfun-live#readme');
 }
 export function getTitle() {

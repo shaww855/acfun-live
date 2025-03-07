@@ -1,7 +1,6 @@
 import { getConfig } from './userConfig.js';
 import { makeUserConfig } from './question.js';
 import logger from './log.js';
-// import log4js from 'log4js';
 import './globalValue.js';
 import welcome from './welcome.js';
 import main, { closeBrowser } from './browser/index.js';
@@ -10,11 +9,14 @@ let timeid = null;
 let userClose = false;
 
 process.on('SIGINT', async () => {
+  logger.debug('退出');
   userClose = true;
   logger.warn('收到用户的退出命令，再见。');
-  await closeBrowser();
-  // await log4js.shutdown();
-  process.exitCode = 1;
+  process.nextTick(() => {
+    logger.shutdown(() => {
+      process.exitCode = 1;
+    });
+  });
 });
 
 process.on('uncaughtException', (error) => {
