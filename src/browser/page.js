@@ -5,7 +5,6 @@ import {
   qrcodeAcceptResult,
   medalList,
   channelList,
-  channelListFollow,
   extraInfo,
   medalInfo,
 } from './api.js';
@@ -13,7 +12,8 @@ import fs from 'fs';
 import moment from 'moment';
 import { saveConfig } from '../userConfig.js';
 import logger from '../log.js';
-import { sleep } from '../utils.js';
+import si from 'systeminformation';
+import { getTitle } from '../welcome.js';
 
 moment.locale('zh-cn');
 /**
@@ -62,7 +62,7 @@ export async function loginByQrcode() {
             logger.debug(`饼干过期时间处理失败，${res.cookies[0]}`);
             throw new Error('饼干过期时间处理失败');
           }
-          const dateStr = res.cookies[0].split('Expires=');
+          // const dateStr = res.cookies[0].split('Expires=');
         } catch (error) {
           logger.debug(`解析饼干失败，${error.message}`);
           throw error;
@@ -107,7 +107,7 @@ function saveQrcodeImg(base64Data) {
     if (err) {
       logger.error(`保存二维码图片失败： ${err.message}`);
     } else {
-      console.log(
+      logger.info(
         '如二维码图片无法扫描，请自行打开本工具目录下的二维码图片进行扫码',
       );
     }
@@ -119,7 +119,7 @@ function saveQrcodeImg(base64Data) {
  * @param {String} qrLoginToken token
  */
 function showQrcode(qrLoginToken) {
-  console.log('↓↓↓ 请使用 AcFun APP 扫码并确认登录 ↓↓↓');
+  logger.info('↓↓↓ 请使用 AcFun APP 扫码并确认登录 ↓↓↓');
   QRCode.toString(
     `http://scan.acfun.cn/l/${qrLoginToken}`,
     { type: 'terminal', small: true },
@@ -128,7 +128,7 @@ function showQrcode(qrLoginToken) {
         throw err;
       }
       console.log(string);
-      logger.info('二维码打印成功');
+      logger.debug('二维码打印成功');
     },
   );
 }
@@ -305,23 +305,19 @@ export async function monitor(browser, times = 0) {
         page = pageList[targetIndex];
         logger.info('切换标签页至前台');
         await page.bringToFront();
-        await sleep(3000);
+        // await sleep(3000);
         // logger.info("刷新聊天室");
         // await page.reload();
       } else {
         // 没找到并且没有挂满的则新建;
+        logger.info('正在进入聊天室');
         await browser.newPage().then(async (page) => {
-          logger.info('新建标签页完成');
           // 设置5分钟的超时允许
           page.setDefaultNavigationTimeout(1000 * 60 * 5);
           await requestFliter(page);
-          await page
-            .goto(
-              `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false`,
-            )
-            .finally(() => {
-              logger.info('已进入聊天室');
-            });
+          await page.goto(
+            `https://live.acfun.cn/room/${info.uperId}?theme=default&showAuthorclubOnly=true&showAvatar=false`,
+          );
         });
       }
     }
@@ -330,11 +326,15 @@ export async function monitor(browser, times = 0) {
   logger.info(
     `[观看时长未满/筛选后的主播总数] [${isNotFull}/${需要关注的直播.length}]`,
   );
+  process.title = `[${isNotFull}/${需要关注的直播.length}]${getTitle()}`;
 
   const nextM = 10;
   logger.warn(
     `下次检测时间 ${moment().add(nextM, 'minute').format('YYYY/MM/DD HH:mm:ss')}`,
   );
+
+  showSysUsage(browser);
+
   monitorTimeoutId = setTimeout(
     () => {
       monitor(browser, times + 1);
@@ -380,4 +380,46 @@ async function 整理守护勋章列表() {
       uperName: e.uperName,
     }));
   });
+}
+
+async function showSysUsage(browser) {
+  if (browser === null) {
+    return;
+  }
+
+  // 获取所有进程信息
+  const processes = await si.processes();
+  const toolsProcess = processes.list.find((p) => p.pid === process.pid);
+  // console.log(toolsProcess);
+
+  if (toolsProcess) {
+    logger.info(
+      `已运行：${moment.duration(process.uptime(), 'second').humanize()}， 内存占用：${Math.round(toolsProcess.memRss / 1024)} MB`,
+    );
+  }
+
+  const mainPid = browser.process().pid; // 主进程PID
+
+  // 递归查找所有子进程（包括子进程的子进程）
+  const getChildProcesses = (pid, list = []) => {
+    const children = processes.list.filter((p) => p.parentPid === pid);
+    // console.log('children', children.length);
+
+    list.push(...children);
+    children.forEach((child) => getChildProcesses(child.pid, list));
+    return list;
+  };
+
+  // 主进程 + 所有子进程
+  const allProcesses = [
+    processes.list.find((p) => p.pid === mainPid),
+    ...getChildProcesses(mainPid),
+  ];
+
+  // 累加内存（单位：字节）
+  const totalMemory = allProcesses.reduce(
+    (sum, p) => sum + (p?.memRss || 0),
+    0,
+  );
+  logger.info(`浏览器总内存占用：${Math.round(totalMemory / 1024)} MB`);
 }

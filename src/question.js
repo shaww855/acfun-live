@@ -101,7 +101,10 @@ export function makeUserConfig() {
     }
 
     try {
-      if (answers.手动指定拥有守护团徽章的UID.trim() !== '') {
+      if (
+        answers.手动指定拥有守护团徽章的UID &&
+        answers.手动指定拥有守护团徽章的UID.trim() !== ''
+      ) {
         answers.手动指定拥有守护团徽章的UID =
           answers.手动指定拥有守护团徽章的UID.split(',');
       } else {

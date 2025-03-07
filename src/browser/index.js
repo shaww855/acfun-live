@@ -14,6 +14,8 @@ export default async function main() {
       await loginByQrcode();
     }
   } else {
+    logger.warn('请在windows平台使用');
+    process.exit(1);
   }
 
   logger.info('正在获取登录信息');
@@ -23,14 +25,12 @@ export default async function main() {
   });
 
   logger.info(`正在启动 ${global.config.浏览器路径}`);
-  puppeteer
+  return puppeteer
     .launch({
       devtools: global.config.调试,
-      product: 'chrome',
       executablePath: global.config.浏览器路径,
       args: [
         '--disable-crash-reporte',
-        '--disable-extensions',
         '--disable-smooth-scrolling',
         '--no-crash-upload',
       ],
@@ -70,6 +70,7 @@ function readCookies(page) {
 export async function closeBrowser() {
   if (browserObj) {
     await browserObj.close();
+    browserObj = null;
   }
   logger.info('浏览器已关闭');
 }

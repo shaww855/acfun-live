@@ -1,4 +1,5 @@
 .DS_Store
+.clinic
 node_modules
 /dist
 **/logs
