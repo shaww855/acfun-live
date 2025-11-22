@@ -118,6 +118,5 @@ export function makeUserConfig() {
 function validateUid(input) {
   if (input.trim() === '') return true;
   const arr = input.split(',').map((s) => s.trim());
-  return arr.every((v) => /^
-\d+$/.test(v));
+  return arr.every((v) => /^\d+$/.test(v));
 }
