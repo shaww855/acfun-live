@@ -14,8 +14,9 @@ const questionList = [
     type: 'list',
     name: '出错时',
     message: '请选择工具报错时的行为',
-    choices: ['自动重启', '挂起等待', '自动关闭'],
-    default: '自动重启',
+    // 已移除自动重启选项
+    choices: ['挂起等待', '自动关闭'],
+    default: '自动关闭',
   },
   {
     type: 'input',
@@ -95,43 +96,27 @@ export function makeUserConfig() {
         answers.黑名单 = [];
       }
     } catch (error) {
+      console.error(error);
       answers.黑名单 = [];
       logger.info('整理黑名单失败，将留空');
-      logger.error(error);
     }
 
     try {
-      if (
-        answers.手动指定拥有守护团徽章的UID &&
-        answers.手动指定拥有守护团徽章的UID.trim() !== ''
-      ) {
-        answers.手动指定拥有守护团徽章的UID =
-          answers.手动指定拥有守护团徽章的UID.split(',');
-      } else {
-        answers.手动指定拥有守护团徽章的UID = [];
-      }
-    } catch (error) {
-      answers.手动指定拥有守护团徽章的UID = [];
-      logger.info('整理 手动指定拥有守护团徽章的UID 失败，将留空');
-      logger.error(error);
+      global.config = {
+        ...defaultConfig,
+        ...answers,
+      };
+      saveConfig();
+    } catch (e) {
+      logger.error('保存配置时出错：', e && e.message);
     }
 
-    delete answers.引导方式;
-    global.config = {
-      ...defaultConfig,
-      ...answers,
-    };
-    saveConfig();
+    return answers;
   });
 }
 
 function validateUid(input) {
-  if (input.trim() == '') {
-    return true;
-  }
-  if (/^(\d+[-,])+?\d+$/g.test(input)) {
-    return true;
-  }
-
-  return '请输入以英文逗号分隔的uid文本';
+  if (input.trim() === '') return true;
+  const arr = input.split(',').map((s) => s.trim());
+  return arr.every((v) => /^\d+$/.test(v));
 }

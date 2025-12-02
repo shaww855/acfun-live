@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { getConfig } from './userConfig.js';
 import { makeUserConfig } from './question.js';
 import logger from './log.js';
@@ -5,59 +6,107 @@ import './globalValue.js';
 import welcome from './welcome.js';
 import main, { closeBrowser } from './browser/index.js';
 
-let timeid = null;
 let userClose = false;
+let exitReason = 'unknown'; // 'user' | 'error' | 'external' | 'normal'
 
+// Helper to persist exit info synchronously, then shutdown logger and exit
+function persistExitInfoSync(reason, code) {
+  const data = {
+    time: new Date().toISOString(),
+    reason,
+    code,
+  };
+  try {
+    // 使用同步写入确保在进程退出前数据已落盘
+    fs.writeFileSync('./last-exit.json', JSON.stringify(data, null, 2), { encoding: 'utf8' });
+  } catch (e) {
+    // 若此处失败则无更多操作可以保证，尽量记录到 stderr
+    try {
+      // eslint-disable-next-line no-console
+      console.error('写入 last-exit.json 失败：', e && e.message);
+    } catch (ee) {}
+  }
+}
+
+async function gracefulExit(reason, code) {
+  exitReason = reason;
+  try {
+    // 先把退出原因用 logger 记录一次（保留原日志链路）
+    logger.info(`程序退出，原因：${exitReason}，退出码：${code}`);
+  } catch (e) {
+    // 忽略 logger 抛错
+  }
+
+  // 关键：再做一份同步持久化，作为保底
+  persistExitInfoSync(exitReason, code);
+
+  // 然后优雅关闭 logger（如果 logger.shutdown 有回调）
+  try {
+    // 确保 logger.shutdown 回调执行后再退出
+    await new Promise((resolve) => {
+      try {
+        logger.shutdown(() => {
+          resolve();
+        });
+      } catch (e) {
+        // 若 logger.shutdown 本身抛异常，继续
+        resolve();
+      }
+    });
+  } catch (e) {
+    // ignore
+  } finally {
+    // 最后退出
+    try {
+      process.exit(code);
+    } catch (e) {
+      process.exitCode = code;
+    }
+  }
+}
+
+// 用户主动 Ctrl+C（SIGINT）
 process.on('SIGINT', async () => {
   userClose = true;
-  logger.warn('收到用户的退出命令，再见。');
-  process.nextTick(() => {
-    logger.shutdown(() => {
-      process.exitCode = 1;
-    });
-  });
+  // 使用惯例退出码 130（128 + SIGINT(2)）
+  await gracefulExit('user', 130);
 });
 
-process.on('uncaughtException', (error) => {
-  if (userClose) {
-    return;
+// 外部终止（例如 systemd 或 docker 发出的 SIGTERM）
+process.on('SIGTERM', async () => {
+  await gracefulExit('external', 143); // 128 + 15
+});
+
+// 未捕获异常：记录错误、尝试优雅清理并退出（不重启）
+process.on('uncaughtException', async (error) => {
+  if (userClose) return;
+
+  try {
+    logger.error(`捕获未知错误：${error && error.message}`);
+    if (error && error.stack) logger.debug(error.stack);
+    logger.warn('请尝试删除 config.json 文件后重试');
+    logger.warn('如无法解决，请保留日志文件并反馈至唯一指定扣扣群：726686920');
+  } catch (e) {}
+
+  try {
+    await Promise.resolve(closeBrowser()).catch((err) => {
+      logger.error('closeBrowser 执行出错（已捕获）：', err && err.message);
+      logger.debug(err && err.stack);
+    });
+  } catch (e) {
+    logger.error('在 uncaughtException 处理器中关闭浏览器时发生错误（已捕获）：', e && e.message);
   }
-  if (error instanceof Error && error.name === 'ExitPromptError') {
-    logger.error('用户取消配置引导');
-    process.exitCode = 1;
-  } else {
-    logger.error(`捕获未知错误！ ${error.message}`);
-    if (timeid === null) {
-      logger.warn('请尝试删除 config.json 文件后重试');
-      logger.warn(
-        '如无法解决，请保留日志文件并反馈至唯一指定扣扣群：726686920',
-      );
 
-      closeBrowser().then(() => {
-        let msg = '5s后自动退出！';
-        if (global.config && global.config.出错时 === '自动重启') {
-          msg = '5s后自动重启！';
-        }
-        let timeCount = 5;
-        logger.info(msg);
-        timeid = setInterval(() => {
-          timeCount--;
-          logger.info(timeCount);
-          if (timeCount == 1) {
-            clearInterval(timeid);
-            timeid = null;
+  // 退出码 1 表示程序错误退出
+  await gracefulExit('error', 1);
+});
 
-            if (global.config && global.config.出错时 === '自动重启') {
-              start();
-            } else {
-              // log4js.shutdown().finally(() => {
-              process.exitCode = 1;
-              // });
-            }
-          }
-        }, 1000);
-      });
-    }
+// 在进程退出时做保底记录（logger 可能已被关闭）
+process.on('exit', (code) => {
+  try {
+    logger.info(`程序退出（exit 事件），原因：${exitReason}，退出码：${code}`);
+  } catch (e) {
+    // 忽略
   }
 });
 

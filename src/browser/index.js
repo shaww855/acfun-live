@@ -7,6 +7,7 @@ import logger from '../log.js';
 moment.locale('zh-cn');
 
 let browserObj = null;
+let closePromise = null;
 
 export default async function main() {
   if (global.platformIsWin) {
@@ -38,14 +39,12 @@ export default async function main() {
     .then(async (browser) => {
       logger.info(`启动成功，浏览器版本：${await browser.version()}`);
       browserObj = browser;
-      // ac_username=%E6%B3%A5%E5%A3%95; Max-Age=2592000; Expires=Mon, 03-Mar-2025 15: 03: 02 GMT; Domain=acfun.cn; Path=/
 
       const pageList = await browser.pages();
       const page = pageList[0];
       await requestFliter(page);
       await readCookies(page);
       logger.info('饼干设置完成');
-      // await page.goto("https://www.acfun.cn/");
       await monitor(browser);
     });
 }
@@ -64,13 +63,51 @@ function readCookies(page) {
 }
 
 /**
- * 关闭浏览器
- * @returns
+ * 更稳健的 closeBrowser 实现（并发安全、超时、错误吞掉并记录）
  */
 export async function closeBrowser() {
-  if (browserObj) {
-    await browserObj.close();
-    browserObj = null;
+  if (!browserObj) {
+    logger.debug('closeBrowser: 无浏览器实例，忽略关闭请求');
+    return;
   }
-  logger.info('浏览器已关闭');
+
+  if (closePromise) {
+    logger.debug('closeBrowser: 已存在正在进行的关闭操作，等待完成');
+    return closePromise;
+  }
+
+  closePromise = (async () => {
+    const browserRef = browserObj;
+    const TIMEOUT_MS = 5000;
+    try {
+      await Promise.race([
+        browserRef.close(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('browser.close() 超时')), TIMEOUT_MS),
+        ),
+      ]);
+      logger.info('浏览器正常关闭');
+    } catch (err) {
+      logger.error('关闭浏览器时发生错误（已捕获）：', err && err.message);
+      logger.debug(err && err.stack);
+      try {
+        if (browserRef.disconnect && typeof browserRef.disconnect === 'function') {
+          browserRef.disconnect();
+          logger.info('已尝试通过 disconnect 断开浏览器连接');
+        }
+      } catch (e) {
+        logger.debug('disconnect 也失败：', e && e.message);
+      }
+    } finally {
+      try {
+        browserObj = null;
+      } catch (e) {
+        logger.debug('在清理 browserObj 引用时发生错误（已捕获）：', e && e.message);
+      }
+      closePromise = null;
+      logger.info('closeBrowser: 已完成清理');
+    }
+  })();
+
+  return closePromise.catch(() => undefined);
 }
