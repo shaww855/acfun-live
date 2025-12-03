@@ -12,7 +12,11 @@ let closePromise = null;
 export default async function main() {
   if (global.platformIsWin) {
     if (!global.config.饼干过期时间) {
-      await loginByQrcode();
+      const loginResult = await loginByQrcode();
+      if (!loginResult) {
+        logger.error('登录失败，程序退出');
+        process.exit(1);
+      }
     }
   } else {
     logger.warn('请在windows平台使用');
@@ -20,36 +24,52 @@ export default async function main() {
   }
 
   logger.info('正在获取登录信息');
-  await personalInfo().then((res) => {
-    logger.info(`==${res.info.userName}，欢迎使用==`);
+  try {
+    const userInfo = await personalInfo();
+    logger.info(`==${userInfo.info.userName}，欢迎使用==`);
     logger.info(`当前账号登录过期时间：${global.config.饼干过期时间}`);
-  });
+  } catch (err) {
+    logger.error('获取用户信息失败：', err && err.message);
+  }
 
   logger.info(`正在启动 ${global.config.浏览器路径}`);
-  return puppeteer
-    .launch({
+  try {
+    const browser = await puppeteer.launch({
       devtools: global.config.调试,
       executablePath: global.config.浏览器路径,
       args: [
-        '--disable-crash-reporte',
+        '--disable-crash-reporter',
         '--disable-smooth-scrolling',
         '--no-crash-upload',
+        '--disable-extensions',
+        '--disable-plugins',
+        '--disable-images',
+        '--disable-javascript',
       ],
-    })
-    .then(async (browser) => {
-      logger.info(`启动成功，浏览器版本：${await browser.version()}`);
-      browserObj = browser;
-
-      const pageList = await browser.pages();
-      const page = pageList[0];
-      await requestFliter(page);
-      await readCookies(page);
-      logger.info('饼干设置完成');
-      await monitor(browser);
     });
+
+    logger.info(`启动成功，浏览器版本：${await browser.version()}`);
+    browserObj = browser;
+
+    const pageList = await browser.pages();
+    const page = pageList[0];
+    await requestFliter(page);
+    await readCookies(page);
+    logger.info('饼干设置完成');
+    await monitor(browser);
+  } catch (err) {
+    logger.error('启动浏览器失败：', err && err.message);
+    logger.debug(err && err.stack);
+    process.exit(1);
+  }
 }
 
 function readCookies(page) {
+  if (!Array.isArray(global.config.饼干) || global.config.饼干.length === 0) {
+    logger.warn('未找到饼干配置，跳过设置cookies');
+    return Promise.resolve();
+  }
+
   const CookieData = global.config.饼干.map((cookie) => {
     const list = cookie.split('=');
     return {
@@ -59,7 +79,9 @@ function readCookies(page) {
     };
   });
 
-  return Promise.all(CookieData.map((e) => page.setCookie(e)));
+  return Promise.all(CookieData.map((e) => page.setCookie(e))).catch((err) => {
+    logger.error('设置cookies失败：', err && err.message);
+  });
 }
 
 /**
