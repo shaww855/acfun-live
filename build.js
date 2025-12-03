@@ -41,9 +41,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const outCjs = path.join(distPath, `acfunlive_${version}.cjs`);
     const outExe = path.join(distPath, `acfunlive_${version}.exe`);
 
+    // 修正esbuild命令格式，使用双引号包裹路径，并指定兼容的target
     const buildCommands = [
-      `npx esbuild "${entryFile}" --bundle --platform=node --outfile="${outCjs}" --format=cjs`,
-      `npx pkg "${outCjs}" --target latest --platform win --output "${outExe}"`,
+      `npx esbuild "${entryFile}" --bundle --platform=node --outfile="${outCjs}" --format=cjs --target=es2017`,
+      `npx pkg "${outCjs}" --target node18-win-x64 --output "${outExe}" --compress`,
     ];
 
     // 执行构建命令
