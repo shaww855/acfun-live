@@ -105,7 +105,10 @@ export async function closeBrowser() {
       await Promise.race([
         browserRef.close(),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('browser.close() 超时')), TIMEOUT_MS),
+          setTimeout(
+            () => reject(new Error('browser.close() 超时')),
+            TIMEOUT_MS,
+          ),
         ),
       ]);
       logger.info('浏览器正常关闭');
@@ -113,7 +116,10 @@ export async function closeBrowser() {
       logger.error('关闭浏览器时发生错误（已捕获）：', err && err.message);
       logger.debug(err && err.stack);
       try {
-        if (browserRef.disconnect && typeof browserRef.disconnect === 'function') {
+        if (
+          browserRef.disconnect &&
+          typeof browserRef.disconnect === 'function'
+        ) {
           browserRef.disconnect();
           logger.info('已尝试通过 disconnect 断开浏览器连接');
         }
@@ -124,7 +130,10 @@ export async function closeBrowser() {
       try {
         browserObj = null;
       } catch (e) {
-        logger.debug('在清理 browserObj 引用时发生错误（已捕获）：', e && e.message);
+        logger.debug(
+          '在清理 browserObj 引用时发生错误（已捕获）：',
+          e && e.message,
+        );
       }
       closePromise = null;
       logger.info('closeBrowser: 已完成清理');
