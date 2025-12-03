@@ -12,7 +12,7 @@ export default async function () {
 
 `);
 
-  const version = '2.1.0';
+  const version = '2.1.1';
   defTitle = `挂牌子工具 v${version}`;
   process.title = defTitle;
   console.log('当前版本：', version);
