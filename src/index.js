@@ -18,11 +18,12 @@ function persistExitInfoSync(reason, code) {
   };
   try {
     // 使用同步写入确保在进程退出前数据已落盘
-    fs.writeFileSync('./last-exit.json', JSON.stringify(data, null, 2), { encoding: 'utf8' });
+    fs.writeFileSync('./last-exit.json', JSON.stringify(data, null, 2), {
+      encoding: 'utf8',
+    });
   } catch (e) {
     // 若此处失败则无更多操作可以保证，尽量记录到 stderr
     try {
-      // eslint-disable-next-line no-console
       console.error('写入 last-exit.json 失败：', e && e.message);
     } catch (ee) {}
   }
@@ -89,12 +90,40 @@ process.on('uncaughtException', async (error) => {
   } catch (e) {}
 
   try {
-    await Promise.resolve(closeBrowser()).catch((err) => {
+    await closeBrowser().catch((err) => {
       logger.error('closeBrowser 执行出错（已捕获）：', err && err.message);
       logger.debug(err && err.stack);
     });
   } catch (e) {
-    logger.error('在 uncaughtException 处理器中关闭浏览器时发生错误（已捕获）：', e && e.message);
+    logger.error(
+      '在 uncaughtException 处理器中关闭浏览器时发生错误（已捕获）：',
+      e && e.message,
+    );
+  }
+
+  // 退出码 1 表示程序错误退出
+  await gracefulExit('error', 1);
+});
+
+// 未捕获的 promise 拒绝：记录错误、尝试优雅清理并退出
+process.on('unhandledRejection', async (reason, promise) => {
+  if (userClose) return;
+
+  try {
+    logger.error(`捕获未处理的 promise 拒绝：${reason && reason.message}`);
+    if (reason && reason.stack) logger.debug(reason.stack);
+  } catch (e) {}
+
+  try {
+    await closeBrowser().catch((err) => {
+      logger.error('closeBrowser 执行出错（已捕获）：', err && err.message);
+      logger.debug(err && err.stack);
+    });
+  } catch (e) {
+    logger.error(
+      '在 unhandledRejection 处理器中关闭浏览器时发生错误（已捕获）：',
+      e && e.message,
+    );
   }
 
   // 退出码 1 表示程序错误退出
@@ -112,19 +141,24 @@ process.on('exit', (code) => {
 
 async function start() {
   await welcome();
-  getConfig()
-    .then(() => {
-      main();
-    })
-    .catch(() => {
-      if (global.platformIsWin) {
-        makeUserConfig().then((res) => {
-          main();
-        });
-      } else {
-        throw new Error('非windows平台，请手动新增配置文件后再试！');
+  try {
+    await getConfig();
+    await main();
+  } catch (error) {
+    logger.error('启动过程中发生错误：', error.message);
+    if (global.platformIsWin) {
+      try {
+        await makeUserConfig();
+        await main();
+      } catch (setupError) {
+        logger.error('配置创建失败：', setupError.message);
+        process.exit(1);
       }
-    });
+    } else {
+      logger.error('非windows平台，请手动新增配置文件后再试！');
+      process.exit(1);
+    }
+  }
 }
 
 start();

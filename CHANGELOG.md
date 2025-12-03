@@ -5,6 +5,13 @@
 
 ## [未发布]
 
+## [2.1.1] - 2025-12-03
+
+### 变更  
+- 修复问题 #82
+- AI优化代码
+- 升级依赖包
+
 ## [2.1.0] - 2025-02-27
 
 ### 增加
@@ -121,6 +128,7 @@
 - 读取配置方式优化，在登录成功后配置储存于运行环境，避免频繁 I/O。
 
 [未发布]: https://github.com/shaww855/acfun-live/compare/main...dev
+[2.1.1]: https://github.com/shaww855/acfun-live/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/shaww855/acfun-live/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/shaww855/acfun-live/compare/v1.5.11...v2.0.0
 [1.5.12]: https://github.com/shaww855/acfun-live/compare/v1.5.11...v1.5.12
