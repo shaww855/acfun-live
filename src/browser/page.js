@@ -85,6 +85,17 @@ export async function loginByQrcode() {
       logger.debug(`解析饼干失败，${error && error.message}`);
     }
     saveConfig();
+
+    // 清理二维码图片文件
+    try {
+      if (fs.existsSync(qrcodePath)) {
+        fs.unlinkSync(qrcodePath);
+        logger.info('二维码图片已清理');
+      }
+    } catch (err) {
+      logger.warn('清理二维码图片失败：', err.message);
+    }
+
     return acceptRes;
   } catch (err) {
     logger.error('登录流程出错：', err && err.message);
