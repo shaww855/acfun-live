@@ -6,7 +6,6 @@ const configPath = './config.json';
 
 export const defaultConfig = {
   调试: false,
-  出错时: '自动关闭',
   记住登录状态: false,
   监控间隔分钟: 10,
   浏览器路径: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',

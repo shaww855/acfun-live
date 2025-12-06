@@ -11,14 +11,6 @@ const questionList = [
     default: '快速',
   },
   {
-    type: 'list',
-    name: '出错时',
-    message: '请选择工具报错时的行为',
-    // 已移除自动重启选项
-    choices: ['挂起等待', '自动关闭'],
-    default: '自动关闭',
-  },
-  {
     type: 'input',
     name: '白名单',
     message: '你是单推吗？请输入uid（例：123,456）',
