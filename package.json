@@ -20,7 +20,7 @@
     "publish": "node ./build.js"
   },
   "dependencies": {
-    "axios": "^1.13.2",
+    "axios": "^1.13.5",
     "axios-retry": "^4.5.0",
     "inquirer": "^12.11.1",
     "log4js": "^6.9.1",
