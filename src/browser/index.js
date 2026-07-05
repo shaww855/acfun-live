@@ -34,18 +34,25 @@ export default async function main() {
 
   logger.info(`正在启动 ${global.config.浏览器路径}`);
   try {
+    const args = [
+      '--disable-crash-reporter',
+      '--disable-smooth-scrolling',
+      '--no-crash-upload',
+      '--disable-extensions',
+      '--disable-plugins',
+      '--disable-images',
+      '--disable-javascript',
+    ];
+    if (global.config.调试) {
+      logger.info('调试模式已开启，浏览器将以可视化模式启动');
+    } else {
+      args.push('--window-position=-2400,-2400');
+      args.push('--window-size=800,600');
+    }
     const browser = await puppeteer.launch({
       devtools: global.config.调试,
       executablePath: global.config.浏览器路径,
-      args: [
-        '--disable-crash-reporter',
-        '--disable-smooth-scrolling',
-        '--no-crash-upload',
-        '--disable-extensions',
-        '--disable-plugins',
-        '--disable-images',
-        '--disable-javascript',
-      ],
+      args,
     });
 
     logger.info(`启动成功，浏览器版本：${await browser.version()}`);

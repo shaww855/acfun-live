@@ -1,6 +1,6 @@
 {
   "name": "acfun-live",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "使用 Puppeteer 开启 AcFun 直播监控室，挂牌子！😏",
   "homepage": "https://github.com/shaww855/acfun-live#readme",
   "bugs": {
@@ -25,9 +25,9 @@
     "inquirer": "^12.11.1",
     "log4js": "^6.9.1",
     "moment": "^2.30.1",
-    "puppeteer-core": "^24.32.0",
+    "puppeteer-core": "^25.3.0",
     "qrcode": "^1.5.4",
-    "systeminformation": "^5.31.6"
+    "systeminformation": "^5.31.13"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
