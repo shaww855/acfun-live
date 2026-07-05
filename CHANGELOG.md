@@ -5,6 +5,11 @@
 
 ## [未发布]
 
+## [2.1.2] - 2026-07-05
+
+### 变更  
+- 修复空白窗口，无头运行时移出可视窗口范围 #110
+
 ## [2.1.1] - 2025-12-03
 
 ### 变更  
@@ -128,6 +133,7 @@
 - 读取配置方式优化，在登录成功后配置储存于运行环境，避免频繁 I/O。
 
 [未发布]: https://github.com/shaww855/acfun-live/compare/main...dev
+[2.1.1]: https://github.com/shaww855/acfun-live/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/shaww855/acfun-live/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/shaww855/acfun-live/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/shaww855/acfun-live/compare/v1.5.11...v2.0.0
