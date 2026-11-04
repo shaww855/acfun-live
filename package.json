@@ -27,7 +27,7 @@
     "moment": "^2.31.0",
     "puppeteer-core": "^25.16.0",
     "qrcode": "^1.5.4",
-    "systeminformation": "^5.31.13"
+    "systeminformation": "^5.33.16"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
