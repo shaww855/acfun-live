@@ -36,6 +36,7 @@ module.exports = function () {
   if (config.notification) {
     console.log('IFTTT', config.iftttKey ? '已启用' : '未启用')
     console.log('BARK', config.barkKey ? '已启用' : '未启用')
+    console.log('NTFY', config.ntfKey ? '已启用' : '未启用')
   }
 
   let globalBrowser = null
