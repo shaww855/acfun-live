@@ -69,6 +69,7 @@ useObsDanmaku | Boolean | 使用官方OBS弹幕工具监控<br>开启此项时 �
 notification | Boolean<br>Array  | 借助第三方APP推送开播通知<br>true: 有粉丝牌的主播都通知<br>false: 不推送开播通知<br> [ Number ]: 指定uid开播推送<br>此配置项会受 `checkAllRoom` 影响<br>服务器时间的 0~6 点不推送
 iftttKey | String | [IFTTT](https://ifttt.com/) 密钥<br>[配置方法](#IFTTT)
 barkKey | String | [Bark](https://github.com/Finb/Bark) 密钥  仅限IOS<br>[配置方法](#BARK)
+ntfyKey | String | [Ntfy](https://docs.ntfy.sh/publish/) topic
 cookies | String<br>Array | 保存登录状态的字段<br>要么为空字符串，要么为`puppeteer`导出的`cookies`数组
 version | String | 当前版本号<br>本工具会将它与Github上的版本号对比并提示是否有更新
 

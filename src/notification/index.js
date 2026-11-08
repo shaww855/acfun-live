@@ -3,6 +3,7 @@ let data = {}
 const { getConfig, formartDate } = require('../../util.js')
 const IFTTT = require('./ifttt.js')
 const BARK = require('./bark.js')
+const NTFY = require('./ntfy.js')
 
 /**
  * 发送开播通知
@@ -10,9 +11,9 @@ const BARK = require('./bark.js')
  * @returns 
  */
 function liveStart (liveUperInfo) {
-  const { checkLiveTimeout, notification, iftttKey, barkKey } = getConfig()
+  const { checkLiveTimeout, notification, iftttKey, barkKey, ntfKey } = getConfig()
   if (notification === false || notification.length === 0) return
-  if (iftttKey + barkKey === '') {
+  if (iftttKey + barkKey + ntfKey === '') {
     console.log('开播通知 发送失败，未配置相关key。');
     return
   }
@@ -26,8 +27,8 @@ function liveStart (liveUperInfo) {
     // 每天0点10分触发 清空
     data = {}
   }
-  if (hours < 6) {
-    console.log('开播通知 0 ~ 6 点默认不发送');
+  if (hours < 7) {
+    console.log('开播通知 0 ~ 7 点默认不发送');
     return
   }
 
@@ -72,6 +73,10 @@ function liveStart (liveUperInfo) {
     fn = BARK
     path = `/${barkKey}/${title}/${message.replace('/', '')}?url=${url}&group=acfun&icon=${headUrl}&badge=${badge}`
   }
+  if (ntfKey !== '') {
+    fn = NTFY
+    path = `/${ntfKey}/publish?t=${title}&m=${message}&click=${url}`
+  }
   fn(path).then(res => {
     console.log(`开播通知 发送成功`);
   }).catch(err => {
@@ -91,9 +96,9 @@ function notify (message, url = '') {
   if (config === null) {
     return
   }
-  const { notification, iftttKey, barkKey } = config
+  const { notification, iftttKey, barkKey, ntfKey } = config
   if (notification === false || notification.length === 0) return
-  if (iftttKey + barkKey === '') {
+  if (iftttKey + barkKey + ntfKey === '') {
     console.log('通知 发送失败，未配置相关key。');
     return
   }
@@ -112,6 +117,10 @@ function notify (message, url = '') {
     fn = BARK
     path = `/${barkKey}/${title}/${message.replace('/', '')}?group=acfun&icon=${headUrl}`
     if(url !== '') path += `&url=${url}`
+  }
+  if (ntfKey !== '') {
+    fn = NTFY
+    path = `/${ntfKey}/publish?t=${title}&m=${message.replace('/', '')}`
   }
   fn(path).then(res => {
     console.log(`通知 发送成功`);

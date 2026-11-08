@@ -24,6 +24,7 @@ const defaultConfig = {
   "notification": false,
   "iftttKey": "",
   "barkKey": "",
+  "ntfKey": "",
   "cookies": ""
 }
 // 页面操作
@@ -189,13 +190,10 @@ const config = getConfig()
 if (config !== null && global.version === config.version) {
   global.loginInfo = config
   runApp()
-  checkUpdate()
 } else {
   confirmLoginType().then(async () => {
     console.log('配置文件不存在或工具版本已更新，需要重新配置');
     await createConfiguration()
     runApp()
-  }).finally(() => {
-    checkUpdate()
   })
 }

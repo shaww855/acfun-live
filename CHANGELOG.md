@@ -4,6 +4,11 @@
 
 ## [未发布]
 
+## [1.5.13] - 2026-11-09
+### 变更
+* 移除版本更新检查
+* 新增通知通道ntfy
+
 ## [1.5.12] - 2025-01-21
 ### 变更
 * 工作流调整，使用 `Node18` 打包，发布压缩后的文件。
@@ -74,6 +79,7 @@
 * 读取配置方式优化，在登录成功后配置储存于运行环境，避免频繁 I/O。
 
 [未发布]: https://github.com/shaww855/acfun-live/compare/main...dev
+[1.5.12]: https://github.com/shaww855/acfun-live/compare/v1.5.12...v1.5.13
 [1.5.12]: https://github.com/shaww855/acfun-live/compare/v1.5.11...v1.5.12
 [1.5.11]: https://github.com/shaww855/acfun-live/compare/v1.5.10...v1.5.11
 [1.5.10]: https://github.com/shaww855/acfun-live/compare/v1.5.9...v1.5.10
