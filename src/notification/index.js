@@ -11,9 +11,9 @@ const NTFY = require('./ntfy.js')
  * @returns 
  */
 function liveStart (liveUperInfo) {
-  const { checkLiveTimeout, notification, iftttKey, barkKey, ntfKey } = getConfig()
+  const { checkLiveTimeout, notification, iftttKey, barkKey, ntfyKey } = getConfig()
   if (notification === false || notification.length === 0) return
-  if (iftttKey + barkKey + ntfKey === '') {
+  if (iftttKey + barkKey + ntfyKey === '') {
     console.log('开播通知 发送失败，未配置相关key。');
     return
   }
@@ -73,9 +73,9 @@ function liveStart (liveUperInfo) {
     fn = BARK
     path = `/${barkKey}/${title}/${message.replace('/', '')}?url=${url}&group=acfun&icon=${headUrl}&badge=${badge}`
   }
-  if (ntfKey !== '') {
+  if (ntfyKey !== '') {
     fn = NTFY
-    path = `/${ntfKey}/publish?t=${title}&m=${message}&click=${url}`
+    path = `/${ntfyKey}/publish?t=${title}&m=${message}&click=${url}`
   }
   fn(path).then(res => {
     console.log(`开播通知 发送成功`);
@@ -96,9 +96,9 @@ function notify (message, url = '') {
   if (config === null) {
     return
   }
-  const { notification, iftttKey, barkKey, ntfKey } = config
+  const { notification, iftttKey, barkKey, ntfyKey } = config
   if (notification === false || notification.length === 0) return
-  if (iftttKey + barkKey + ntfKey === '') {
+  if (iftttKey + barkKey + ntfyKey === '') {
     console.log('通知 发送失败，未配置相关key。');
     return
   }
@@ -118,9 +118,9 @@ function notify (message, url = '') {
     path = `/${barkKey}/${title}/${message.replace('/', '')}?group=acfun&icon=${headUrl}`
     if(url !== '') path += `&url=${url}`
   }
-  if (ntfKey !== '') {
+  if (ntfyKey !== '') {
     fn = NTFY
-    path = `/${ntfKey}/publish?t=${title}&m=${message.replace('/', '')}`
+    path = `/${ntfyKey}/publish?t=${title}&m=${message.replace('/', '')}`
   }
   fn(path).then(res => {
     console.log(`通知 发送成功`);

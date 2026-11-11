@@ -24,7 +24,7 @@ const defaultConfig = {
   "notification": false,
   "iftttKey": "",
   "barkKey": "",
-  "ntfKey": "",
+  "ntfyKey": "",
   "cookies": ""
 }
 // 页面操作
