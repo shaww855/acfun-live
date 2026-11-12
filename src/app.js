@@ -37,6 +37,12 @@ module.exports = function () {
     console.log('IFTTT', config.iftttKey ? '已启用' : '未启用')
     console.log('BARK', config.barkKey ? '已启用' : '未启用')
     console.log('NTFY', config.ntfyKey ? '已启用' : '未启用')
+    try {
+      const { notify } = require('./notification/index.js')
+      notify('工具已启动，开始监控')
+    } catch (error) {
+      console.error('通知发送失败:', error)
+    }
   }
 
   let globalBrowser = null
